@@ -1,12 +1,18 @@
-from PyQt4.QtGui import QTextEdit
+from PyQt4.QtGui import QWidget, QLabel, QTextEdit, QVBoxLayout
 
-class FSNTextEdit(QTextEdit):
+class FSNTextEdit(QWidget):
     def __init__(self, *args, **kwargs):
-        super(FSNTextEdit, *args, **kwargs)
-        self.setTooltip("Paste a list of FSNs here. Preferably from Excel or Google Spreadsheets.\nIf you're entering more than 1 FSN yourself, then please separate them either by a comma or a new line.")
+        super(FSNTextEdit, self).__init__(*args, **kwargs)
+        self.fsn_label = QLabel("FSN(s):")
+        self.text_edit = QTextEdit()
+        layout = QVBoxLayout()
+        layout.addWidget(self.fsn_label,0)
+        layout.addWidget(self.text_edit,2)
+        self.text_edit.setToolTip("Paste a list of FSNs here. Preferably from Excel or Google Spreadsheets.\nIf you're entering more than 1 FSN yourself, then please separate them either by a comma or a new line.")
+        self.setLayout(layout)
 
     def getFSNs(self):
-        text_edit_contents = str(self.toPlainText()).strip()
+        text_edit_contents = str(self.text_edit.toPlainText()).strip()
         #print "Got text!"
         if '"' in text_edit_contents:
             text_edit_contents.replace('"',"")
