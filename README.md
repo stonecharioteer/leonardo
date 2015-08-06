@@ -5,3 +5,4 @@ The following are a list of functions:
 *App-Friendly USP Image Creation
 *Bunk Image Downloading
 *Watermarking
+*Removal of background color

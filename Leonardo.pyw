@@ -2,7 +2,11 @@ import os, sys, math
 from PyQt4 import QtGui, QtCore
 from LeonardoModules import LeonardoMethods
 from LeonardoModules.Splinter import Splinter
+#from LeonardoModules.IconListBox import IconListBox
 from LeonardoModules.LeonardoToolbox import LeonardoToolbox
+#from LeonardoModules.DataSelector import DataSelector
+#from LeonardoModules.TemplateSelector import TemplateSelector
+#from LeonardoModules.SettingsWidget import SettingsWidget
 from LeonardoModules.LeonardoImagePreview import LeonardoImagePreview
 from LeonardoModules.ShellShocked import showSplashScreen, setWindowTheme
 from LeonardoModules.ProgressBar import ProgressBar
