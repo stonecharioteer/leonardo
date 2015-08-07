@@ -1,4 +1,4 @@
-import os
+import os, csv
 from PyQt4 import QtGui
 from FSNTextEdit import FSNTextEdit
 from IconButton import IconButton
@@ -12,6 +12,7 @@ class DataSelector(QtGui.QWidget):
         self.createUI()
         self.mapEvents()
         self.data_is_ready = False
+        self.data = None
         self.setMode()
 
     def setMode(self):
@@ -89,7 +90,8 @@ class DataSelector(QtGui.QWidget):
         self.setMode()
 
     def loadDataFromFile(self):
-        
+        data_file_name = QtGui.QFileDialog.getOpenFileName(self,"Open Data File",os.getcwd(),tr("Comma Separated Values Files (*.csv)"))
+        print data_file_name
         pass
 
 
