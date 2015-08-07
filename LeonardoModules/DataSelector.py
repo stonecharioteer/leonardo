@@ -11,6 +11,11 @@ class DataSelector(QtGui.QWidget):
         super(DataSelector,self).__init__()
         self.createUI()
         self.mapEvents()
+        self.data_is_ready = False
+        self.setMode()
+
+    def setMode(self):
+        self.mode = "FSNs" if self.use_fsns_and_fk_information_checkbox.isChecked() else "CSV"
 
     def createUI(self):
         self.group_box = QtGui.QGroupBox("Data Selection")
@@ -76,9 +81,15 @@ class DataSelector(QtGui.QWidget):
 
     def mapEvents(self):
         self.check_button_group.buttonClicked.connect(self.changePage)
+        self.input_data_set_button.clicked.connect(self.loadDataFromFile)
+
     def changePage(self):
-        if self.use_fsns_and_fk_information_checkbox.isChecked():
-            button_number = 0
-        else:
-            button_number = 1
+        button_number = 0 if self.use_fsns_and_fk_information_checkbox.isChecked() else 1
         self.fsn_or_csv_stacked_widget.setCurrentIndex(button_number)
+        self.setMode()
+
+    def loadDataFromFile(self):
+        
+        pass
+
+

@@ -9,6 +9,7 @@ from LeonardoModules.SettingsWidget import SettingsWidget
 from LeonardoModules.PreviewRunWidget import PreviewRunWidget
 from LeonardoModules.ShellShocked import showSplashScreen, setWindowTheme
 from LeonardoModules.ProgressBar import ProgressBar
+from LeonardoModules.April import April
 
 class Leonardo(QtGui.QMainWindow):
     def __init__(self):
@@ -33,7 +34,7 @@ class Leonardo(QtGui.QMainWindow):
                     }
                 ]
         self.page_changer.addElements(page_control_list)
-        self.page_changer.setFixedSize(120,400)
+        self.page_changer.setFixedSize(120, 400)
         #self.page_changer.item(1).setFlags(QtCore.Qt.NoItemFlags)
         #self.page_changer.item(2).setFlags(QtCore.Qt.NoItemFlags)
         #self.page_changer.item(3).setFlags(QtCore.Qt.NoItemFlags)
