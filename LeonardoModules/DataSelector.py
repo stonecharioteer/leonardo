@@ -14,6 +14,7 @@ class DataSelector(QtGui.QWidget):
         self.data_is_ready = False
         self.data = None
         self.setMode()
+        self.validate_button.setEnabled(False)
 
     def setMode(self):
         self.mode = "FSNs" if self.use_fsns_and_fk_information_checkbox.isChecked() else "CSV"
@@ -90,8 +91,47 @@ class DataSelector(QtGui.QWidget):
         self.setMode()
 
     def loadDataFromFile(self):
-        data_file_name = QtGui.QFileDialog.getOpenFileName(self,"Open Data File",os.getcwd(),tr("Comma Separated Values Files (*.csv)"))
-        print data_file_name
-        pass
-
+        """This method asks for a csv data file. Upon loading, it'll read the file, check it and declare whether it's valid or not.
+            It does it based on:
+            1. File headers: 
+                FSN, Category, Primary USP[1-5] Attribute; Primary USP[1-5] Description; Secondary USP[1-5] Attribute; Secondary USP[1-5] Description;
+            2. At least 1 row of data.
+        """
+        #Get the file name.
+        data_file_name = QtGui.QFileDialog.getOpenFileName(self,"Open Data File",os.getcwd(),("Comma Separated Values Files (*.csv)"))
+        #Load the file.
+        data_file_handler = open(data_file_name,"r")
+        data_file_as_csv = csv.DictReader(data_file_handler)
+        file_headers = []
+        for row in data_file_as_csv:
+            file_headers = row.keys()
+        file_headers.sort()
+        required_file_headers = [
+                    "FSN","Category",
+                    "Primary USP-1 Attribute","Primary USP-1 Description Text",
+                    "Primary USP-2 Attribute","Primary USP-2 Description Text",
+                    "Primary USP-3 Attribute","Primary USP-3 Description Text",
+                    "Primary USP-4 Attribute","Primary USP-4 Description Text",
+                    "Primary USP-5 Attribute","Primary USP-5 Description Text",
+                    "Secondary USP-1 Attribute","Secondary USP-1 Description Text",
+                    "Secondary USP-2 Attribute","Secondary USP-2 Description Text",
+                    "Secondary USP-3 Attribute","Secondary USP-3 Description Text",
+                    "Secondary USP-4 Attribute","Secondary USP-4 Description Text",
+                    "Secondary USP-5 Attribute","Secondary USP-5 Description Text"
+                    ]
+        required_file_headers.sort()
+        data_is_valid = True
+        for header in required_file_headers:
+            if header not in file_headers:
+                data_is_valid = False
+                break
+                 
+        if data_is_valid:
+            self.validate_button.setEnabled(True)
+            print "Valid data!"
+        else:
+            self.validate_button.setEnabled(False)
+            print "Invalid data!"
+            #print file_headers, required_file_headers
+        data_file_handler.seek(0)
 

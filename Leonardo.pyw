@@ -9,7 +9,7 @@ from LeonardoModules.SettingsWidget import SettingsWidget
 from LeonardoModules.PreviewRunWidget import PreviewRunWidget
 from LeonardoModules.ShellShocked import showSplashScreen, setWindowTheme
 from LeonardoModules.ProgressBar import ProgressBar
-from LeonardoModules.April import April
+#from LeonardoModules.April import April
 
 class Leonardo(QtGui.QMainWindow):
     def __init__(self):
