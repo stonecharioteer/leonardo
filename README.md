@@ -11,6 +11,7 @@ The following are a list of functions:
  * I have a plan where I can change this to use the Flipkart API instead of scraping the website for images. Currently, it uses BeautifulSoup4.
 * Watermarking
 * Removal of background color
+
 ###Requirements
 ----
 * Python 2.7
@@ -23,4 +24,4 @@ The following are a list of functions:
 
 ###History
 ----
-I had the idea for Leonardo when tasked with batch processing watermarks. It's part of the OINK Report Management system, but exists separately since it's essence is entirely unique. I'll integrate it into the [OINK](www.github.com\oink) repository later.
+I had the idea for Leonardo when tasked with batch processing watermarks. It's part of the OINK Report Management system, but exists separately since it's essence is entirely unique. I'll integrate it into the [OINK](www.github.com/oink) repository later.
