@@ -105,7 +105,7 @@ class DataSelector(QtGui.QWidget):
             2. At least 1 row of data.
         """
         #Get the file name.
-        data_file_name = QtGui.QFileDialog.getOpenFileName(self,"Open Data File",os.getcwd(),("Comma Separated Values Files (*.csv)"))
+        data_file_name = str(QtGui.QFileDialog.getOpenFileName(self,"Open Data File",os.getcwd(),("Comma Separated Values Files (*.csv)")))
         #Load the file.
         data_file_handler = open(data_file_name,"r")
         data_file_as_csv = csv.DictReader(data_file_handler)
