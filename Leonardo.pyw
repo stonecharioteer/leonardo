@@ -1,5 +1,7 @@
 import os, sys, math
+
 from PyQt4 import QtGui, QtCore
+
 from LeonardoModules import LeonardoMethods
 from LeonardoModules.Splinter import Splinter
 from LeonardoModules.IconListBox import IconListBox
@@ -15,6 +17,7 @@ class Leonardo(QtGui.QMainWindow):
     def __init__(self):
         super(Leonardo, self).__init__()
         self.createUI()
+        self.hamato_yoshi = Splinter()
         self.mapEvents()
 
     def createUI(self):
@@ -35,7 +38,7 @@ class Leonardo(QtGui.QMainWindow):
                 ]
         self.page_changer.addElements(page_control_list)
         self.page_changer.setFixedSize(120, 400)
-        #self.page_changer.item(1).setFlags(QtCore.Qt.NoItemFlags)
+        self.page_changer.item(1).setFlags(QtCore.Qt.NoItemFlags)
         #self.page_changer.item(2).setFlags(QtCore.Qt.NoItemFlags)
         #self.page_changer.item(3).setFlags(QtCore.Qt.NoItemFlags)
 
@@ -74,7 +77,25 @@ class Leonardo(QtGui.QMainWindow):
 
     def mapEvents(self):
         self.page_changer.currentItemChanged.connect(self.changePage)
-
+        self.data_selector_widget.validate_button.clicked.connect(self.getData)
+        self.template_selector_widget.validate_button.clicked.connect(self.runSplinter)
+    
+    def getData(self):
+        #print len(self.data_selector_widget.data)
+        self.page_changer.item(1).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+        self.page_changer.setCurrentRow(1)
+    
+    def runSplinter(self):
+        self.hamato_yoshi.data = self.data_selector_widget.data
+        self.hamato_yoshi.template = str(self.template_selector_widget.template_selection_combobox.currentText())
+        self.hamato_yoshi.positioning = str(self.template_selector_widget.icon_positioning_combobox.currentText())
+        self.hamato_yoshi.icon_palette = "Black" #Enable this later.
+        self.hamato_yoshi.allow_overlap = False #Add a checkbox in the template_selector
+        self.hamato_yoshi.background_image_path = str(self.template_selector_widget.background_selection_combobox.currentText())
+        self.hamato_yoshi.primary_attribute_relative_size = 0.10
+        self.hamato_yoshi.secondary_attribute_relative_size = 0.05
+        self.hamato_yoshi.output_location = str(self.template_selector_widget.output_images_location_widget.line_edit.currentText())
+        self.hamato_yoshi.allow_run = True
 
 
 if __name__ == "__main__":

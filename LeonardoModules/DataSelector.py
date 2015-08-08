@@ -24,7 +24,7 @@ class DataSelector(QtGui.QWidget):
         self.use_fsns_and_fk_information_checkbox = QtGui.QCheckBox("Get Attribute Data from Flipkart")
         self.use_fsns_and_fk_information_checkbox.setToolTip("If checked, this enables building images for a list of FSNs by getting attribute data from the website.")
         self.use_csv_file_checkbox = QtGui.QCheckBox("Load Data from CSV")
-        self.use_csv_file_checkbox.setToolTip("Get the parent image data, the attributes list and image locations from a csv file.")
+        self.use_csv_file_checkbox.setToolTip("Get the parent image data, the attributes list and image locations from a csv file. Use this when you want to get data for more than one category at the same time.")
         #Button groups need to be defined at the class level. Hence, self.
         self.check_button_group = QtGui.QButtonGroup()
         self.check_button_group.setExclusive(True)
@@ -34,6 +34,9 @@ class DataSelector(QtGui.QWidget):
         
 
         self.fsn_text_edit = FSNTextEdit()
+        self.category_label = QtGui.QLabel("Category:")
+        self.category_combo_box = QtGui.QComboBox()
+        self.category_combo_box.addItems(["Cameras","Mobiles","Tablets"]) #Later, add this data from OINK's server.        
         self.attributes_list_box = QtGui.QListWidget()
         self.primary_attributes_list_box = QtGui.QListWidget()
         self.secondary_attributes_list_box = QtGui.QListWidget()
@@ -42,19 +45,22 @@ class DataSelector(QtGui.QWidget):
         self.push_to_secondary_button = QtGui.QPushButton("Add to\nSecondary List")
         self.remove_from_secondary_button = QtGui.QPushButton("Remove from\nSecondary List")
         self.fetch_images_attributes_button = QtGui.QPushButton("Download Images\nand Specs.")
+        self.fetch_images_attributes_button.setToolTip("This will check if parent images are available for all the FSNs and download them if necessary from the FK site. It will also load the spec table.")
         self.fetching_progress = QtGui.QProgressBar()
 
         fsn_mode_layout = QtGui.QGridLayout()
         fsn_mode_layout.addWidget(self.fsn_text_edit,0,0,2,3)
         fsn_mode_layout.addWidget(self.fetch_images_attributes_button,2,0,1,1)
         fsn_mode_layout.addWidget(self.fetching_progress,2,1,1,2)
-        fsn_mode_layout.addWidget(self.attributes_list_box,3,0,4,1)
-        fsn_mode_layout.addWidget(self.push_to_primary_button,3,1,1,1)
-        fsn_mode_layout.addWidget(self.remove_from_primary_button,4,1,1,1)
-        fsn_mode_layout.addWidget(self.primary_attributes_list_box,3,2,2,1)
-        fsn_mode_layout.addWidget(self.push_to_secondary_button,5,1,1,1)
-        fsn_mode_layout.addWidget(self.secondary_attributes_list_box,5,2,2,1)
-        fsn_mode_layout.addWidget(self.remove_from_secondary_button,6,1,1,1)
+        fsn_mode_layout.addWidget(self.category_label,3,0,1,1)
+        fsn_mode_layout.addWidget(self.category_combo_box,3,1,1,1)
+        fsn_mode_layout.addWidget(self.attributes_list_box,4,0,4,1)
+        fsn_mode_layout.addWidget(self.push_to_primary_button,4,1,1,1)
+        fsn_mode_layout.addWidget(self.remove_from_primary_button,5,1,1,1)
+        fsn_mode_layout.addWidget(self.primary_attributes_list_box,4,2,2,1)
+        fsn_mode_layout.addWidget(self.push_to_secondary_button,6,1,1,1)
+        fsn_mode_layout.addWidget(self.secondary_attributes_list_box,6,2,2,1)
+        fsn_mode_layout.addWidget(self.remove_from_secondary_button,7,1,1,1)
 
         self.fsn_mode_widget = QtGui.QWidget()
         self.fsn_mode_widget.setLayout(fsn_mode_layout)
@@ -91,7 +97,8 @@ class DataSelector(QtGui.QWidget):
         self.setMode()
 
     def loadDataFromFile(self):
-        """This method asks for a csv data file. Upon loading, it'll read the file, check it and declare whether it's valid or not.
+        """This method asks for a csv data file. Upon loading, it'll read the file, 
+            check it and declare whether it's valid or not.
             It does it based on:
             1. File headers: 
                 FSN, Category, Primary USP[1-5] Attribute; Primary USP[1-5] Description; Secondary USP[1-5] Attribute; Secondary USP[1-5] Description;
@@ -125,13 +132,18 @@ class DataSelector(QtGui.QWidget):
             if header not in file_headers:
                 data_is_valid = False
                 break
-                 
         if data_is_valid:
             self.validate_button.setEnabled(True)
-            print "Valid data!"
+            self.validate_button.setStyleSheet("QPushButton{background-color: #458B00} QPushButton:hover{background-color: #78AB46};")
+            data_file_handler.seek(0)
+            self.data = []
+            for row in data_file_as_csv:
+                self.data.append(row)
+            self.data_is_ready
+            #print self.data
         else:
+            self.validate_button.setStyleSheet("background-color: #B22222")
             self.validate_button.setEnabled(False)
-            print "Invalid data!"
             #print file_headers, required_file_headers
-        data_file_handler.seek(0)
+        data_file_handler.close()
 

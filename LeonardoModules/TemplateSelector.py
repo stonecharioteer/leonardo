@@ -36,7 +36,7 @@ class TemplateSelector(QtGui.QWidget):
 
         self.background_selection_combobox.addItems(self.backgrounds)
         self.background_preview_space = QtGui.QLabel()
-        self.background_preview_space.setFixedSize(180,320)
+        self.background_preview_space.setFixedSize(170,300)
         self.background_preview_space.setStyleSheet("QLabel {background-color: grey; border: 1px solid black;}")
         self.background_preview_space.setToolTip("Preview of the selected background image.")
         self.primary_attr_icon_size_label = QtGui.QLabel("Set Primary Attribute Icon\nRelative Size:")
@@ -70,8 +70,8 @@ class TemplateSelector(QtGui.QWidget):
         for row in range(layout.rowCount()):
             layout.setRowStretch(row,0)
             layout.setRowMinimumHeight(row,0)
-        layout.setRowStretch(7,10)
-        layout.setRowMinimumHeight(7,10)
+        layout.setRowStretch(9,10)
+        layout.setRowMinimumHeight(9,10)
         for column in range(layout.columnCount()):
             layout.setColumnStretch(column,0)
             layout.setColumnMinimumWidth(column,0)

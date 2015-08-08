@@ -7,6 +7,12 @@ from PIL import ImageFont
 from PIL import ImageDraw
 import PIL
 
+def prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_data, template, positioning, icon_palette, allow_overlap,background_image_path, primary_attribute_relative_size, secondary_attribute_relative_size, output_location):
+    """This method takes one fsn set, and prepares the app-image."""
+
+def getValidPlacementPoints(image_base_size, parent_image_size, past_icons_data, new_icon_data, allow_overlap):
+    """This method calculates valid positions for icons."""
+
 def main():
     print "Loading Data..."
     with open("raw_data.csv","r") as data_file:
