@@ -2,13 +2,35 @@ from __future__ import division
 import csv
 import os
 from random import shuffle
+import numpy as np
+import pandas
 from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
 import PIL
 
-def prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_data, template, positioning, icon_palette, allow_overlap,background_image_path, primary_attribute_relative_size, secondary_attribute_relative_size, output_location):
-    """This method takes one fsn set, and prepares the app-image."""
+def prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_data, parent_image_positioning, icon_positioning, icon_palette, allow_overlap, background_image_path, primary_attribute_relative_size, secondary_attribute_relative_size, bounding_box, output_location):
+    """This method takes one fsn set, and prepares the app-image.
+    ALGORITHM:
+    1. If the background image is specified, check if Background image exists.
+        a. If it doesn't, throw an exception.
+    2. Check if the parent image exists.
+        a. If it doesn't, throw an exception.
+    3. Using the Attribute values for the Primary and Secondary USPs, look in the Images\Repository\Category folder for icons. Check if they're available. If they're not, throw an exception.
+    4. Check if the bounding box shape image is available.
+        (a) If it's not, throw an exception.
+    5. Create an Image instance using the background image. If the background image is set to "Random", then use a random background image from the Images\Backgrounds folder.
+    6. Add the parent image to the specified location. Acceptable locations are (i,j) where i,j <= 2. 0, 1, 2 indicate position based on % of the background image. If the parent_image_position value is "Random", then pick one of these randomly.
+    7. Calculate the size of the primary and secondary icons based on the relative size factor variables.
+    8. Calculate the area of the parent image, and that of the entire image. Using this area, as well as the icon_positioning variable as constraints find locations which can be used for a primary icon.
+    9. Place the first primary icon at a random coordinate. Place the bounding box right over the icon and the text below the bounding box. If the palette is non-black, then generate the respective colors and use random colors for the text and icons.
+    10. Place subsequent icons at the other locations pulled up by the formula.
+    11. Next, calculate the available coordinates at which to place the secondary icons.
+    12. After getting the coordinates, place the secondary icons at similar positions as well.
+
+    """
+
+    
 
 def getValidPlacementPoints(image_base_size, parent_image_size, past_icons_data, new_icon_data, allow_overlap):
     """This method calculates valid positions for icons."""

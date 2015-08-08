@@ -11,7 +11,7 @@ from LeonardoModules import LeonardoMethods
 from LeonardoModules.Splinter import Splinter
 from LeonardoModules.IconListBox import IconListBox
 from LeonardoModules.DataSelector import DataSelector
-from LeonardoModules.TemplateSelector import TemplateSelector
+from LeonardoModules.LayoutDesigner import LayoutDesigner
 from LeonardoModules.SettingsWidget import SettingsWidget
 from LeonardoModules.PreviewRunWidget import PreviewRunWidget
 from LeonardoModules.ShellShocked import showSplashScreen, setWindowTheme
@@ -49,13 +49,13 @@ class Leonardo(QtGui.QMainWindow):
 
         #Initialize the individual widget pages
         self.data_selector_widget = DataSelector()
-        self.template_selector_widget = TemplateSelector()
+        self.layout_designer_widget = LayoutDesigner()
         self.settings_widget = SettingsWidget()
         self.preview_and_run_widget = PreviewRunWidget()
 
         self.pages = QtGui.QStackedWidget()
         self.pages.addWidget(self.data_selector_widget)
-        self.pages.addWidget(self.template_selector_widget)
+        self.pages.addWidget(self.layout_designer_widget)
         self.pages.addWidget(self.settings_widget)
         self.pages.addWidget(self.preview_and_run_widget)
 
@@ -83,7 +83,7 @@ class Leonardo(QtGui.QMainWindow):
     def mapEvents(self):
         self.page_changer.currentItemChanged.connect(self.changePage)
         self.data_selector_widget.validate_button.clicked.connect(self.getData)
-        self.template_selector_widget.validate_button.clicked.connect(self.runSplinter)
+        self.layout_designer_widget.validate_button.clicked.connect(self.runSplinter)
     
     def getData(self):
         #print len(self.data_selector_widget.data)
@@ -92,14 +92,14 @@ class Leonardo(QtGui.QMainWindow):
     
     def runSplinter(self):
         self.hamato_yoshi.data = self.data_selector_widget.data
-        self.hamato_yoshi.template = str(self.template_selector_widget.template_selection_combobox.currentText())
-        self.hamato_yoshi.positioning = str(self.template_selector_widget.icon_positioning_combobox.currentText())
+        self.hamato_yoshi.template = str(self.layout_designer_widget.template_selection_combobox.currentText())
+        self.hamato_yoshi.positioning = str(self.layout_designer_widget.icon_positioning_combobox.currentText())
         self.hamato_yoshi.icon_palette = "Black" #Enable this later.
         self.hamato_yoshi.allow_overlap = False #Add a checkbox in the template_selector
-        self.hamato_yoshi.background_image_path = str(self.template_selector_widget.background_selection_combobox.currentText())
+        self.hamato_yoshi.background_image_path = str(self.layout_designer_widget.background_selection_combobox.currentText())
         self.hamato_yoshi.primary_attribute_relative_size = 0.10
         self.hamato_yoshi.secondary_attribute_relative_size = 0.05
-        self.hamato_yoshi.output_location = str(self.template_selector_widget.output_images_location_widget.line_edit.currentText())
+        self.hamato_yoshi.output_location = str(self.layout_designer_widget.output_images_location_widget.line_edit.currentText())
         self.hamato_yoshi.allow_run = True
 
 
