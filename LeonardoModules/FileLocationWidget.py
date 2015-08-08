@@ -1,6 +1,6 @@
 import os
 from PyQt4.QtGui import QPushButton, QLabel, QLineEdit, QWidget, QHBoxLayout, QPixmap, QIcon
-from PyQt4.QtCore import QSize
+from PyQt4.QtCore import QSize, Qt
 
 class FileLocationWidget(QWidget):
     def __init__(self,name):
@@ -20,9 +20,9 @@ class FileLocationWidget(QWidget):
         self.browse_button.setFixedSize(button_size)
         self.browse_button.setToolTip("Click this to change the location")
 
-        layout = QHBoxLayout()
-        layout.addWidget(self.label,0)
-        layout.addWidget(self.line_edit,2)
-        layout.addWidget(self.browse_button,0)
+        layout = QGridLayout()
+        layout.addWidget(self.label,0,0,1,1,Qt.AlignLeft)
+        layout.addWidget(self.line_edit,0,1,2,1,Qt.AlignLeft)
+        layout.addWidget(self.browse_button,0,3,1,1,Qt.AlignHCenter)
 
         self.setLayout(layout)

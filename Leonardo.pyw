@@ -1,3 +1,8 @@
+"""
+Leonardo is a tool that'll help Flipkart Content Artists in batch processing.
+When complete, it'll be able to help them make the secondary iconic image for the App.
+It's part of the artists' and SMEs' toolset.
+"""
 import os, sys, math
 
 from PyQt4 import QtGui, QtCore
