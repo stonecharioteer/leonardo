@@ -11,7 +11,7 @@ class FileLocationWidget(QWidget):
             self.current_path = os.getcwd()
         else:
             self.current_path = default_path
-        self.line_edit.setText()
+        self.line_edit.setText(self.current_path)
         self.line_edit.setReadOnly(True)
         self.line_edit.setMinimumWidth(150)
         self.browse_button = QPushButton()
