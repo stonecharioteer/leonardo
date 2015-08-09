@@ -82,24 +82,24 @@ class Leonardo(QtGui.QMainWindow):
 
     def mapEvents(self):
         self.page_changer.currentItemChanged.connect(self.changePage)
-        self.data_selector_widget.validate_button.clicked.connect(self.getData)
+        self.data_selector_widget.validate_button.clicked.connect(self.allowDesign)
         self.layout_designer_widget.validate_button.clicked.connect(self.runSplinter)
     
-    def getData(self):
-        #print len(self.data_selector_widget.data)
+    def allowDesign(self):
         self.page_changer.item(1).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
         self.page_changer.setCurrentRow(1)
     
     def runSplinter(self):
         self.hamato_yoshi.data = self.data_selector_widget.data
-        self.hamato_yoshi.template = str(self.layout_designer_widget.template_selection_combobox.currentText())
-        self.hamato_yoshi.positioning = str(self.layout_designer_widget.icon_positioning_combobox.currentText())
-        self.hamato_yoshi.icon_palette = "Black" #Enable this later.
-        self.hamato_yoshi.allow_overlap = False #Add a checkbox in the template_selector
-        self.hamato_yoshi.background_image_path = str(self.layout_designer_widget.background_selection_combobox.currentText())
-        self.hamato_yoshi.primary_attribute_relative_size = 0.10
-        self.hamato_yoshi.secondary_attribute_relative_size = 0.05
-        self.hamato_yoshi.output_location = str(self.layout_designer_widget.output_images_location_widget.line_edit.currentText())
+        self.hamato_yoshi.parent_image_position = self.layout_designer_widget.getParentImageCoords()
+        self.hamato_yoshi.icon_positioning = self.layout_designer_widget.getIconPosition()
+        self.hamato_yoshi.icon_palette = self.layout_designer_widget.getIconPalette() #Enable this later.
+        self.hamato_yoshi.allow_overlap = self.layout_designer_widget.getOverlap()
+        self.hamato_yoshi.background_image_path = self.layout_designer_widget.getBackgroundImage()
+        self.hamato_yoshi.primary_attribute_relative_size = self.layout_designer_widget.getPrimaryAttrRelativeSize()
+        self.hamato_yoshi.secondary_attribute_relative_size = self.layout_designer_widget.getSecondaryAttrRelativeSize()
+        self.hamato_yoshi.bounding_box = self.layout_designer_widget.getIconBoundingBox()
+        self.hamato_yoshi.output_location = os.getcwd()
         self.hamato_yoshi.allow_run = True
 
 

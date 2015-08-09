@@ -1,7 +1,8 @@
+from __future__ import division
 import datetime
+from PIL import Image
 from PyQt4 import QtCore
 import LeonardoMethods
-
 class Splinter(QtCore.QThread):
     progress = QtCore.pyqtSignal(str, int, datetime.datetime, bool)
     def __init__(self):
@@ -10,8 +11,8 @@ class Splinter(QtCore.QThread):
         self.condition = QtCore.QWaitCondition()
         self.allow_run = False
         self.data = None
-        self.template = "Parent to One Side"
-        self.positioning = None
+        self.parent_image_position = (0.5,0.5)
+        self.icon_positioning = None
         self.icon_palette = "Black"
         self.allow_overlap = False
         self.background_image_path = None
@@ -24,8 +25,12 @@ class Splinter(QtCore.QThread):
     def run(self):
         while True:
             if self.allow_run:
-                rows = len(self.data)
+                total = len(self.data)
+                counter = 0
+                start_time = datetime.datetime.now()
+
                 for row in self.data:
+                    counter+=1
                     fsn = row["FSN"]
                     category = row["Category"]
                     primary_attribute_data = []
@@ -39,16 +44,26 @@ class Splinter(QtCore.QThread):
                     primary_attributes_count = len(primary_attributes)/2
                     primary_attribute_data = [] 
                     #print primary_attributes_count
-                    for i in range(primary_attributes_count):
+                    for i in range(int(primary_attributes_count)):
                         index = i+1
                         primary_attribute_data.append({"Attribute":row["Primary USP-%d Attribute"%index],"Description Text":row["Primary USP-%d Description Text"%index]})
                     secondary_attributes_count = len(secondary_attributes)/2
                     secondary_attribute_data = [] 
                     #print secondary_attributes_count
-                    for i in range(secondary_attributes_count):
+                    for i in range(int(secondary_attributes_count)):
                         index = i+1
                         secondary_attribute_data.append({"Attribute":row["Secondary USP-%d Attribute"%index],"Description Text":row["Secondary USP-%d Description Text"%index]})
-                    LeonardoMethods.prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_data, self.template, self.positioning, self.icon_palette, self.allow_overlap, self.background_image_path, self.primary_attribute_relative_size, self.secondary_attribute_relative_size, self.output_location)
+                    LeonardoMethods.prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_data, self.parent_image_position, self.icon_positioning, self.icon_palette, self.allow_overlap, self.background_image_path, self.primary_attribute_relative_size, self.secondary_attribute_relative_size, self.bounding_box, self.output_location)
+                    eta = LeonardoMethods.getETA(start_time, counter, total)
+                    if counter < total:
+                        message = "Processing %d of %d FSNs." %(counter,total)
+                        progress = int(counter/total)
+                        completion_status = False
+                    else:
+                        message = "Completed."
+                        progress = 100
+                        completion_status = True
+                    self.progress.emit(message, progress, eta, completion_status)
                     
                 self.allow_run = False
 #                self.deploy()

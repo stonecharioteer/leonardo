@@ -136,10 +136,11 @@ class DataSelector(QtGui.QWidget):
             self.validate_button.setEnabled(True)
             self.validate_button.setStyleSheet("QPushButton{background-color: #458B00} QPushButton:hover{background-color: #78AB46};")
             data_file_handler.seek(0)
+            next(data_file_handler) #0 has the header, so go to row 1.
             self.data = []
             for row in data_file_as_csv:
                 self.data.append(row)
-            self.data_is_ready
+            self.data_is_ready = True
             #print self.data
         else:
             self.validate_button.setStyleSheet("background-color: #B22222")

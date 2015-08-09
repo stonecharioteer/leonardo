@@ -1,6 +1,6 @@
 from __future__ import division
 import csv
-import os
+import os, glob, datetime
 from random import shuffle
 import numpy as np
 import pandas
@@ -28,7 +28,52 @@ def prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_d
     11. Next, calculate the available coordinates at which to place the secondary icons.
     12. After getting the coordinates, place the secondary icons at similar positions as well.
     """
-    
+#    print fsn, category, primary_attribute_data, secondary_attribute_data, parent_image_positioning, icon_positioning, icon_palette, allow_overlap, background_image_path, primary_attribute_relative_size, secondary_attribute_relative_size, bounding_box, output_location
+    #Get the primary image path
+    parent_image_path = getParentImage(fsn)
+    #Get the primary and secondary attribute icons.
+    primary_attributes_and_icons_data = getIcons(primary_attribute_data,category)
+    secondary_attributes_and_icons_data = getIcons(secondary_attribute_data,category)
+    #Create an image with the background image's proportions.
+    base_image = Image.open(background_image_path)
+    #Open the parent image and resize it to 25% of the background_image's height.
+    parent_image = getResizedParentImage(Image.open(parent_image_path),0.25,base_image.size)
+    #Based on the input control parameters, get the coordinates for the parent image.
+    parent_image_coords = getParentImageCoords(base_image.size,parent_image.size,parent_image_positioning)
+
+def getResizedParentImage(parent_image,resize_factor,base_image_size):
+    return parent_image
+
+def getParentImageCoords(base_image_size, parent_image_size, parent_image_positioning):
+    return (0,0)
+def getIcons(attribute_data, category):
+    #print attribute_data, category
+    look_in_path = os.path.join(os.path.join(os.path.join(os.getcwd(),"Images"),"Repository"),category)
+    image_search_path = os.path.join(look_in_path, "*.*")
+    images_in_look_in_path = glob.glob(image_search_path)
+    #print look_in_path,"\n",image_search_path
+    #print images_in_look_in_path
+    attributes_without_icons = []
+    for attribute in attribute_data:
+        found_icon = False
+        for icon in images_in_look_in_path:
+            if not found_icon:
+                if attribute["Attribute"].lower().strip() in icon.lower().strip():
+                    attribute.update({"Icon": icon})
+                    found_icon = True
+                else:
+                    attribute.update({"Icon": None})
+        if not found_icon:
+            attributes_without_icons.append(attribute["Attribute"])
+    if len(attributes_without_icons) >0:
+        print "The following attributes don't have icons. Recommend making them before progressing."
+        print attributes_without_icons
+        raw_input(">")
+    return attribute_data
+
+def getParentImage(fsn):
+    parent_image_path = glob.glob(os.path.join(os.path.join(os.path.join(os.getcwd(),"Images"),"Parent Images"),"%s*.*"%fsn))[0]
+    return parent_image_path
     
 
 def getValidPlacementPoints(image_base_size, parent_image_size, past_icons_data, new_icon_data, allow_overlap):
@@ -95,5 +140,13 @@ def main():
                 background_image.paste(resized_temp,temp_location,resized_temp)
             background_image.show()
 
+def getETA(start_time, counter, total):
+    #from __future__ import division
+    now = datetime.datetime.now()
+    time_spent = now - start_time
+    mean_time = time_spent.total_seconds()/counter
+    ETA = start_time + datetime.timedelta(seconds=(mean_time*total))
+    return ETA
+
 if __name__ == "__main__":
-    main()
+    print "Don't use the Main Function."
