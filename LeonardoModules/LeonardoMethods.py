@@ -27,9 +27,8 @@ def prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_d
     10. Place subsequent icons at the other locations pulled up by the formula.
     11. Next, calculate the available coordinates at which to place the secondary icons.
     12. After getting the coordinates, place the secondary icons at similar positions as well.
-
     """
-
+    
     
 
 def getValidPlacementPoints(image_base_size, parent_image_size, past_icons_data, new_icon_data, allow_overlap):

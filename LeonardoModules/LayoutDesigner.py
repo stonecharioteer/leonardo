@@ -1,3 +1,4 @@
+from __future__ import division
 import os, glob
 from PyQt4 import QtGui, QtCore
 from FSNTextEdit import FSNTextEdit
@@ -26,19 +27,21 @@ class LayoutDesigner(QtGui.QWidget):
         for i in range(3):
             for j in range(3):
                 self.parent_image_position_selector_radiobuttons_group.addButton(self.parent_image_position_position_radiobuttons[i][j])
-                self.parent_image_position_position_radiobuttons[i][j].setToolTip("This sets the position of the parent image to the %s %s of the image.\nPlease note that the representation isn't exact and the final image layout may vary as constraints dictate." %(vpos[i],hpos[j]))
+                self.parent_image_position_position_radiobuttons[i][j].setToolTip("This sets the position of the parent image to the %s %s of the image.\nPlease note that the representation isn't exact and\nthe final image layout may vary as constraints dictate." %(vpos[i],hpos[j]))
         self.parent_image_position_selector_radiobuttons_group.setExclusive(True)
         self.parent_image_position_position_radiobuttons[1][1].setChecked(True)
         self.parent_image_position_selector_layout = QtGui.QGridLayout()
         self.background_preview_space = QtGui.QLabel()
         self.background_preview_space.setFixedSize(170,300)        
-        self.parent_image_position_selector_layout.addWidget(self.background_preview_space,0,0,3,3,QtCore.Qt.AlignHCenter)
+        self.parent_image_position_selector_layout.addWidget(self.background_preview_space,0,0,3,3,QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop)
+        halignment = [QtCore.Qt.AlignLeft, QtCore.Qt.AlignHCenter, QtCore.Qt.AlignRight]
+        valignment = [QtCore.Qt.AlignTop, QtCore.Qt.AlignVCenter, QtCore.Qt.AlignBottom]
         for i in range(3):
             for j in range(3):
-                self.parent_image_position_selector_layout.addWidget(self.parent_image_position_position_radiobuttons[i][j],i,j,1,1,QtCore.Qt.AlignHCenter)
+                self.parent_image_position_selector_layout.addWidget(self.parent_image_position_position_radiobuttons[i][j],i,j,1,1,halignment[j]|valignment[i])
         self.parent_image_position_selector = QtGui.QGroupBox("Parent Image Position:")
         self.parent_image_position_selector.setLayout(self.parent_image_position_selector_layout)
-        self.parent_image_position_selector.setFixedSize(200,400)
+        self.parent_image_position_selector.setFixedSize(192,335)
         #
         self.icon_positioning_label = QtGui.QLabel("Icon Positioning:")
         self.icon_positioning_combobox = QtGui.QComboBox()
@@ -52,6 +55,7 @@ class LayoutDesigner(QtGui.QWidget):
         palette_options = QtGui.QHBoxLayout()
         palette_options.addWidget(self.palette_selection_combobox,1)
         palette_options.addWidget(self.palette_selection_button,0)
+
         self.background_selection_label = QtGui.QLabel("Background Image:")
         self.background_selection_combobox = QtGui.QComboBox()
         self.background_selection_combobox.setMaximumWidth(200)
@@ -110,7 +114,13 @@ class LayoutDesigner(QtGui.QWidget):
 
     def mapEvents(self):
         self.background_selection_combobox.currentIndexChanged.connect(self.changeBackground)
-        pass
+        self.use_random_parent_image_position.stateChanged.connect(self.toggleRandomParentBackground)
+    
+    def toggleRandomParentBackground(self):
+        if self.use_random_parent_image_position.isChecked():
+            self.parent_image_position_selector.setEnabled(False)
+        else:
+            self.parent_image_position_selector.setEnabled(True)
 
     def changeBackground(self):
         self.current_background = str(self.background_selection_combobox.currentText())
@@ -124,4 +134,14 @@ class LayoutDesigner(QtGui.QWidget):
             self.background_image_pixmap = QtGui.QPixmap(random_image_path)
             self.background_image_pixmap = self.background_image_pixmap.scaled(self.background_preview_space.size(),QtCore.Qt.IgnoreAspectRatio,QtCore.Qt.SmoothTransformation)
             self.background_preview_space.setPixmap(self.background_image_pixmap)
-        
+
+    def getParentImageCoords(self):
+        if self.use_random_parent_image_position.isChecked():
+            return "Random"
+        else:
+            number_of_rows_or_columns = 2
+            for i in range(number_of_rows_or_columns+1):
+                for j in range(number_of_rows_or_columns+1):
+                    if self.parent_image_position_position_radiobuttons[i][j].isChecked():
+                        return (i/number_of_rows_or_columns,j/number_of_rows_or_columns)
+            

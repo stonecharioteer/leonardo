@@ -1,6 +1,6 @@
 ##Leonardo
 ----
-Leonardo is a tool that'll be used to get images from Flipkart, add appropriate icons as dictated by catalogue requirements, and build a presentable image for customer consumption. Yes, it's named for both the Renaissance artist and the Teenage Mutant Ninja Turtle.
+Leonardo is a tool that'll be used to get images from Flipkart, add appropriate icons as dictated by catalogue requirements, and build a presentable image for customer consumption. Yes, it's named for both the Renaissance artist and the Teenage Mutant Ninja Turtle. When completed, Leonardo will be able to do many things simulataneously. I'm going to ensure that Leonardo is completely usable at long stretches, and I'm also going to make it flexible and reliable. Expected TAT reduction at production time is 99.45%.
 
 ###Functions
 ----
@@ -24,4 +24,4 @@ The following are a list of functions:
 
 ###History
 ----
-I had the idea for Leonardo when tasked with batch processing watermarks. It's part of the OINK Report Management system, but exists separately since it's essence is entirely unique. I'll integrate it into the [OINK](www.github.com/oink) repository later.
+I had the idea for Leonardo when tasked with batch processing watermarks. It's part of the OINK Report Management system, but exists separately since it's essence is entirely unique. I'll integrate it into the [OINK](https://github.com/vinay87/oink) repository later.
