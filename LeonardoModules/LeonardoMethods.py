@@ -1,7 +1,6 @@
 from __future__ import division
 import csv
-import os, glob, datetime
-from random import shuffle
+import os, glob, datetime, random
 import numpy as np
 import pandas
 from PIL import Image
@@ -28,25 +27,77 @@ def prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_d
     11. Next, calculate the available coordinates at which to place the secondary icons.
     12. After getting the coordinates, place the secondary icons at similar positions as well.
     """
-#    print fsn, category, primary_attribute_data, secondary_attribute_data, parent_image_positioning, icon_positioning, icon_palette, allow_overlap, background_image_path, primary_attribute_relative_size, secondary_attribute_relative_size, bounding_box, output_location
+    #    print fsn, category, primary_attribute_data, secondary_attribute_data, parent_image_positioning, icon_positioning, icon_palette, allow_overlap, background_image_path, primary_attribute_relative_size, secondary_attribute_relative_size, bounding_box, output_location
     #Get the primary image path
     parent_image_path = getParentImage(fsn)
     #Get the primary and secondary attribute icons.
-    primary_attributes_and_icons_data = getIcons(primary_attribute_data,category)
-    secondary_attributes_and_icons_data = getIcons(secondary_attribute_data,category)
+    base_image = Image.open(background_image_path).convert("RGB")
+    primary_attributes_and_icons_data = getIcons(primary_attribute_data,category,primary_attribute_relative_size, base_image.size)
+    secondary_attributes_and_icons_data = getIcons(secondary_attribute_data,category,secondary_attribute_relative_size, base_image.size)
     #Create an image with the background image's proportions.
-    base_image = Image.open(background_image_path)
-    #Open the parent image and resize it to 25% of the background_image's height.
-    parent_image = getResizedParentImage(Image.open(parent_image_path),0.25,base_image.size)
+    #Open the parent image and resize it to 50% of the background_image's height.
+    parent_image = getResizedImage(Image.open(parent_image_path).convert("RGBA"),0.5,"Height",base_image.size)
     #Based on the input control parameters, get the coordinates for the parent image.
     parent_image_coords = getParentImageCoords(base_image.size,parent_image.size,parent_image_positioning)
+    base_image.paste(parent_image,parent_image_coords,parent_image)
+    icon_coords = getIconCoords(primary_attributes_and_icons_data,secondary_attributes_and_icons_data,parent_image_positioning,base_image.size,parent_image.size)
+    counter = 0
+    for icon in primary_attributes_and_icons_data:
+        base_image.paste(icon["Icon"],icon_coords[counter],icon["Icon"])
+        counter +=1
+    for icon in secondary_attributes_and_icons_data:
+        base_image.paste(icon["Icon"],icon_coords[counter],icon["Icon"])
+        counter +=1
+    #Randomizer method.
+    #icon_position = getValidPlacementPoints(base_image.size, parent_image.size, parent_image_coords, None,primary_attributes_and_icons_data[0], allow_overlap)
+    #base_image.paste(primary_attributes_and_icons_data[0]["Icon"],icon_position,primary_attributes_and_icons_data[0]["Icon"])
 
-def getResizedParentImage(parent_image,resize_factor,base_image_size):
-    return parent_image
+    base_image.save(os.path.join("Output",fsn+"_app_image.png"))
+
+def getIconCoords(primary_attributes_and_icons_data,secondary_attributes_and_icons_data,parent_image_positioning,base_image_size,parent_image_size):
+
+    coords_list = []
+    current_x = -50
+    current_y = int(0.10*base_image_size[1])
+    for icon in primary_attributes_and_icons_data:
+        coords_list.append((current_x,current_y))
+        current_x += int(0.20*base_image_size[0])
+    current_x = int(0.18*base_image_size[0])
+    current_y = int(base_image_size[1]*0.8)
+    for icon in secondary_attributes_and_icons_data:
+        coords_list.append((current_x,current_y))
+        current_x += int(0.1*base_image_size[0])
+    return coords_list
+
+
+
+def getResizedImage(image_to_resize,resize_factor,resize_by,base_image_size):
+    image_to_resize_original_width, image_to_resize_original_height = image_to_resize.size
+    base_image_width, base_image_height = base_image_size
+    if resize_by == "Width":
+        resized_width = resize_factor*base_image_width
+        resized_height = image_to_resize_original_height*resized_width/image_to_resize_original_width
+    else:
+        resized_height = resize_factor*base_image_height
+        resized_width = image_to_resize_original_width*resized_height/image_to_resize_original_height
+    resized_dimensions = (int(resized_width),int(resized_height))
+    resized_image = image_to_resize.resize(resized_dimensions)
+    return resized_image
 
 def getParentImageCoords(base_image_size, parent_image_size, parent_image_positioning):
-    return (0,0)
-def getIcons(attribute_data, category):
+    base_width, base_height = base_image_size
+    parent_width, parent_height = parent_image_size
+    if parent_image_positioning != "Random":
+        x_pos_factor, y_pos_factor = parent_image_positioning
+    else:
+        x_pos_factor = random.uniform(0.0,1.0)
+        y_pos_factor = random.uniform(0.0,1.0)    
+    x_pos = int((base_width-parent_width)*x_pos_factor)
+    y_pos = int((base_height-parent_height)*y_pos_factor)
+
+    return (x_pos,y_pos)
+
+def getIcons(attribute_data, category, icon_relative_size, base_image_size):
     #print attribute_data, category
     look_in_path = os.path.join(os.path.join(os.path.join(os.getcwd(),"Images"),"Repository"),category)
     image_search_path = os.path.join(look_in_path, "*.*")
@@ -59,7 +110,8 @@ def getIcons(attribute_data, category):
         for icon in images_in_look_in_path:
             if not found_icon:
                 if attribute["Attribute"].lower().strip() in icon.lower().strip():
-                    attribute.update({"Icon": icon})
+                    icon_with_text = getIconImage(icon, attribute["Description Text"], icon_relative_size, base_image_size)
+                    attribute.update({"Icon": icon_with_text})
                     found_icon = True
                 else:
                     attribute.update({"Icon": None})
@@ -68,16 +120,129 @@ def getIcons(attribute_data, category):
     if len(attributes_without_icons) >0:
         print "The following attributes don't have icons. Recommend making them before progressing."
         print attributes_without_icons
-        raw_input(">")
     return attribute_data
 
 def getParentImage(fsn):
     parent_image_path = glob.glob(os.path.join(os.path.join(os.path.join(os.getcwd(),"Images"),"Parent Images"),"%s*.*"%fsn))[0]
     return parent_image_path
-    
 
-def getValidPlacementPoints(image_base_size, parent_image_size, past_icons_data, new_icon_data, allow_overlap):
+def getIconImage(icon_path, description_text, icon_relative_size, base_image_size):
+    """This method generates an image object which contains the icon image as well as the description text."""
+    import textwrap
+    clearance_factor_for_text = 2.0
+    font_resize_factor = 0.3
+    text_as_paragraphs = textwrap.wrap(description_text,width=15)
+    #get an image object using the icon path, and resize it to the required dimensions with respect to the height of the base image.
+    icon_image = getResizedImage(Image.open(icon_path).convert("RGBA"),icon_relative_size,"height",base_image_size)
+    #Create a blank canvas for the text.
+    max_w, max_h = 500, 500
+    text_canvas = Image.new("RGBA",(max_w, max_h),(0,0,0,0))
+    
+    draw_text_handle = ImageDraw.Draw(text_canvas)
+    font_size = int(icon_image.size[1]*font_resize_factor)
+    font = ImageFont.truetype(os.path.join("essentials","RionaSans-Regular.ttf"), font_size)
+    
+    current_h, pad = 0, 10
+    #Ref: http://stackoverflow.com/questions/1970807/center-middle-align-text-with-pil
+    for line in text_as_paragraphs:
+        w, h = draw_text_handle.textsize(line, font=font)
+        draw_text_handle.text(((int((max_w-w)/2)), current_h), line, (0,0,0), font=font)
+        current_h += h + pad
+    
+    #merge both images now.
+    final_canvas_width = text_canvas.size[0] if text_canvas.size[0] >= icon_image.size[0] else icon_image.size[0]
+    final_canvas_height = text_canvas.size[1] + icon_image.size[1] + pad
+
+    final_canvas = Image.new("RGBA",(final_canvas_width, final_canvas_height))
+    icon_x = int((final_canvas.size[0]-icon_image.size[0])/2)
+    icon_y = 0
+    icon_position = (icon_x, icon_y)
+    text_x = int((final_canvas.size[0]-text_canvas.size[0])/2)
+    text_y = int(final_canvas.size[1]-text_canvas.size[1])
+    text_canvas_position = (text_x, text_y)
+    final_canvas.paste(icon_image, icon_position, icon_image)
+    final_canvas.paste(text_canvas, text_canvas_position, text_canvas)
+
+    return final_canvas
+
+def getValidPlacementPoints(base_image_size, parent_image_size, parent_coordinates, past_icons_data, new_icon_data, allow_overlap):
     """This method calculates valid positions for icons."""
+    base_width, base_height = base_image_size
+    parent_width, parent_height = parent_image_size
+    parent_x, parent_y = parent_coordinates
+    icon_width, icon_height = new_icon_data["Icon"].size
+
+    right_gap = (base_width-(parent_x+parent_width))
+    bottom_gap = (base_height-(parent_y+parent_height))
+    if past_icons_data is None:
+        #Figure out if the icon can be placed to the left or the right of the parent image.
+        if parent_x > icon_width:
+            allow_left = True
+        elif parent_x == icon_width:
+            allow_left = True
+        else: #parent_x < icon_width
+            allow_left = False
+
+        if right_gap < icon_width:
+            allow_right = False
+        else:
+            allow_right = True
+
+        left_gap= parent_x-icon_width
+        right_gap_limit = base_width-icon_width
+
+
+        if allow_right and allow_left:
+            #Can be between 0 and parent_x-icon_width, OR right_gap and base_width-icon_width
+            icon_x = int(random.sample((random.uniform(0,left_gap),random.uniform(right_gap,right_gap_limit)),1)[0]) #random.sample gives a list. So pick the first item.
+        elif allow_left and (not allow_right):
+            icon_x = int(random.uniform(0,left_gap))
+        elif (not allow_left) and allow_right:
+            icon_x = int(random.uniform(right_gap,right_gap_limit))
+        else:
+            #not either!
+            print "There's no space along the x axis for the icon."
+            print "Icon size is:", icon_width, icon_height
+            print "Parent image size is:", parent_width, parent_height
+            print "Base image size is:", base_width, base_height
+            print "Parent image is at:", parent_x, parent_y
+            icon_x = 0
+            #raw_input(">")
+
+        if parent_y > icon_height:
+            allow_top = True
+        elif parent_y == icon_height:
+            allow_top = True
+        else: #parent_y < icon_height
+            allow_top = False
+
+        if bottom_gap < icon_height:
+            allow_bottom = False
+        else:
+            allow_bottom = True
+
+        top_gap= parent_y-icon_height
+        bottom_gap_limit = base_height-icon_height
+
+        if allow_top and allow_bottom:
+            #Can be between 0 and parent_y-icon_height, OR top_gap and base_height-icon_height
+            icon_y = int(random.sample((random.uniform(0,top_gap),random.uniform(top_gap,bottom_gap_limit)),1)[0])
+        elif allow_top and (not allow_bottom):
+            icon_y = int(random.uniform(0,top_gap))
+        elif (not allow_top) and allow_bottom:
+            icon_y = int(random.uniform(top_gap,bottom_gap_limit))
+        else:
+            #not either!
+            print "There's no space along the y axis for the icon."
+            print "Icon size is:", icon_width, icon_height
+            print "Parent image size is:", parent_width, parent_height
+            print "Base image size is:", base_width, base_height
+            print "Parent image is at:", parent_x, parent_y
+            icon_x, icon_y = 0,0
+
+        return (icon_x,icon_y)
+        
+
 
 def main():
     print "Loading Data..."
@@ -121,7 +286,7 @@ def main():
             primary_usp_icon_height = int(0.15*background_image_height)
             primary_usp_locations = [(200,200),(200,1300),(1100,200),(700,700),(1100,1300)]
             counter = 0
-            shuffle(primary_usp_locations)
+            random.shuffle(primary_usp_locations)
             for usp in primary_usp_dict_list:
                 temp = usp["Image"]
                 callout = usp["USP"]#.toupper()

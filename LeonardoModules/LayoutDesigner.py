@@ -1,5 +1,5 @@
 from __future__ import division
-import os, glob
+import os, glob, random
 from PyQt4 import QtGui, QtCore
 from FSNTextEdit import FSNTextEdit
 from IconButton import IconButton
@@ -76,7 +76,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.secondary_attr_icon_size_spin_box = QtGui.QSpinBox()
         self.secondary_attr_icon_size_spin_box  .setSuffix("%")
         self.secondary_attr_icon_size_spin_box.setToolTip("This sets the size of the secondary attribute icons, at a percentage relative to the background image.")
-        self.secondary_attr_icon_size_spin_box.setRange(1,5)
+        self.secondary_attr_icon_size_spin_box.setRange(3,5)
         self.icon_bounding_box_label = QtGui.QLabel("Icon Bounding Box Shape:")
         self.icon_bounding_box_combobox = QtGui.QComboBox()
         self.icon_bounding_box_combobox.addItems(["Circle","Rectangle","Square"])
@@ -155,7 +155,7 @@ class LayoutDesigner(QtGui.QWidget):
             for i in range(number_of_rows_or_columns+1):
                 for j in range(number_of_rows_or_columns+1):
                     if self.parent_image_position_position_radiobuttons[i][j].isChecked():
-                        return (i/number_of_rows_or_columns,j/number_of_rows_or_columns)
+                        return (j/number_of_rows_or_columns,i/number_of_rows_or_columns)
 
     def getIconPosition(self):
         return str(self.icon_positioning_combobox.currentText())

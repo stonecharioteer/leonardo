@@ -64,7 +64,7 @@ class Splinter(QtCore.QThread):
                         progress = 100
                         completion_status = True
                     self.progress.emit(message, progress, eta, completion_status)
-                    
+                print "Completed in %ss." %(datetime.datetime.now() - start_time)
                 self.allow_run = False
 #                self.deploy()
     
