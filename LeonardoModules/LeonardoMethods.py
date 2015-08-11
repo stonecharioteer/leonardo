@@ -51,11 +51,11 @@ def prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_d
     #Randomizer method.
     #icon_position = getValidPlacementPoints(base_image.size, parent_image.size, parent_image_coords, None,primary_attributes_and_icons_data[0], allow_overlap)
     #base_image.paste(primary_attributes_and_icons_data[0]["Icon"],icon_position,primary_attributes_and_icons_data[0]["Icon"])
+    image_path = os.path.join("Output",fsn+"_app_image.png")
+    base_image.save(image_path)
+    return image_path
 
-    base_image.save(os.path.join("Output",fsn+"_app_image.png"))
-
-def getIconCoords(primary_attributes_and_icons_data,secondary_attributes_and_icons_data,parent_image_positioning,base_image_size,parent_image_size):
-
+def getIconCoords(primary_attributes_and_icons_data, secondary_attributes_and_icons_data, parent_image_positioning, base_image_size, parent_image_size):
     coords_list = []
     current_x = -50
     current_y = int(0.10*base_image_size[1])

@@ -4,7 +4,7 @@ from PIL import Image
 from PyQt4 import QtCore
 import LeonardoMethods
 class Splinter(QtCore.QThread):
-    progress = QtCore.pyqtSignal(str, int, datetime.datetime, bool)
+    progress = QtCore.pyqtSignal(str, int, datetime.datetime, bool, list)
     def __init__(self):
         super(Splinter,self).__init__()
         self.mutex = QtCore.QMutex()
@@ -28,7 +28,7 @@ class Splinter(QtCore.QThread):
                 total = len(self.data)
                 counter = 0
                 start_time = datetime.datetime.now()
-
+                images_list = []
                 for row in self.data:
                     counter+=1
                     fsn = row["FSN"]
@@ -53,18 +53,19 @@ class Splinter(QtCore.QThread):
                     for i in range(int(secondary_attributes_count)):
                         index = i+1
                         secondary_attribute_data.append({"Attribute":row["Secondary USP-%d Attribute"%index],"Description Text":row["Secondary USP-%d Description Text"%index]})
-                    LeonardoMethods.prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_data, self.parent_image_position, self.icon_positioning, self.icon_palette, self.allow_overlap, self.background_image_path, self.primary_attribute_relative_size, self.secondary_attribute_relative_size, self.bounding_box, self.output_location)
+                    image_name = LeonardoMethods.prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_data, self.parent_image_position, self.icon_positioning, self.icon_palette, self.allow_overlap, self.background_image_path, self.primary_attribute_relative_size, self.secondary_attribute_relative_size, self.bounding_box, self.output_location)
                     eta = LeonardoMethods.getETA(start_time, counter, total)
+                    images_list.append(image_name)
                     if counter < total:
                         message = "Processing %d of %d FSNs." %(counter,total)
-                        progress = int(counter/total)
+                        progress = int(counter/total*100)
                         completion_status = False
                     else:
                         message = "Completed."
                         progress = 100
                         completion_status = True
-                    self.progress.emit(message, progress, eta, completion_status)
-                print "Completed in %ss." %(datetime.datetime.now() - start_time)
+                    self.progress.emit(message, progress, eta, completion_status, images_list)
+                #print "Completed in %ss." %(datetime.datetime.now() - start_time)
                 self.allow_run = False
 #                self.deploy()
     

@@ -12,10 +12,8 @@ from LeonardoModules.Splinter import Splinter
 from LeonardoModules.IconListBox import IconListBox
 from LeonardoModules.DataSelector import DataSelector
 from LeonardoModules.LayoutDesigner import LayoutDesigner
-from LeonardoModules.SettingsWidget import SettingsWidget
 from LeonardoModules.PreviewRunWidget import PreviewRunWidget
 from LeonardoModules.ShellShocked import showSplashScreen, setWindowTheme
-from LeonardoModules.ProgressBar import ProgressBar
 #from LeonardoModules.April import April
 
 class Leonardo(QtGui.QMainWindow):
@@ -44,28 +42,20 @@ class Leonardo(QtGui.QMainWindow):
         self.page_changer.addElements(page_control_list)
         self.page_changer.setFixedSize(120, 400)
         self.page_changer.item(1).setFlags(QtCore.Qt.NoItemFlags)
-        #self.page_changer.item(2).setFlags(QtCore.Qt.NoItemFlags)
-        #self.page_changer.item(3).setFlags(QtCore.Qt.NoItemFlags)
+        self.page_changer.item(2).setFlags(QtCore.Qt.NoItemFlags)
 
         #Initialize the individual widget pages
         self.data_selector_widget = DataSelector()
         self.layout_designer_widget = LayoutDesigner()
-        self.settings_widget = SettingsWidget()
-        self.preview_and_run_widget = PreviewRunWidget()
+        self.preview_and_run_widget = PreviewRunWidget("Preview and Run")
 
         self.pages = QtGui.QStackedWidget()
         self.pages.addWidget(self.data_selector_widget)
         self.pages.addWidget(self.layout_designer_widget)
-        self.pages.addWidget(self.settings_widget)
         self.pages.addWidget(self.preview_and_run_widget)
-
-        self.progress_bar = ProgressBar()
-
         final_layout = QtGui.QGridLayout()
         final_layout.addWidget(self.page_changer,0,0,5,1)
         final_layout.addWidget(self.pages,0,1,5,1)
-        final_layout.addWidget(self.progress_bar,5,0,1,2)
-
         main_widget = QtGui.QWidget()
         main_widget.setLayout(final_layout)
         self.setCentralWidget(main_widget)
@@ -83,7 +73,16 @@ class Leonardo(QtGui.QMainWindow):
     def mapEvents(self):
         self.page_changer.currentItemChanged.connect(self.changePage)
         self.data_selector_widget.validate_button.clicked.connect(self.allowDesign)
-        self.layout_designer_widget.validate_button.clicked.connect(self.runSplinter)
+        self.layout_designer_widget.validate_button.clicked.connect(self.showPreviewScreen)
+        self.preview_and_run_widget.start_progress_button.clicked.connect(self.runSplinter)
+        self.hamato_yoshi.progress.connect(self.preview_and_run_widget.displayProgress)
+        
+    def showPreviewScreen(self):
+        #self.page_changer.item(0).setFlags(QtCore.Qt.NoItemFlags)
+        #self.page_changer.item(1).setFlags(QtCore.Qt.NoItemFlags)
+        self.page_changer.item(2).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+        self.page_changer.setCurrentRow(2)
+
     
     def allowDesign(self):
         self.page_changer.item(1).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
