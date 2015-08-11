@@ -84,13 +84,15 @@ def getStrippedImage(image):
     column_indices = range(col_max+1)
     reversed_row_indices = list(reversed(row_indices))
     reversed_column_indices = list(reversed(column_indices))
-    #Loop through each row.
+
+    #Rows: Top to bottom
     for row_number in row_indices:
         row_of_pixels = image_data[row_number]
-        keep_looking = True
+        keep_looking_forth = True
         previous_pixel = None
+        #Columns: left to right.
         for column_number in column_indices:
-            if keep_looking:
+            if keep_looking_forth:
                 pixel = row_of_pixels[column_number]
                 pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
                 if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
@@ -98,31 +100,39 @@ def getStrippedImage(image):
                     image_data[row_number][column_number] = pixel
                 else:
                     #On finding a pixel that doesn't lie in this color, quit
-                    keep_looking = False
+                    keep_looking_forth = False
+        #Columns: right to left.
+        keep_looking_reverse = True
+        for column_number in reversed_column_indices:
+            if keep_looking_reverse:
+                pixel = row_of_pixels[column_number]
+                pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
+                if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
+                    pixel = [0,255,0,0]
+                    image_data[row_number][column_number] = pixel
+                else:
+                    #On finding a pixel that doesn't lie in this color, quit
+                    keep_looking_reverse = False
 
-    #Loop through each row, backwards.
+    #Rows: Bottom to top
     for row_number in reversed_row_indices:
+        #Columns: left to right.
         row_of_pixels = image_data[row_number]
-        keep_looking = True
-        previous_pixel = None
+        keep_looking_forth = True
         for column_number in column_indices:
-            if keep_looking:
+            if keep_looking_forth:
                 pixel = row_of_pixels[column_number]
                 pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
                 if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
-                    pixel = [0,255,0,0]
+                    pixel = [0,0,0,0]
                     image_data[row_number][column_number] = pixel
                 else:
                     #On finding a pixel that doesn't lie in this color, quit
-                    keep_looking = False
-
-    #Loop through each column.
-    for row_number in row_indices:
-        row_of_pixels = image_data[row_number]
-        keep_looking = True
-        previous_pixel = None
+                    keep_looking_forth = False
+        #Columns: right to left.
+        keep_looking_reverse = True
         for column_number in reversed_column_indices:
-            if keep_looking:
+            if keep_looking_reverse:
                 pixel = row_of_pixels[column_number]
                 pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
                 if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
@@ -130,23 +140,62 @@ def getStrippedImage(image):
                     image_data[row_number][column_number] = pixel
                 else:
                     #On finding a pixel that doesn't lie in this color, quit
-                    keep_looking = False
+                    keep_looking_reverse = False
 
-    #Loop through each column, backwards.
-    for row_number in reversed_row_indices:
-        row_of_pixels = image_data[row_number]
-        keep_looking = True
-        previous_pixel = None
-        for column_number in reversed_column_indices:
-            if keep_looking:
-                pixel = row_of_pixels[column_number]
+    #Columns: Left to Right
+    for column_number in column_indices:
+        #Rows: Top to Bottom
+        keep_looking_forth = True
+        for row_number in row_indices:
+            pixel = image_data[row_number][column_number]
+            pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
+            if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
+                pixel = [0,0,0,0]
+                image_data[row_number][column_number] = pixel
+            else:
+                #On finding a pixel that doesn't lie in this color, quit
+                keep_looking_forth = False            
+        #Rows: Bottom to Top 
+        keep_looking_reverse = True
+        for row_number in reversed_row_indices:
+            pixel = image_data[row_number][column_number]
                 pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
                 if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
                     pixel = [0,255,0,0]
                     image_data[row_number][column_number] = pixel
                 else:
                     #On finding a pixel that doesn't lie in this color, quit
-                    keep_looking = False
+                    keep_looking_reverse = False
+
+    #Columns: Right to Left
+    for column_number in reversed_column_indices:
+        #Rows: Top to Bottom
+        keep_looking_forth = True
+        for row_number in row_indices:
+            pixel = image_data[row_number][column_number]
+            pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
+            if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
+                pixel = [0,0,0,0]
+                image_data[row_number][column_number] = pixel
+            else:
+                #On finding a pixel that doesn't lie in this color, quit
+                keep_looking_forth = False
+
+        #Rows: Bottom to Top 
+        keep_looking_reverse = True
+        for row_number in reversed_row_indices:
+            pixel = image_data[row_number][column_number]
+                pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
+                if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
+                    pixel = [0,255,0,0]
+                    image_data[row_number][column_number] = pixel
+                else:
+                    #On finding a pixel that doesn't lie in this color, quit
+                    keep_looking_reverse = False
+            
+
+
+
     stripped_image = Image.fromarray(image_data,mode="RGBA")
     return stripped_image
 
