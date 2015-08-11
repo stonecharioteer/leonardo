@@ -97,6 +97,8 @@ class Leonardo(QtGui.QMainWindow):
         self.hamato_yoshi.primary_attribute_relative_size = self.layout_designer_widget.getPrimaryAttrRelativeSize()
         self.hamato_yoshi.secondary_attribute_relative_size = self.layout_designer_widget.getSecondaryAttrRelativeSize()
         self.hamato_yoshi.bounding_box = self.layout_designer_widget.getIconBoundingBox()
+        self.hamato_yoshi.use_simple_bg_color_strip = self.layout_designer_widget.useSimpleColorStripAlgorithm()
+        self.hamato_yoshi.bg_color_strip_threshold = self.layout_designer_widget.getColorStripThreshold()
         self.hamato_yoshi.output_location = os.getcwd()
         self.hamato_yoshi.allow_run = True
 

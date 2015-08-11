@@ -8,7 +8,7 @@ from PIL import ImageFont
 from PIL import ImageDraw
 import PIL
 
-def prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_data, parent_image_positioning, icon_positioning, icon_palette, allow_overlap, background_image_path, primary_attribute_relative_size, secondary_attribute_relative_size, bounding_box, output_location):
+def prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_data, parent_image_positioning, icon_positioning, icon_palette, allow_overlap, background_image_path, primary_attribute_relative_size, secondary_attribute_relative_size, bounding_box, use_simple_bg_color_strip, bg_color_strip_threshold, output_location):
     """This method takes one fsn set, and prepares the app-image.
     ALGORITHM:
     1. If the background image is specified, check if Background image exists.
@@ -36,8 +36,10 @@ def prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_d
     secondary_attributes_and_icons_data = getIcons(secondary_attribute_data,category,secondary_attribute_relative_size, base_image.size)
     #Create an image with the background image's proportions.
     #Open the parent image and resize it to 50% of the background_image's height.
-    stripped_parent_image = getStrippedImage(Image.open(parent_image_path).convert("RGBA"))
-    #stripped_parent_image = replaceColorInImage(Image.open(parent_image_path).convert("RGBA"), (255,255,255,255),(255,255,255,0))
+    if use_simple_bg_color_strip:
+        stripped_parent_image = replaceColorInImage(Image.open(parent_image_path).convert("RGBA"), (255,255,255,255),(0,0,0,0), bg_color_strip_threshold)
+    else:
+        stripped_parent_image = getStrippedImage(Image.open(parent_image_path).convert("RGBA"), bg_color_strip_threshold)
     parent_image = getResizedImage(stripped_parent_image,0.5,"Height",base_image.size)
     #Based on the input control parameters, get the coordinates for the parent image.
     parent_image_coords = getParentImageCoords(base_image.size,parent_image.size,parent_image_positioning)
@@ -57,18 +59,32 @@ def prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_d
     base_image.save(image_path)
     return image_path
 
-def replaceColorInImage(image, original_colour, replacement_color):
+def replaceColorInImage(image, original_colour, replacement_color, threshold):
     import numpy as np
     image_data = np.array(image)
     #print image.size
     #print image_data.shape
     #raw_input("Waiting!")
-
+    max_color = []
+    for color in original_colour:
+        if color == 255:
+            max_color.append(color)
+        else:
+            max_color.append(color+threshold)
+    min_color = []
+    for color in original_colour:
+        if color == 0:
+            min_color.append(color-threshold)
+        else:
+            min_color.append(color)
+    max_color[3] = 255
+    min_color[3] = 255
     image_data[(image_data == original_colour).all(axis=-1)] = replacement_color
+    #image_data[(min_color <=image_data <= max_colour).all(axis=-1)] = replacement_color
     return Image.fromarray(image_data,mode="RGBA")
 
 
-def getStrippedImage(image):
+def getStrippedImage(image, threshold):
     """This method removes the background color of the image."""
     import numpy as np
     image_data_columns, image_data_rows = image.size
@@ -78,8 +94,6 @@ def getStrippedImage(image):
     row_max, col_max = image_data_rows-1, image_data_columns-1
     rgba_at_borders = [image_data[row_min][col_min],image_data[row_min][col_max],image_data[row_max][col_min],image_data[row_max][col_max]]
     r_border, g_border, b_border, a_border = np.median(np.array(rgba_at_borders),axis=0)
-    print 
-    threshold = 30
     row_indices = range(row_max+1)
     column_indices = range(col_max+1)
     reversed_row_indices = list(reversed(row_indices))
@@ -101,6 +115,7 @@ def getStrippedImage(image):
                 else:
                     #On finding a pixel that doesn't lie in this color, quit
                     keep_looking_forth = False
+                    break
         #Columns: right to left.
         keep_looking_reverse = True
         for column_number in reversed_column_indices:
@@ -113,6 +128,7 @@ def getStrippedImage(image):
                 else:
                     #On finding a pixel that doesn't lie in this color, quit
                     keep_looking_reverse = False
+                    break
 
     #Rows: Bottom to top
     for row_number in reversed_row_indices:
@@ -129,6 +145,7 @@ def getStrippedImage(image):
                 else:
                     #On finding a pixel that doesn't lie in this color, quit
                     keep_looking_forth = False
+                    break
         #Columns: right to left.
         keep_looking_reverse = True
         for column_number in reversed_column_indices:
@@ -141,24 +158,30 @@ def getStrippedImage(image):
                 else:
                     #On finding a pixel that doesn't lie in this color, quit
                     keep_looking_reverse = False
+                    break
 
+    #COLUMNWISE SEARCH FOR BG COLOR
     #Columns: Left to Right
     for column_number in column_indices:
         #Rows: Top to Bottom
         keep_looking_forth = True
         for row_number in row_indices:
-            pixel = image_data[row_number][column_number]
-            pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
-            if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
-                pixel = [0,0,0,0]
-                image_data[row_number][column_number] = pixel
-            else:
-                #On finding a pixel that doesn't lie in this color, quit
-                keep_looking_forth = False            
+            if keep_looking_forth:
+                pixel = image_data[row_number][column_number]
+                pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
+                if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
+                    pixel = [0,0,0,0]
+                    image_data[row_number][column_number] = pixel
+                else:
+                    #On finding a pixel that doesn't lie in this color, quit
+                    keep_looking_forth = False
+                    break
+
         #Rows: Bottom to Top 
         keep_looking_reverse = True
         for row_number in reversed_row_indices:
-            pixel = image_data[row_number][column_number]
+            if keep_looking_reverse:
+                pixel = image_data[row_number][column_number]
                 pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
                 if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
                     pixel = [0,255,0,0]
@@ -166,25 +189,29 @@ def getStrippedImage(image):
                 else:
                     #On finding a pixel that doesn't lie in this color, quit
                     keep_looking_reverse = False
+                    break
 
     #Columns: Right to Left
     for column_number in reversed_column_indices:
         #Rows: Top to Bottom
         keep_looking_forth = True
         for row_number in row_indices:
-            pixel = image_data[row_number][column_number]
-            pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
-            if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
-                pixel = [0,0,0,0]
-                image_data[row_number][column_number] = pixel
-            else:
-                #On finding a pixel that doesn't lie in this color, quit
-                keep_looking_forth = False
+            if keep_looking_forth:
+                pixel = image_data[row_number][column_number]
+                pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
+                if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
+                    pixel = [0,0,0,0]
+                    image_data[row_number][column_number] = pixel
+                else:
+                    #On finding a pixel that doesn't lie in this color, quit
+                    keep_looking_forth = False
+                    break
 
         #Rows: Bottom to Top 
         keep_looking_reverse = True
         for row_number in reversed_row_indices:
-            pixel = image_data[row_number][column_number]
+            if keep_looking_reverse:
+                pixel = image_data[row_number][column_number]
                 pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
                 if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
                     pixel = [0,255,0,0]
@@ -192,9 +219,7 @@ def getStrippedImage(image):
                 else:
                     #On finding a pixel that doesn't lie in this color, quit
                     keep_looking_reverse = False
-            
-
-
+                    break
 
     stripped_image = Image.fromarray(image_data,mode="RGBA")
     return stripped_image
@@ -281,7 +306,7 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     font_resize_factor = 0.3
     text_as_paragraphs = textwrap.wrap(description_text,width=15)
     #get an image object using the icon path, and resize it to the required dimensions with respect to the height of the base image.
-    icon_image = getResizedImage(Image.open(icon_path).convert("RGBA"),icon_relative_size,"height",base_image_size)
+    icon_image = getStrippedImage(getResizedImage(Image.open(icon_path).convert("RGBA"),icon_relative_size,"height",base_image_size), threshold=30)
     #icon_image = replaceColorInImage(resized_icon_image,(255,255,255,255),(0,0,0,255))
     #Create a blank canvas for the text.
     max_w, max_h = 500, 500
