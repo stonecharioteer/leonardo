@@ -62,8 +62,7 @@ class Leonardo(QtGui.QMainWindow):
         self.setWindowTitle("Leonardo: The Valorous Informational Creator of Images")
         self.setWindowIcon(QtGui.QIcon(os.path.join("essentials","oink.png")))
         self.show()
-        self.resize(400,600)
-        self.move(250,100)
+        self.showMaximized()
 
     def changePage(self, current, previous):
         if not current:
@@ -76,7 +75,7 @@ class Leonardo(QtGui.QMainWindow):
         self.layout_designer_widget.validate_button.clicked.connect(self.showPreviewScreen)
         self.preview_and_run_widget.start_progress_button.clicked.connect(self.runSplinter)
         self.hamato_yoshi.progress.connect(self.preview_and_run_widget.displayProgress)
-        
+
     def showPreviewScreen(self):
         #self.page_changer.item(0).setFlags(QtCore.Qt.NoItemFlags)
         #self.page_changer.item(1).setFlags(QtCore.Qt.NoItemFlags)

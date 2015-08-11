@@ -36,7 +36,8 @@ def prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_d
     secondary_attributes_and_icons_data = getIcons(secondary_attribute_data,category,secondary_attribute_relative_size, base_image.size)
     #Create an image with the background image's proportions.
     #Open the parent image and resize it to 50% of the background_image's height.
-    stripped_parent_image = replaceColorInImage(Image.open(parent_image_path).convert("RGBA"), (255,255,255,255),(255,255,255,0))
+    stripped_parent_image = getStrippedImage(Image.open(parent_image_path).convert("RGBA"))
+    #stripped_parent_image = replaceColorInImage(Image.open(parent_image_path).convert("RGBA"), (255,255,255,255),(255,255,255,0))
     parent_image = getResizedImage(stripped_parent_image,0.5,"Height",base_image.size)
     #Based on the input control parameters, get the coordinates for the parent image.
     parent_image_coords = getParentImageCoords(base_image.size,parent_image.size,parent_image_positioning)
@@ -59,8 +60,95 @@ def prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_d
 def replaceColorInImage(image, original_colour, replacement_color):
     import numpy as np
     image_data = np.array(image)
+    #print image.size
+    #print image_data.shape
+    #raw_input("Waiting!")
+
     image_data[(image_data == original_colour).all(axis=-1)] = replacement_color
     return Image.fromarray(image_data,mode="RGBA")
+
+
+def getStrippedImage(image):
+    """This method removes the background color of the image."""
+    import numpy as np
+    image_data_columns, image_data_rows = image.size
+    image_data = np.array(image)
+
+    row_min, col_min = 0, 0
+    row_max, col_max = image_data_rows-1, image_data_columns-1
+    rgba_at_borders = [image_data[row_min][col_min],image_data[row_min][col_max],image_data[row_max][col_min],image_data[row_max][col_max]]
+    r_border, g_border, b_border, a_border = np.median(np.array(rgba_at_borders),axis=0)
+    print 
+    threshold = 30
+    row_indices = range(row_max+1)
+    column_indices = range(col_max+1)
+    reversed_row_indices = list(reversed(row_indices))
+    reversed_column_indices = list(reversed(column_indices))
+    #Loop through each row.
+    for row_number in row_indices:
+        row_of_pixels = image_data[row_number]
+        keep_looking = True
+        previous_pixel = None
+        for column_number in column_indices:
+            if keep_looking:
+                pixel = row_of_pixels[column_number]
+                pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
+                if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
+                    pixel = [0,255,0,0]
+                    image_data[row_number][column_number] = pixel
+                else:
+                    #On finding a pixel that doesn't lie in this color, quit
+                    keep_looking = False
+
+    #Loop through each row, backwards.
+    for row_number in reversed_row_indices:
+        row_of_pixels = image_data[row_number]
+        keep_looking = True
+        previous_pixel = None
+        for column_number in column_indices:
+            if keep_looking:
+                pixel = row_of_pixels[column_number]
+                pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
+                if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
+                    pixel = [0,255,0,0]
+                    image_data[row_number][column_number] = pixel
+                else:
+                    #On finding a pixel that doesn't lie in this color, quit
+                    keep_looking = False
+
+    #Loop through each column.
+    for row_number in row_indices:
+        row_of_pixels = image_data[row_number]
+        keep_looking = True
+        previous_pixel = None
+        for column_number in reversed_column_indices:
+            if keep_looking:
+                pixel = row_of_pixels[column_number]
+                pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
+                if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
+                    pixel = [0,255,0,0]
+                    image_data[row_number][column_number] = pixel
+                else:
+                    #On finding a pixel that doesn't lie in this color, quit
+                    keep_looking = False
+
+    #Loop through each column, backwards.
+    for row_number in reversed_row_indices:
+        row_of_pixels = image_data[row_number]
+        keep_looking = True
+        previous_pixel = None
+        for column_number in reversed_column_indices:
+            if keep_looking:
+                pixel = row_of_pixels[column_number]
+                pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
+                if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
+                    pixel = [0,255,0,0]
+                    image_data[row_number][column_number] = pixel
+                else:
+                    #On finding a pixel that doesn't lie in this color, quit
+                    keep_looking = False
+    stripped_image = Image.fromarray(image_data,mode="RGBA")
+    return stripped_image
 
 def getIconCoords(primary_attributes_and_icons_data, secondary_attributes_and_icons_data, parent_image_positioning, base_image_size, parent_image_size):
     coords_list = []
