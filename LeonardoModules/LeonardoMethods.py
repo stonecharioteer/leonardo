@@ -36,7 +36,8 @@ def prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_d
     secondary_attributes_and_icons_data = getIcons(secondary_attribute_data,category,secondary_attribute_relative_size, base_image.size)
     #Create an image with the background image's proportions.
     #Open the parent image and resize it to 50% of the background_image's height.
-    parent_image = getResizedImage(Image.open(parent_image_path).convert("RGBA"),0.5,"Height",base_image.size)
+    stripped_parent_image = replaceColorInImage(Image.open(parent_image_path).convert("RGBA"), (255,255,255,255),(255,255,255,0))
+    parent_image = getResizedImage(stripped_parent_image,0.5,"Height",base_image.size)
     #Based on the input control parameters, get the coordinates for the parent image.
     parent_image_coords = getParentImageCoords(base_image.size,parent_image.size,parent_image_positioning)
     base_image.paste(parent_image,parent_image_coords,parent_image)
@@ -54,6 +55,12 @@ def prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_d
     image_path = os.path.join("Output",fsn+"_app_image.png")
     base_image.save(image_path)
     return image_path
+
+def replaceColorInImage(image, original_colour, replacement_color):
+    import numpy as np
+    image_data = np.array(image)
+    image_data[(image_data == original_colour).all(axis=-1)] = replacement_color
+    return Image.fromarray(image_data,mode="RGBA")
 
 def getIconCoords(primary_attributes_and_icons_data, secondary_attributes_and_icons_data, parent_image_positioning, base_image_size, parent_image_size):
     coords_list = []
@@ -123,7 +130,11 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size):
     return attribute_data
 
 def getParentImage(fsn):
-    parent_image_path = glob.glob(os.path.join(os.path.join(os.path.join(os.getcwd(),"Images"),"Parent Images"),"%s*.*"%fsn))[0]
+    try:
+        parent_image_path = glob.glob(os.path.join(os.path.join(os.path.join(os.getcwd(),"Images"),"Parent Images"),"%s*.*"%fsn))[0]
+    except:
+        print "Error getting Parent Image for %s."%fsn
+        parent_image_path = glob.glob(os.path.join(os.path.join(os.path.join(os.getcwd(),"Images"),"Parent Images"),"*.*"))[0]
     return parent_image_path
 
 def getIconImage(icon_path, description_text, icon_relative_size, base_image_size):
@@ -134,6 +145,7 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     text_as_paragraphs = textwrap.wrap(description_text,width=15)
     #get an image object using the icon path, and resize it to the required dimensions with respect to the height of the base image.
     icon_image = getResizedImage(Image.open(icon_path).convert("RGBA"),icon_relative_size,"height",base_image_size)
+    #icon_image = replaceColorInImage(resized_icon_image,(255,255,255,255),(0,0,0,255))
     #Create a blank canvas for the text.
     max_w, max_h = 500, 500
     text_canvas = Image.new("RGBA",(max_w, max_h),(0,0,0,0))

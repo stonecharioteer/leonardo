@@ -6,8 +6,8 @@ from IconButton import IconButton
 #from FileLocationWidget import FileLocationWidget
 from PrimaryButton import PrimaryButton
 from QColorButton import QColorButton
+
 class LayoutDesigner(QtGui.QWidget):
-    
     def __init__(self):
         super(LayoutDesigner,self).__init__()
         self.createUI()
