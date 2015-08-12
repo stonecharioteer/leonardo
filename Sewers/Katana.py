@@ -1,6 +1,6 @@
 from __future__ import division
 import csv
-import os, glob, datetime, random
+import os, glob, datetime, random, math
 import numpy as np
 import pandas
 from PIL import Image
@@ -46,8 +46,9 @@ def prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_d
     base_image.paste(parent_image,parent_image_coords,parent_image)
     #icon_coords = getIconCoords(primary_attributes_and_icons_data,secondary_attributes_and_icons_data,parent_image_positioning,base_image.size,parent_image.size)
     counter = 0
-    icons_and_coordinates = getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, "Circular","Separate",allow_overlap)
-
+    icons_and_coordinates = getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, "Circular","Alternate",allow_overlap)
+    for icon in icons_and_coordinates:
+        base_image.paste(icon["Icon"],icon["Position"],icon["Icon"])
     #for icon in primary_attributes_and_icons_data:
     #    icon_position = getValidPlacementPoints(base_image.size, parent_image.size, parent_image_coords, None,icon, allow_overlap)
     #    base_image.paste(icon["Icon"],icon_position,icon["Icon"])
@@ -63,13 +64,81 @@ def prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_d
     image_path = os.path.join("Output",fsn+"_app_image.png")
     base_image.save(image_path)
     return image_path
-    
+
 def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, icon_arrangement,ordering,allow_overlap):
-    width_parent, height_image = parent_image_size
+    width_parent, height_parent = parent_image.size
     x_top_left_parent, y_top_left_parent = parent_image_coords
     x_center_parent, y_center_parent = (x_top_left_parent + width_parent/2), (y_top_left_parent + height_parent/2)
-
+    primary_icons = [icon["Icon"] for icon in primary_attributes_and_icons_data]
+    secondary_icons = [icon["Icon"] for icon in secondary_attributes_and_icons_data]
+    if ordering == "Separate":
+        icon_list = primary_icons + secondary_icons
+    elif ordering == "Alternate":
+        least_no_of_attributes = min(len(primary_icons),len(secondary_icons))
+        max_no_of_attributes = max(len(primary_icons),len(secondary_icons))
+        icons_diff = (max_no_of_attributes - least_no_of_attributes)
+        icon_list = []
+        for i in range(least_no_of_attributes):
+            icon_list.append(primary_icons[i])    
+            icon_list.append(secondary_icons[i])
+        if icons_diff > 0:
+            if len(primary_icons) == max_no_of_attributes:
+                icon_list.append(primary_icons[(least_no_of_attributes-1):(max_no_of_attributes-1)])
+            elif len(primary_icons) == max_no_of_attributes:
+                icon_list.append(secondary_icons[(least_no_of_attributes-1):(max_no_of_attributes-1)])
+    coordinates_and_icons = []
+    origin = (x_center_parent, y_center_parent)
+    radius = 0.6*min(base_image.size)
     if icon_arrangement == "Circular":
+        #generate circular coordinates.
+        counter = 0
+        divisions = len(icon_list)
+        points = getPointsOnCircle(origin, radius, divisions)
+        for icon in icon_list:
+            counter +=1
+            coord = {
+                "Icon": icon,
+                "Position": points[counter]
+            }
+            print points[counter]
+            coordinates_and_icons.append(coord)
+    return coordinates_and_icons
+
+def getPointsOnCircle(origin, radius, divisions):
+    theta_step = (2*math.pi/divisions)
+    theta = 0
+    points = []
+    while (theta <= 2*math.pi):
+        points.append(getPointOnCircle(origin, radius, theta))
+        theta += theta_step
+        print theta
+    return points
+
+def getPointOnCircle(origin, radius, theta):
+    return (int(origin[0]+radius*math.cos(theta)),int(origin[1]+radius*math.sin(theta)))
+
+def getPointOnCircleCartesian(origin_x,origin_y,radius,ref_x=None,ref_y=None):
+    if ref_x is None:
+        checker=(radius**2-(origin_x-ref_x)**2)
+        if checker>=0:
+            ref_y = checker**0.5+origin_y
+            return ref_y
+        else:
+            print "No such x-coordinate possible."
+            return False
+    elif ref_y is None:
+        checker=(radius**2-(origin_y-ref_y)**2)
+        if checker>=0:
+            ref_x = checker**0.5+origin_x
+            return ref_x
+        else:
+            print "No such x-coordinate possible."
+            return False
+    else:
+        print "Don't give both coordinates!"
+
+def getDistanceBetweenPoints(point_1,point_2):
+    return ((point_1[0]-point_2[0])**2 + (point_1[1]-point_2[1])**2)**0.5
 
 def replaceColorInImage(image, original_colour, replacement_color, threshold):
     import numpy as np
@@ -115,7 +184,7 @@ def getStrippedImage(image, threshold):
                 pixel = row_of_pixels[column_number]
                 pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
                 if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
-                    pixel = replacement_color
+                    pixel = (pixel_red, pixel_green, pixel_blue,0)
                     image_data[row_number][column_number] = pixel
                 else:
                     #On finding a pixel that doesn't lie in this color, quit
@@ -128,7 +197,7 @@ def getStrippedImage(image, threshold):
                 pixel = row_of_pixels[column_number]
                 pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
                 if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
-                    pixel = replacement_color
+                    pixel = (pixel_red, pixel_green, pixel_blue,0)
                     image_data[row_number][column_number] = pixel
                 else:
                     #On finding a pixel that doesn't lie in this color, quit
@@ -145,7 +214,7 @@ def getStrippedImage(image, threshold):
                 pixel = row_of_pixels[column_number]
                 pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
                 if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
-                    pixel = replacement_color
+                    pixel = (pixel_red, pixel_green, pixel_blue,0)
                     image_data[row_number][column_number] = pixel
                 else:
                     #On finding a pixel that doesn't lie in this color, quit
@@ -158,7 +227,7 @@ def getStrippedImage(image, threshold):
                 pixel = row_of_pixels[column_number]
                 pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
                 if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
-                    pixel = replacement_color
+                    pixel = (pixel_red, pixel_green, pixel_blue,0)
                     image_data[row_number][column_number] = pixel
                 else:
                     #On finding a pixel that doesn't lie in this color, quit
@@ -175,7 +244,7 @@ def getStrippedImage(image, threshold):
                 pixel = image_data[row_number][column_number]
                 pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
                 if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
-                    pixel = replacement_color
+                    pixel = (pixel_red, pixel_green, pixel_blue,0)
                     image_data[row_number][column_number] = pixel
                 else:
                     #On finding a pixel that doesn't lie in this color, quit
@@ -189,7 +258,7 @@ def getStrippedImage(image, threshold):
                 pixel = image_data[row_number][column_number]
                 pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
                 if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
-                    pixel = replacement_color
+                    pixel = (pixel_red, pixel_green, pixel_blue,0)
                     image_data[row_number][column_number] = pixel
                 else:
                     #On finding a pixel that doesn't lie in this color, quit
@@ -205,7 +274,7 @@ def getStrippedImage(image, threshold):
                 pixel = image_data[row_number][column_number]
                 pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
                 if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
-                    pixel = replacement_color
+                    pixel = (pixel_red, pixel_green, pixel_blue,0)
                     image_data[row_number][column_number] = pixel
                 else:
                     #On finding a pixel that doesn't lie in this color, quit
@@ -219,7 +288,7 @@ def getStrippedImage(image, threshold):
                 pixel = image_data[row_number][column_number]
                 pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
                 if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
-                    pixel = replacement_color
+                    pixel = (pixel_red, pixel_green, pixel_blue,0)
                     image_data[row_number][column_number] = pixel
                 else:
                     #On finding a pixel that doesn't lie in this color, quit

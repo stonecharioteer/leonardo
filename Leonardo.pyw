@@ -6,10 +6,9 @@ It's part of the artists' and SMEs' toolset.
 import os, sys, math
 
 from PyQt4 import QtGui, QtCore
-
-from Sewers import Katana
+#Sewers is the folder containing all the modules.
 from Sewers.Turtle import Turtle
-from Sewers.Splinter import Splinter
+from Sewers.Splinter import Splinter #Thread for Leo to use. 
 from Sewers.IconListBox import IconListBox
 from Sewers.DataSelector import DataSelector
 from Sewers.LayoutDesigner import LayoutDesigner
