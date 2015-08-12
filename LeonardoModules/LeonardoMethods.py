@@ -65,21 +65,15 @@ def replaceColorInImage(image, original_colour, replacement_color, threshold):
     #print image.size
     #print image_data.shape
     #raw_input("Waiting!")
-    max_color = []
-    for color in original_colour:
-        if color == 255:
-            max_color.append(color)
-        else:
-            max_color.append(color+threshold)
-    min_color = []
-    for color in original_colour:
-        if color == 0:
-            min_color.append(color-threshold)
-        else:
-            min_color.append(color)
-    max_color[3] = 255
-    min_color[3] = 255
-    image_data[(image_data == original_colour).all(axis=-1)] = replacement_color
+    rows, columns,rgba = image_data.shape
+    original_r, original_g, original_b, original_a = original_colour
+    for row in range(rows):
+        for column in range(columns):
+            pixel = image_data[row][column]
+            pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
+            if ((original_r-threshold)<=pixel_red<=(original_r+threshold)) and ((original_g-threshold)<=pixel_green<=(original_g+threshold)) and ((original_b-threshold)<=pixel_blue<=(original_b+threshold)):
+                image_data[row][column] = replacement_color
+#    image_data[(image_data == original_colour).all(axis=-1)] = replacement_color
     #image_data[(min_color <=image_data <= max_colour).all(axis=-1)] = replacement_color
     return Image.fromarray(image_data,mode="RGBA")
 
@@ -98,7 +92,7 @@ def getStrippedImage(image, threshold):
     column_indices = range(col_max+1)
     reversed_row_indices = list(reversed(row_indices))
     reversed_column_indices = list(reversed(column_indices))
-
+    replacement_color = [255,255,255,0]
     #Rows: Top to bottom
     for row_number in row_indices:
         row_of_pixels = image_data[row_number]
@@ -110,7 +104,7 @@ def getStrippedImage(image, threshold):
                 pixel = row_of_pixels[column_number]
                 pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
                 if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
-                    pixel = [0,255,0,0]
+                    pixel = replacement_color
                     image_data[row_number][column_number] = pixel
                 else:
                     #On finding a pixel that doesn't lie in this color, quit
@@ -123,7 +117,7 @@ def getStrippedImage(image, threshold):
                 pixel = row_of_pixels[column_number]
                 pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
                 if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
-                    pixel = [0,255,0,0]
+                    pixel = replacement_color
                     image_data[row_number][column_number] = pixel
                 else:
                     #On finding a pixel that doesn't lie in this color, quit
@@ -140,7 +134,7 @@ def getStrippedImage(image, threshold):
                 pixel = row_of_pixels[column_number]
                 pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
                 if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
-                    pixel = [0,0,0,0]
+                    pixel = replacement_color
                     image_data[row_number][column_number] = pixel
                 else:
                     #On finding a pixel that doesn't lie in this color, quit
@@ -153,7 +147,7 @@ def getStrippedImage(image, threshold):
                 pixel = row_of_pixels[column_number]
                 pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
                 if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
-                    pixel = [0,255,0,0]
+                    pixel = replacement_color
                     image_data[row_number][column_number] = pixel
                 else:
                     #On finding a pixel that doesn't lie in this color, quit
@@ -170,7 +164,7 @@ def getStrippedImage(image, threshold):
                 pixel = image_data[row_number][column_number]
                 pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
                 if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
-                    pixel = [0,0,0,0]
+                    pixel = replacement_color
                     image_data[row_number][column_number] = pixel
                 else:
                     #On finding a pixel that doesn't lie in this color, quit
@@ -184,7 +178,7 @@ def getStrippedImage(image, threshold):
                 pixel = image_data[row_number][column_number]
                 pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
                 if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
-                    pixel = [0,255,0,0]
+                    pixel = replacement_color
                     image_data[row_number][column_number] = pixel
                 else:
                     #On finding a pixel that doesn't lie in this color, quit
@@ -200,7 +194,7 @@ def getStrippedImage(image, threshold):
                 pixel = image_data[row_number][column_number]
                 pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
                 if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
-                    pixel = [0,0,0,0]
+                    pixel = replacement_color
                     image_data[row_number][column_number] = pixel
                 else:
                     #On finding a pixel that doesn't lie in this color, quit
@@ -214,7 +208,7 @@ def getStrippedImage(image, threshold):
                 pixel = image_data[row_number][column_number]
                 pixel_red, pixel_green, pixel_blue, pixel_alpha = pixel
                 if ((r_border-threshold)<=pixel_red<=(r_border+threshold)) and ((g_border-threshold)<=pixel_green<=(g_border+threshold)) and ((b_border-threshold)<=pixel_blue<=(b_border+threshold)):
-                    pixel = [0,255,0,0]
+                    pixel = replacement_color
                     image_data[row_number][column_number] = pixel
                 else:
                     #On finding a pixel that doesn't lie in this color, quit
@@ -237,8 +231,6 @@ def getIconCoords(primary_attributes_and_icons_data, secondary_attributes_and_ic
         coords_list.append((current_x,current_y))
         current_x += int(0.1*base_image_size[0])
     return coords_list
-
-
 
 def getResizedImage(image_to_resize,resize_factor,resize_by,base_image_size):
     image_to_resize_original_width, image_to_resize_original_height = image_to_resize.size
@@ -295,8 +287,7 @@ def getParentImage(fsn):
     try:
         parent_image_path = glob.glob(os.path.join(os.path.join(os.path.join(os.getcwd(),"Images"),"Parent Images"),"%s*.*"%fsn))[0]
     except:
-        print "Error getting Parent Image for %s."%fsn
-        parent_image_path = glob.glob(os.path.join(os.path.join(os.path.join(os.getcwd(),"Images"),"Parent Images"),"*.*"))[0]
+        parent_image_path = os.path.join("essentials","na_parent_image.png")
     return parent_image_path
 
 def getIconImage(icon_path, description_text, icon_relative_size, base_image_size):
