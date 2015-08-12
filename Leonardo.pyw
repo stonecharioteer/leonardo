@@ -7,16 +7,17 @@ import os, sys, math
 
 from PyQt4 import QtGui, QtCore
 
-from LeonardoModules import LeonardoMethods
-from LeonardoModules.Splinter import Splinter
-from LeonardoModules.IconListBox import IconListBox
-from LeonardoModules.DataSelector import DataSelector
-from LeonardoModules.LayoutDesigner import LayoutDesigner
-from LeonardoModules.PreviewRunWidget import PreviewRunWidget
-from LeonardoModules.ShellShocked import showSplashScreen, setWindowTheme
-#from LeonardoModules.April import April
-
-class Leonardo(QtGui.QMainWindow):
+from Sewers import Katana
+from Sewers.Turtle import Turtle
+from Sewers.Splinter import Splinter
+from Sewers.IconListBox import IconListBox
+from Sewers.DataSelector import DataSelector
+from Sewers.LayoutDesigner import LayoutDesigner
+from Sewers.PreviewRunWidget import PreviewRunWidget
+from Sewers.ShellShocked import showSplashScreen, setWindowTheme
+#from Sewers.April import April
+ 
+class Leonardo(Turtle):
     def __init__(self):
         super(Leonardo, self).__init__()
         self.createUI()
@@ -101,7 +102,9 @@ class Leonardo(QtGui.QMainWindow):
         self.hamato_yoshi.bg_color_strip_threshold = self.layout_designer_widget.getColorStripThreshold()
         self.hamato_yoshi.output_location = os.getcwd()
         self.hamato_yoshi.allow_run = True
-
+    
+    def sayCowabunga(self, message):
+        print "Cowabunga! ", message
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)

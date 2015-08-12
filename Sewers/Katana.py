@@ -44,20 +44,32 @@ def prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_d
     #Based on the input control parameters, get the coordinates for the parent image.
     parent_image_coords = getParentImageCoords(base_image.size,parent_image.size,parent_image_positioning)
     base_image.paste(parent_image,parent_image_coords,parent_image)
-    icon_coords = getIconCoords(primary_attributes_and_icons_data,secondary_attributes_and_icons_data,parent_image_positioning,base_image.size,parent_image.size)
+    #icon_coords = getIconCoords(primary_attributes_and_icons_data,secondary_attributes_and_icons_data,parent_image_positioning,base_image.size,parent_image.size)
     counter = 0
-    for icon in primary_attributes_and_icons_data:
-        base_image.paste(icon["Icon"],icon_coords[counter],icon["Icon"])
-        counter +=1
-    for icon in secondary_attributes_and_icons_data:
-        base_image.paste(icon["Icon"],icon_coords[counter],icon["Icon"])
-        counter +=1
+    icons_and_coordinates = getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, "Circular","Separate",allow_overlap)
+
+    #for icon in primary_attributes_and_icons_data:
+    #    icon_position = getValidPlacementPoints(base_image.size, parent_image.size, parent_image_coords, None,icon, allow_overlap)
+    #    base_image.paste(icon["Icon"],icon_position,icon["Icon"])
+    #    #base_image.paste(icon["Icon"],icon_coords[counter],icon["Icon"])
+    #    counter +=1
+    #counter = 0
+    #for icon in secondary_attributes_and_icons_data:
+    #    icon_position = getValidPlacementPoints(base_image.size, parent_image.size, parent_image_coords, None,icon, allow_overlap)
+    #    base_image.paste(icon["Icon"],icon_position,icon["Icon"])
+    #    counter +=1
     #Randomizer method.
-    #icon_position = getValidPlacementPoints(base_image.size, parent_image.size, parent_image_coords, None,primary_attributes_and_icons_data[0], allow_overlap)
     #base_image.paste(primary_attributes_and_icons_data[0]["Icon"],icon_position,primary_attributes_and_icons_data[0]["Icon"])
     image_path = os.path.join("Output",fsn+"_app_image.png")
     base_image.save(image_path)
     return image_path
+    
+def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, icon_arrangement,ordering,allow_overlap):
+    width_parent, height_image = parent_image_size
+    x_top_left_parent, y_top_left_parent = parent_image_coords
+    x_center_parent, y_center_parent = (x_top_left_parent + width_parent/2), (y_top_left_parent + height_parent/2)
+
+    if icon_arrangement == "Circular":
 
 def replaceColorInImage(image, original_colour, replacement_color, threshold):
     import numpy as np
@@ -76,7 +88,6 @@ def replaceColorInImage(image, original_colour, replacement_color, threshold):
 #    image_data[(image_data == original_colour).all(axis=-1)] = replacement_color
     #image_data[(min_color <=image_data <= max_colour).all(axis=-1)] = replacement_color
     return Image.fromarray(image_data,mode="RGBA")
-
 
 def getStrippedImage(image, threshold):
     """This method removes the background color of the image."""
@@ -255,7 +266,6 @@ def getParentImageCoords(base_image_size, parent_image_size, parent_image_positi
         y_pos_factor = random.uniform(0.0,1.0)    
     x_pos = int((base_width-parent_width)*x_pos_factor)
     y_pos = int((base_height-parent_height)*y_pos_factor)
-
     return (x_pos,y_pos)
 
 def getIcons(attribute_data, category, icon_relative_size, base_image_size):

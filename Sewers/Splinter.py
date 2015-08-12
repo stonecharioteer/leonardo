@@ -2,7 +2,8 @@ from __future__ import division
 import datetime
 from PIL import Image
 from PyQt4 import QtCore
-import LeonardoMethods
+import Katana
+
 class Splinter(QtCore.QThread):
     progress = QtCore.pyqtSignal(str, int, datetime.datetime, bool, list)
     def __init__(self):
@@ -56,8 +57,8 @@ class Splinter(QtCore.QThread):
                     for i in range(int(secondary_attributes_count)):
                         index = i+1
                         secondary_attribute_data.append({"Attribute":row["Secondary USP-%d Attribute"%index],"Description Text":row["Secondary USP-%d Description Text"%index]})
-                    image_name = LeonardoMethods.prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_data, self.parent_image_position, self.icon_positioning, self.icon_palette, self.allow_overlap, self.background_image_path, self.primary_attribute_relative_size, self.secondary_attribute_relative_size, self.bounding_box, self.use_simple_bg_color_strip, self.bg_color_strip_threshold, self.output_location)
-                    eta = LeonardoMethods.getETA(start_time, counter, total)
+                    image_name = Katana.prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_data, self.parent_image_position, self.icon_positioning, self.icon_palette, self.allow_overlap, self.background_image_path, self.primary_attribute_relative_size, self.secondary_attribute_relative_size, self.bounding_box, self.use_simple_bg_color_strip, self.bg_color_strip_threshold, self.output_location)
+                    eta = Katana.getETA(start_time, counter, total)
                     images_list.append(image_name)
                     if counter < total:
                         message = "Processing %d of %d FSNs." %(counter,total)
