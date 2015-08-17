@@ -92,18 +92,34 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
     if icon_arrangement == "Circular":
         #generate circular coordinates.
         counter = 0
-        divisions = len(icon_list)
+        divisions = len(icon_list)*3
         points = getPointsOnCircle(origin, radius, divisions)
+        valid_points = getValidPoints(points,divisions,base_image.size)
         for icon in icon_list:
             counter +=1
             coord = {
                 "Icon": icon,
-                "Position": points[counter]
+                "Position": valid_points[counter]
             }
             print points[counter]
             coordinates_and_icons.append(coord)
     return coordinates_and_icons
 
+def getValidPoints(points, divisions, base_image_size):
+    """Given a list of points and the number of points required, it'll return only those 
+    points that're within a bounding box dictated by a (max_x, max_y) 
+    value obtained from PIL.Image.Image.size"""
+    import random
+    max_x, max_y = base_image_size
+    counter = 1
+    valid_points = []
+    while len(valid_points) <= divisions:
+        for point in points:
+            point_x, point_y = point
+            if (0 <= point_x <= max_x) and (0 <= point_y <= max_y):
+                valid_points.append(point)
+    return valid_points
+    
 def getPointsOnCircle(origin, radius, divisions):
     theta_step = (2*math.pi/divisions)
     theta = 0
@@ -492,8 +508,6 @@ def getBackgroundImage(background_path):
         backgrounds = glob.glob(os.path.join(os.path.join(os.path.join(os.getcwd(),"Images"),"Backgrounds"),"Background*.*"))
         background_path = random.choice(backgrounds)
     return Image.open(background_path).convert("RGB")
-
-
 
 def main():
     print "Loading Data..."
