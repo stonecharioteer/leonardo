@@ -31,7 +31,7 @@ def prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_d
     #Get the primary image path
     parent_image_path = getParentImage(fsn)
     #Get the primary and secondary attribute icons.
-    base_image = Image.open(background_image_path).convert("RGB")
+    base_image = getBackgroundImage(background_image_path)
     primary_attributes_and_icons_data = getIcons(primary_attribute_data,category,primary_attribute_relative_size, base_image.size)
     secondary_attributes_and_icons_data = getIcons(secondary_attribute_data,category,secondary_attribute_relative_size, base_image.size)
     #Create an image with the background image's proportions.
@@ -485,7 +485,14 @@ def getValidPlacementPoints(base_image_size, parent_image_size, parent_coordinat
             icon_x, icon_y = 0,0
 
         return (icon_x,icon_y)
-        
+
+def getBackgroundImage(background_path):
+    import random, os
+    if background_path == "Random":
+        backgrounds = glob.glob(os.path.join(os.path.join(os.path.join(os.getcwd(),"Images"),"Backgrounds"),"Background*.*"))
+        background_path = random.choice(backgrounds)
+    return Image.open(background_path).convert("RGB")
+
 
 
 def main():
