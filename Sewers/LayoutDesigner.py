@@ -12,6 +12,7 @@ class LayoutDesigner(QtGui.QWidget):
         super(LayoutDesigner,self).__init__()
         self.createUI()
         self.mapEvents()
+        self.primary_attr_icon_size_spin_box.setValue(10)
 
     def createUI(self):
         #self.output_images_location_widget = FileLocationWidget("Output")
@@ -76,7 +77,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.secondary_attr_icon_size_spin_box = QtGui.QSpinBox()
         self.secondary_attr_icon_size_spin_box  .setSuffix("%")
         self.secondary_attr_icon_size_spin_box.setToolTip("This sets the size of the secondary attribute icons, at a percentage relative to the background image.")
-        self.secondary_attr_icon_size_spin_box.setRange(3,5)
+        self.secondary_attr_icon_size_spin_box.setRange(5,10)
         self.icon_bounding_box_label = QtGui.QLabel("Icon Bounding Box Shape:")
         self.icon_bounding_box_combobox = QtGui.QComboBox()
         self.icon_bounding_box_combobox.addItems(["None","Circle","Rectangle","Square"])

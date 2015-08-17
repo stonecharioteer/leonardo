@@ -112,6 +112,7 @@ def getValidPoints(points, divisions, base_image_size):
     import random
     max_x, max_y = base_image_size
     counter = 1
+    random.shuffle(points)
     valid_points = []
     while len(valid_points) <= divisions:
         for point in points:
