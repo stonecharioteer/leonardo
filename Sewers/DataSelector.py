@@ -5,11 +5,13 @@ from IconButton import IconButton
 from FileLocationWidget import FileLocationWidget
 from PrimaryButton import PrimaryButton
 from QColorButton import QColorButton
+from FKRetriever import FKRetriever
 
 class DataSelector(QtGui.QWidget):
     def __init__(self):
         super(DataSelector,self).__init__()
         self.createUI()
+        self.fk_retriever = FKRetriever()
         self.mapEvents()
         self.data_is_ready = False
         self.data = None
@@ -90,6 +92,13 @@ class DataSelector(QtGui.QWidget):
     def mapEvents(self):
         self.check_button_group.buttonClicked.connect(self.changePage)
         self.input_data_set_button.clicked.connect(self.loadDataFromFile)
+        self.fk_retriever.sendData.connect(self.prepareDataFromFK)
+
+    def prepareDataFromFK(self, data_list):
+        """Gets data from FK through thread and prepares it."""
+
+    def getData(self):
+        return self.data
 
     def changePage(self):
         button_number = 0 if self.use_fsns_and_fk_information_checkbox.isChecked() else 1
