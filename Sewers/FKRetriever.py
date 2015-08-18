@@ -1,34 +1,79 @@
 #!usr/bin/
+from __future__ import division
 import datetime
 import os
 import glob
 import urllib
 import urllib2
+import time
+import math
 from bs4 import BeautifulSoup
 from Katana import getETA
 from PyQt4 import QtCore
 
 class FKRetriever(QtCore.QThread):
-	sendData = QtCore.pyqtSignal(str,list,int,bool)
+    #status, data_set, progress_value, completion_status, eta
+    sendData = QtCore.pyqtSignal(str, dict, int, bool, datetime.datetime) 
+    #error_msg
+    sendException = QtCore.pyqtSignal(str)
+    def __init__(self,*args,**kwargs):
+        super(FKRetriever,self).__init__(*args, **kwargs)
+        self.allow_run = False
+        self.fsn_list = None
+        self.image_location = os.path.join("Images","Parent Images")
+        self.data_list = None
+        self.mutex = QtCore.QMutex()
+        self.condition = QtCore.QWaitCondition()
+        if not self.isRunning():
+            self.start(QtCore.QThread.LowPriority)
 
-	def __init__(self,*args,**kwargs):
-		super(FKRetriever,self).__init__(*args, **kwargs)
-		self.allow_run = False
-		self.fsn_list = None
-		self.image_location = os.path.join("Images","Parent Images")
-		self.data_list = None
 
+    def run(self):
+        while True:
+            if self.allow_run:
+                #process_events
+                counter = 0
+                self.data_list = {}
+                total = len(self.fsn_list)
+                start_time = datetime.datetime.now()
+                for fsn in self.fsn_list:
+                    success = False
+                    loop_counter = 0
+                    while not success:
+                        fk_page_soup, success = self.getFlipkartPageAsSoupFromFSN(fsn)
+                        time.sleep(5)
+                        loop_counter +=1
+                        if loop_counter >5:
+                            break
+                    if success:
+                        if self.imagesNotAvailable(fsn):
+                            self.downloadProductImages(fsn, fk_page_soup)
+                        else:
+                            print "Skipping fetching of images for %s since I've already got them."%fsn
+                        spec_table = self.downloadSpecTable(fk_page_soup)
+                        self.data_list[fsn] = spec_table
+                        counter += 1
+                        status = "Completed %d of %d." % (counter, total)
+                        data_set = self.data_list
+                        progress_value = int(math.ceil(counter/total*100))
+                        completion_status = False
+                        eta = getETA(start_time, counter, total)
+                        self.sendData.emit(status, data_set, progress_value, completion_status, eta)
+                completion_status = True
+                progress_value = 100
+                data_set = self.data_list
+                eta = datetime.datetime.now()
+                self.sendData.emit(status, data_set, progress_value, completion_status, eta)
+                self.allow_run = False
 
-	def run(self):
-		while True:
-			if self.allow_run:
-				self.allow_run = False
+    def __del__(self):
+        self.mutex.lock()
+        self.condition.wakeOne()
+        self.mutex.unlock()
+        self.wait()
 
-	def __del__(self):
-		pass
-
-	def getFlipkartPageAsSoupFromFSN(self, fsn):
-		"""Improve this method at a later stage."""
+    def getFlipkartPageAsSoupFromFSN(self, fsn):
+        """Improve this method at a later stage."""
         url = "http://www.flipkart.com/search?q=" + fsn
         while True:
             try:
@@ -72,8 +117,18 @@ class FKRetriever(QtCore.QThread):
             item_id = None
         return item_id
 
+    def imagesNotAvailable(self, fsn):
+        images_path = os.path.join("Images","Parent Images")
+        images_list = glob.glob(os.path.join(images_path,"*.jpeg"))
+        valid_image_counter = 0
+        for image_name in images_list:
+            if fsn in os.path.basename(image_name):
+                return False
+        #Get here only if it doesn't find any image with the fsn as the name.
+        return True
 
-	def downloadSpecTable(self, fk_page_soup):
+
+    def downloadSpecTable(self, fk_page_soup):
         """Adapted from Swineherd"""
         #find the section in this thing.
         spec_section_area = fk_page_soup.find(class_ = "productSpecs specSection")
@@ -125,12 +180,71 @@ class FKRetriever(QtCore.QThread):
                         counter += 1
                     except TypeError:
                         pass
-        for column in self.required_data:
-            if column in specifications.keys():
-                self.return_data_set[self.fsn][column]=specifications[column]
-            elif column not in ["WS Name","Brand","Image"]:
-                #print self.return_data_set[self.fsn]
-                self.return_data_set[self.fsn][column]="NA"
+        return specifications
                 
-	def downloadProductImages(self, fk_page_soup):
-		pass
+    def downloadProductImages(self, fsn, fk_page_soup):
+        "Adapted from OINK.SwineHerd"
+        #Assume success happens.
+        success = True
+        #Get all image urls in a list.
+        image_urls = []
+        #First, get the current productImage.
+        image_tag = fk_page_soup.findAll("img", {"class":"productImage  current"})
+        image_attributes = image_tag[0].attrs
+        try:
+            image_url = image_attributes["data-zoomimage"]
+        except:
+            error = "Product page doesn't have zoomed-in image. Extracting original from thumbnail."
+            self.sendException.emit(error)
+            image_url = image_attributes["data-src"]
+            image_url = image_url.replace("400x400","original")
+        image_urls.append(image_url)
+
+        #Next, get the remaining productImages.
+        image_tags = fk_page_soup.findAll("img", {"class":"productImage "})
+        for image_tag in image_tags:
+            image_attributes = image_tag.attrs
+            try:
+                image_url = image_attributes["data-zoomimage"]
+            except:
+                error = "Product page doesn't have zoomed-in image. Extracting original from thumbnail."
+                self.sendException.emit(error)
+                image_url = image_attributes["data-src"]
+                image_url = image_url.replace("400x400","original")
+            image_urls.append(image_url)
+        #Prepare save options.
+        image_name = fsn #Save images as FSNGOESHERE_1.jpeg
+        counter = 0
+        delimiter = "_"
+        image_extension = ".jpeg"
+        current_save_location = os.path.join("Images","Parent Images")
+        if not(os.path.exists(current_save_location)):
+            os.makedirs(current_save_location)
+        image_save_name = os.path.join(current_save_location,image_name)
+        image_counter = 0
+        for image_url in image_urls:
+            image_counter += 1
+            trial_counter = 0
+            while True:
+                try:
+                    trial_counter += 1
+                    image_save_final_name = image_save_name + delimiter + "%2d"%image_counter + image_extension
+                    urllib.urlretrieve(image_url, image_save_final_name)
+                    if int(os.stat(image_save_final_name).st_size)>1000:
+                        break
+                    else:
+                        error = "Extracted image is less than 1kb. Retrying again."
+                        self.sendException.emit(error)
+                        if trial_counter < 10:
+                            continue
+                        else:
+                            error = "No image available, or obtained image is too small."
+                            self.sendException.emit(error)
+                            success = False
+                            break
+                except urllib.ContentTooShortError:
+                    #print "Retrying image fetch for %s." %image_name
+                    error = "Failed retrieving the image. Retrying."
+                    self.sendException.emit(error)
+                    continue
+        return success

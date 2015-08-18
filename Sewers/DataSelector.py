@@ -1,4 +1,4 @@
-import os, csv
+import os, csv, datetime
 from PyQt4 import QtGui
 from FSNTextEdit import FSNTextEdit
 from IconButton import IconButton
@@ -50,7 +50,8 @@ class DataSelector(QtGui.QWidget):
         self.fetch_images_attributes_button = QtGui.QPushButton("Download Images\nand Specs.")
         self.fetch_images_attributes_button.setToolTip("This will check if parent images are available for all the FSNs and download them if necessary from the FK site. It will also load the spec table.")
         self.fetching_progress = QtGui.QProgressBar()
-
+        self.fetching_progress.setRange(0,100)
+        self.fetching_progress.setValue(0)
         fsn_mode_layout = QtGui.QGridLayout()
         fsn_mode_layout.addWidget(self.fsn_text_edit,0,0,2,3)
         fsn_mode_layout.addWidget(self.fetch_images_attributes_button,2,0,1,1)
@@ -93,11 +94,27 @@ class DataSelector(QtGui.QWidget):
     def mapEvents(self):
         self.check_button_group.buttonClicked.connect(self.changePage)
         self.input_data_set_button.clicked.connect(self.loadDataFromFile)
+        self.fetch_images_attributes_button.clicked.connect(self.downloadFromFK)
         self.fk_retriever.sendData.connect(self.prepareDataFromFK)
+        self.fk_retriever.sendException.connect(self.postException)
 
-    def prepareDataFromFK(self, data_list):
+    def postException(self, error_msg):
+        print error_msg, datetime.datetime.now()
+
+    def downloadFromFK(self):
+        """Triggers FKRetriever."""
+        fsns = self.fsn_text_edit.getFSNs()
+        if len(fsns) >=1:
+            self.fk_retriever.fsn_list = fsns
+            self.fk_retriever.allow_run = True
+
+    def prepareDataFromFK(self, status, data_set, progress_value, completion_status, eta):
         """Gets data from FK through thread and prepares it."""
-        print data_list
+        print "************"
+        print status, eta
+        print data_set
+        print "************"
+        self.fetching_progress.setValue(progress_value)
         #show progress too.
 
     def getData(self):
