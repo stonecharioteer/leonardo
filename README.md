@@ -25,3 +25,5 @@ The following are a list of functions:
 ###History
 ----
 I had the idea for Leonardo when tasked with batch processing watermarks. It's part of the OINK Report Management system, but exists separately since it's essence is entirely unique. I'll integrate it into the [OINK](https://github.com/vinay87/oink) repository later.
+
+Development on Leonardo started on 6 August 2015. Cowabunga!
