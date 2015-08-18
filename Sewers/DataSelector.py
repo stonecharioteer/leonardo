@@ -34,17 +34,21 @@ class DataSelector(QtGui.QWidget):
                 ]
         self.page_selector.addElements(page_control_list)
         self.page_selector.setFixedSize(310, 110)
-
+        #FSN Mode Widget
+        self.fsn_mode_widget = QtGui.QGroupBox("Data By FSN")
         self.fsn_text_edit = FSNTextEdit()
         self.category_label = QtGui.QLabel("Category:")
         self.category_combo_box = QtGui.QComboBox()
         self.category_combo_box.addItems(["Cameras","Mobiles","Tablets"]) #Later, add this data from OINK's server.        
         self.category_combo_box.setToolTip("Select the default category for the given FSNs.\nNote that mixing various types of FSNs isn't recommended.\nThe icons won't load.")
         self.attributes_list_box = QtGui.QListWidget()
+        self.attributes_list_box.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
         self.attributes_list_box.setToolTip("Displays all product attributes, obtained from the FK server.")
         self.primary_attributes_list_box = QtGui.QListWidget()
+        self.primary_attributes_list_box.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
         self.primary_attributes_list_box.setToolTip("Displays primary product attributes that you have selected.")
         self.secondary_attributes_list_box = QtGui.QListWidget()
+        self.secondary_attributes_list_box.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
         self.secondary_attributes_list_box.setToolTip("Displays secondary product attributes that you have selected.")
         self.push_to_primary_button = QtGui.QPushButton("Add to\nPrimary List")
         self.push_to_primary_button.setToolTip("Click to move the chosen attribute into the list of primary attributes.")
@@ -80,15 +84,14 @@ class DataSelector(QtGui.QWidget):
         fsn_mode_layout.addWidget(self.fetching_progress,0,3,1,3, QtCore.Qt.AlignBottom)
         fsn_mode_layout.addWidget(self.fetching_activity,1,3,1,3, QtCore.Qt.AlignTop)
         fsn_mode_layout.addWidget(self.fsn_mode_data_options,2,1,4,5)
-
-        self.fsn_mode_widget = QtGui.QGroupBox("Data By FSN")
         self.fsn_mode_widget.setLayout(fsn_mode_layout)
 
+        #CSV Mode Widget
+        self.csv_mode_widget = QtGui.QWidget()
         self.input_data_set_button = IconButton(os.path.join("essentials","csv_file.png"))
         self.input_data_set_button.setToolTip("Click to select a data file if you want manual control.")
         csv_mode_layout = QtGui.QGridLayout()
         csv_mode_layout.addWidget(self.input_data_set_button,0,0)
-        self.csv_mode_widget = QtGui.QWidget()
         self.csv_mode_widget.setLayout(csv_mode_layout)
 
         self.fsn_or_csv_stacked_widget = QtGui.QStackedWidget()
@@ -119,18 +122,35 @@ class DataSelector(QtGui.QWidget):
         """Triggers FKRetriever."""
         fsns = self.fsn_text_edit.getFSNs()
         if len(fsns) >=1:
+            self.fetching_activity.setText("Preparing to download images and specifications off the Flipkart website!")
             self.fk_retriever.fsn_list = fsns
             self.fk_retriever.allow_run = True
 
     def prepareDataFromFK(self, status, data_set, progress_value, completion_status, eta):
         """Gets data from FK through thread and prepares it."""
         print "************"
-        print status, eta
-        print data_set
         print "************"
         self.fetching_progress.setValue(progress_value)
-        #show progress too.
-
+        self.putAttributes(data_set)
+        if completion_status:
+            self.fetching_activity.setText("Fee, fie, fo, fum!")
+            self.fsn_mode_data_options.setEnabled(True)
+            #Map to say cowabunga?
+        else:
+            self.fetching_activity.setText("%s ETA: %s"%(status,eta))
+            self.fsn_mode_data_options.setEnabled(False)
+            
+    def putAttributes(self, data_set):
+        attributes = []
+        for fsn in data_set:
+            attributes+=data_set[fsn].keys()
+        attributes = list(set(attributes))
+        attributes.sort()
+        self.attributes_list_box.clear()
+        self.primary_attributes_list_box.clear()
+        self.secondary_attributes_list_box.clear()
+        self.attributes_list_box.addItems(attributes)
+    
     def getData(self):
         return self.data
 
