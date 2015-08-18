@@ -6,6 +6,7 @@ from FileLocationWidget import FileLocationWidget
 from PrimaryButton import PrimaryButton
 from QColorButton import QColorButton
 from FKRetriever import FKRetriever
+from Katana import getETA
 
 class DataSelector(QtGui.QWidget):
     def __init__(self):
@@ -96,6 +97,8 @@ class DataSelector(QtGui.QWidget):
 
     def prepareDataFromFK(self, data_list):
         """Gets data from FK through thread and prepares it."""
+        print data_list
+        #show progress too.
 
     def getData(self):
         return self.data
