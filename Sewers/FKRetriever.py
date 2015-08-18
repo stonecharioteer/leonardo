@@ -27,7 +27,6 @@ class FKRetriever(QtCore.QThread):
         if not self.isRunning():
             self.start(QtCore.QThread.LowPriority)
 
-
     def run(self):
         while True:
             if self.allow_run:

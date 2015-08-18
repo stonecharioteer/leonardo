@@ -1,11 +1,12 @@
 import os, csv, datetime
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 from FSNTextEdit import FSNTextEdit
 from IconButton import IconButton
 from FileLocationWidget import FileLocationWidget
 from PrimaryButton import PrimaryButton
 from QColorButton import QColorButton
 from FKRetriever import FKRetriever
+from IconListBox import IconListBox
 from Katana import getETA
 
 class DataSelector(QtGui.QWidget):
@@ -16,57 +17,71 @@ class DataSelector(QtGui.QWidget):
         self.mapEvents()
         self.data_is_ready = False
         self.data = None
-        self.setMode()
         self.validate_button.setEnabled(False)
 
-    def setMode(self):
-        self.mode = "FSNs" if self.use_fsns_and_fk_information_checkbox.isChecked() else "CSV"
-
     def createUI(self):
-        self.group_box = QtGui.QGroupBox("Data Selection")
-        self.use_fsns_and_fk_information_checkbox = QtGui.QCheckBox("Get Attribute Data from Flipkart")
-        self.use_fsns_and_fk_information_checkbox.setToolTip("If checked, this enables building images for a list of FSNs by getting attribute data from the website.")
-        self.use_csv_file_checkbox = QtGui.QCheckBox("Load Data from CSV")
-        self.use_csv_file_checkbox.setToolTip("Get the parent image data, the attributes list and image locations from a csv file. Use this when you want to get data for more than one category at the same time.")
-        #Button groups need to be defined at the class level. Hence, self.
-        self.check_button_group = QtGui.QButtonGroup()
-        self.check_button_group.setExclusive(True)
-        self.check_button_group.addButton(self.use_fsns_and_fk_information_checkbox)
-        self.check_button_group.addButton(self.use_csv_file_checkbox)
-        self.use_fsns_and_fk_information_checkbox.setChecked(True)
-        
+        self.group_box = QtGui.QGroupBox("Data Selector")
+        self.page_selector = IconListBox()
+        page_control_list = [
+                    {
+                    "Name": "From Flipkart Using FSNs",
+                    "Icon": os.path.join("essentials","download.png")
+                    },
+                    {
+                    "Name": "From CSV Data File",
+                    "Icon": os.path.join("essentials","csv_file.png")
+                    }
+                ]
+        self.page_selector.addElements(page_control_list)
+        self.page_selector.setFixedSize(310, 110)
 
         self.fsn_text_edit = FSNTextEdit()
         self.category_label = QtGui.QLabel("Category:")
         self.category_combo_box = QtGui.QComboBox()
         self.category_combo_box.addItems(["Cameras","Mobiles","Tablets"]) #Later, add this data from OINK's server.        
+        self.category_combo_box.setToolTip("Select the default category for the given FSNs.\nNote that mixing various types of FSNs isn't recommended.\nThe icons won't load.")
         self.attributes_list_box = QtGui.QListWidget()
+        self.attributes_list_box.setToolTip("Displays all product attributes, obtained from the FK server.")
         self.primary_attributes_list_box = QtGui.QListWidget()
+        self.primary_attributes_list_box.setToolTip("Displays primary product attributes that you have selected.")
         self.secondary_attributes_list_box = QtGui.QListWidget()
+        self.secondary_attributes_list_box.setToolTip("Displays secondary product attributes that you have selected.")
         self.push_to_primary_button = QtGui.QPushButton("Add to\nPrimary List")
+        self.push_to_primary_button.setToolTip("Click to move the chosen attribute into the list of primary attributes.")
         self.remove_from_primary_button = QtGui.QPushButton("Remove from\nPrimary List")
+        self.remove_from_primary_button.setToolTip("Click to move the chosen attribute out of the list of primary attributes.")
         self.push_to_secondary_button = QtGui.QPushButton("Add to\nSecondary List")
+        self.push_to_secondary_button.setToolTip("Click to move the chosen attribute into the list of secondary attributes.")
         self.remove_from_secondary_button = QtGui.QPushButton("Remove from\nSecondary List")
+        self.remove_from_secondary_button.setToolTip("Click to move the chosen attribute out of the list of secondary attributes.")
         self.fetch_images_attributes_button = QtGui.QPushButton("Download Images\nand Specs.")
         self.fetch_images_attributes_button.setToolTip("This will check if parent images are available for all the FSNs and download them if necessary from the FK site. It will also load the spec table.")
         self.fetching_progress = QtGui.QProgressBar()
         self.fetching_progress.setRange(0,100)
         self.fetching_progress.setValue(0)
+        self.fetching_activity = QtGui.QLabel("All that is gold does not glitter!")
+        self.fetching_activity.setToolTip("This indicates the current downloader's activity, or some random quote that Vinay thinks is funny.")
+        self.fsn_mode_data_options = QtGui.QGroupBox("Data Options")
+        fsn_mode_data_options_layout = QtGui.QGridLayout()
+        fsn_mode_data_options_layout.addWidget(self.category_label,0,0,1,2,QtCore.Qt.AlignVCenter)
+        fsn_mode_data_options_layout.addWidget(self.category_combo_box,0,2,1,2,QtCore.Qt.AlignVCenter)
+        fsn_mode_data_options_layout.addWidget(self.attributes_list_box,1,0,4,4, QtCore.Qt.AlignHCenter)
+        fsn_mode_data_options_layout.addWidget(self.primary_attributes_list_box,1,5,2,2, QtCore.Qt.AlignHCenter)
+        fsn_mode_data_options_layout.addWidget(self.push_to_primary_button,1,4,1,1, QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        fsn_mode_data_options_layout.addWidget(self.remove_from_primary_button,2,4,1,1, QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        fsn_mode_data_options_layout.addWidget(self.secondary_attributes_list_box,3,5,2,2, QtCore.Qt.AlignHCenter)
+        fsn_mode_data_options_layout.addWidget(self.push_to_secondary_button,3,4,1,1, QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        fsn_mode_data_options_layout.addWidget(self.remove_from_secondary_button,4,4,1,1, QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        self.fsn_mode_data_options.setLayout(fsn_mode_data_options_layout)
+        self.fsn_mode_data_options.setEnabled(False)
         fsn_mode_layout = QtGui.QGridLayout()
-        fsn_mode_layout.addWidget(self.fsn_text_edit,0,0,2,3)
-        fsn_mode_layout.addWidget(self.fetch_images_attributes_button,2,0,1,1)
-        fsn_mode_layout.addWidget(self.fetching_progress,2,1,1,2)
-        fsn_mode_layout.addWidget(self.category_label,3,0,1,1)
-        fsn_mode_layout.addWidget(self.category_combo_box,3,1,1,1)
-        fsn_mode_layout.addWidget(self.attributes_list_box,4,0,4,1)
-        fsn_mode_layout.addWidget(self.push_to_primary_button,4,1,1,1)
-        fsn_mode_layout.addWidget(self.remove_from_primary_button,5,1,1,1)
-        fsn_mode_layout.addWidget(self.primary_attributes_list_box,4,2,2,1)
-        fsn_mode_layout.addWidget(self.push_to_secondary_button,6,1,1,1)
-        fsn_mode_layout.addWidget(self.secondary_attributes_list_box,6,2,2,1)
-        fsn_mode_layout.addWidget(self.remove_from_secondary_button,7,1,1,1)
+        fsn_mode_layout.addWidget(self.fsn_text_edit,0,0,6,1)
+        fsn_mode_layout.addWidget(self.fetch_images_attributes_button,0,1,2,2, QtCore.Qt.AlignVCenter)
+        fsn_mode_layout.addWidget(self.fetching_progress,0,3,1,3, QtCore.Qt.AlignBottom)
+        fsn_mode_layout.addWidget(self.fetching_activity,1,3,1,3, QtCore.Qt.AlignTop)
+        fsn_mode_layout.addWidget(self.fsn_mode_data_options,2,1,4,5)
 
-        self.fsn_mode_widget = QtGui.QWidget()
+        self.fsn_mode_widget = QtGui.QGroupBox("Data By FSN")
         self.fsn_mode_widget.setLayout(fsn_mode_layout)
 
         self.input_data_set_button = IconButton(os.path.join("essentials","csv_file.png"))
@@ -82,8 +97,7 @@ class DataSelector(QtGui.QWidget):
 
         self.validate_button  = IconButton(os.path.join("essentials","validate.png"))
         layout = QtGui.QGridLayout()
-        layout.addWidget(self.use_fsns_and_fk_information_checkbox,0,0,1,1)
-        layout.addWidget(self.use_csv_file_checkbox,0,1,1,1)
+        layout.addWidget(self.page_selector,0,0,1,2, QtCore.Qt.AlignHCenter)
         layout.addWidget(self.fsn_or_csv_stacked_widget,1,0,1,2)
         layout.addWidget(self.validate_button,3,1)
         self.group_box.setLayout(layout)
@@ -92,7 +106,7 @@ class DataSelector(QtGui.QWidget):
         self.setLayout(final_layout)
 
     def mapEvents(self):
-        self.check_button_group.buttonClicked.connect(self.changePage)
+        self.page_selector.currentItemChanged.connect(self.changePage)
         self.input_data_set_button.clicked.connect(self.loadDataFromFile)
         self.fetch_images_attributes_button.clicked.connect(self.downloadFromFK)
         self.fk_retriever.sendData.connect(self.prepareDataFromFK)
@@ -120,10 +134,10 @@ class DataSelector(QtGui.QWidget):
     def getData(self):
         return self.data
 
-    def changePage(self):
-        button_number = 0 if self.use_fsns_and_fk_information_checkbox.isChecked() else 1
-        self.fsn_or_csv_stacked_widget.setCurrentIndex(button_number)
-        self.setMode()
+    def changePage(self, current, previous):
+        if not current:
+            current = previous
+        self.fsn_or_csv_stacked_widget.setCurrentIndex(self.page_selector.row(current))
 
     def loadDataFromFile(self):
         """This method asks for a csv data file. Upon loading, it'll read the file, 
@@ -135,45 +149,46 @@ class DataSelector(QtGui.QWidget):
         """
         #Get the file name.
         data_file_name = str(QtGui.QFileDialog.getOpenFileName(self,"Open Data File",os.getcwd(),("Comma Separated Values Files (*.csv)")))
-        #Load the file.
-        data_file_handler = open(data_file_name,"r")
-        data_file_as_csv = csv.DictReader(data_file_handler)
-        file_headers = []
-        for row in data_file_as_csv:
-            file_headers = row.keys()
-        file_headers.sort()
-        required_file_headers = [
-                    "FSN","Category",
-                    "Primary USP-1 Attribute","Primary USP-1 Description Text",
-                    "Primary USP-2 Attribute","Primary USP-2 Description Text",
-                    "Primary USP-3 Attribute","Primary USP-3 Description Text",
-                    "Primary USP-4 Attribute","Primary USP-4 Description Text",
-                    "Primary USP-5 Attribute","Primary USP-5 Description Text",
-                    "Secondary USP-1 Attribute","Secondary USP-1 Description Text",
-                    "Secondary USP-2 Attribute","Secondary USP-2 Description Text",
-                    "Secondary USP-3 Attribute","Secondary USP-3 Description Text",
-                    "Secondary USP-4 Attribute","Secondary USP-4 Description Text",
-                    "Secondary USP-5 Attribute","Secondary USP-5 Description Text"
-                    ]
-        required_file_headers.sort()
-        data_is_valid = True
-        for header in required_file_headers:
-            if header not in file_headers:
-                data_is_valid = False
-                break
-        if data_is_valid:
-            self.validate_button.setEnabled(True)
-            self.validate_button.setStyleSheet("QPushButton{background-color: #458B00} QPushButton:hover{background-color: #78AB46};")
-            data_file_handler.seek(0)
-            next(data_file_handler) #0 has the header, so go to row 1.
-            self.data = []
+        if data_file_name:
+            #Load the file.
+            data_file_handler = open(data_file_name,"r")
+            data_file_as_csv = csv.DictReader(data_file_handler)
+            file_headers = []
             for row in data_file_as_csv:
-                self.data.append(row)
-            self.data_is_ready = True
-            #print self.data
-        else:
-            self.validate_button.setStyleSheet("background-color: #B22222")
-            self.validate_button.setEnabled(False)
-            #print file_headers, required_file_headers
-        data_file_handler.close()
+                file_headers = row.keys()
+            file_headers.sort()
+            required_file_headers = [
+                        "FSN","Category",
+                        "Primary USP-1 Attribute","Primary USP-1 Description Text",
+                        "Primary USP-2 Attribute","Primary USP-2 Description Text",
+                        "Primary USP-3 Attribute","Primary USP-3 Description Text",
+                        "Primary USP-4 Attribute","Primary USP-4 Description Text",
+                        "Primary USP-5 Attribute","Primary USP-5 Description Text",
+                        "Secondary USP-1 Attribute","Secondary USP-1 Description Text",
+                        "Secondary USP-2 Attribute","Secondary USP-2 Description Text",
+                        "Secondary USP-3 Attribute","Secondary USP-3 Description Text",
+                        "Secondary USP-4 Attribute","Secondary USP-4 Description Text",
+                        "Secondary USP-5 Attribute","Secondary USP-5 Description Text"
+                        ]
+            required_file_headers.sort()
+            data_is_valid = True
+            for header in required_file_headers:
+                if header not in file_headers:
+                    data_is_valid = False
+                    break
+            if data_is_valid:
+                self.validate_button.setEnabled(True)
+                self.validate_button.setStyleSheet("QPushButton{background-color: #458B00} QPushButton:hover{background-color: #78AB46};")
+                data_file_handler.seek(0)
+                next(data_file_handler) #0 has the header, so go to row 1.
+                self.data = []
+                for row in data_file_as_csv:
+                    self.data.append(row)
+                self.data_is_ready = True
+                #print self.data
+            else:
+                self.validate_button.setStyleSheet("background-color: #B22222")
+                self.validate_button.setEnabled(False)
+                #print file_headers, required_file_headers
+            data_file_handler.close()
 
