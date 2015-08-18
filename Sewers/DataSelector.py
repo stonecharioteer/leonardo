@@ -33,10 +33,11 @@ class DataSelector(QtGui.QWidget):
                     }
                 ]
         self.page_selector.addElements(page_control_list)
-        self.page_selector.setFixedSize(310, 110)
+        self.page_selector.setFixedSize(302,110)
         #FSN Mode Widget
         self.fsn_mode_widget = QtGui.QGroupBox("Data By FSN")
         self.fsn_text_edit = FSNTextEdit()
+        self.fsn_text_edit.setFixedSize(450,400)
         self.category_label = QtGui.QLabel("Category:")
         self.category_combo_box = QtGui.QComboBox()
         self.category_combo_box.addItems(["Cameras","Mobiles","Tablets"]) #Later, add this data from OINK's server.        
@@ -79,11 +80,11 @@ class DataSelector(QtGui.QWidget):
         self.fsn_mode_data_options.setLayout(fsn_mode_data_options_layout)
         self.fsn_mode_data_options.setEnabled(False)
         fsn_mode_layout = QtGui.QGridLayout()
-        fsn_mode_layout.addWidget(self.fsn_text_edit,0,0,6,1)
+        fsn_mode_layout.addWidget(self.fsn_text_edit,0,0,7,1)
         fsn_mode_layout.addWidget(self.fetch_images_attributes_button,0,1,2,2, QtCore.Qt.AlignVCenter)
-        fsn_mode_layout.addWidget(self.fetching_progress,0,3,1,3, QtCore.Qt.AlignBottom)
-        fsn_mode_layout.addWidget(self.fetching_activity,1,3,1,3, QtCore.Qt.AlignTop)
-        fsn_mode_layout.addWidget(self.fsn_mode_data_options,2,1,4,5)
+        fsn_mode_layout.addWidget(self.fetching_progress,0,3,1,5, QtCore.Qt.AlignBottom)
+        fsn_mode_layout.addWidget(self.fetching_activity,1,3,1,5, QtCore.Qt.AlignTop)
+        fsn_mode_layout.addWidget(self.fsn_mode_data_options,2,1,4,7, QtCore.Qt.AlignTop)
         self.fsn_mode_widget.setLayout(fsn_mode_layout)
 
         #CSV Mode Widget
@@ -120,7 +121,7 @@ class DataSelector(QtGui.QWidget):
         self.remove_from_secondary_button.clicked.connect(self.removeFromSecondary)
 
     def postException(self, error_msg):
-        print error_msg, datetime.datetime.now()
+        self.fetching_activity.setText("%s @%s"%(error_msg,datetime.datetime.now().strftime("%H:%M:%S")))
 
     def pushAttrToPrimary(self):
         self.pushFromTo(self.attributes_list_box,self.primary_attributes_list_box)
@@ -130,7 +131,7 @@ class DataSelector(QtGui.QWidget):
 
     def pushAttrToSecondary(self):
         self.pushFromTo(self.attributes_list_box,self.secondary_attributes_list_box)
-        
+
     def removeFromSecondary(self):
         self.pushFromTo(self.secondary_attributes_list_box,self.attributes_list_box)
     
@@ -165,7 +166,7 @@ class DataSelector(QtGui.QWidget):
             self.fsn_mode_data_options.setEnabled(True)
             #Map to say cowabunga?
         else:
-            self.fetching_activity.setText("%s ETA: %s"%(status,eta))
+            self.fetching_activity.setText("%s ETA: %s"%(status,eta.strftime("%a (%d-%b), %H:%M:%S")))
             self.fsn_mode_data_options.setEnabled(False)
             
     def putAttributes(self, data_set):

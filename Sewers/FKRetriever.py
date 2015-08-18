@@ -39,16 +39,22 @@ class FKRetriever(QtCore.QThread):
                     success = False
                     loop_counter = 0
                     while not success:
-                        fk_page_soup, success = self.getFlipkartPageAsSoupFromFSN(fsn)
-                        time.sleep(5)
                         loop_counter +=1
+                        fk_page_soup, success = self.getFlipkartPageAsSoupFromFSN(fsn)
+                        if not success:
+                            time.sleep(5)
+                            error = "Unable to fetch the right page for %s. (Trial %d)"%(fsn,loop_counter)
+                            self.sendException.emit(error)
                         if loop_counter >5:
+                            error = "Tried fetching the page for %s and failed %d times. Giving up."%(fsn,loop_counter)
+                            self.sendException.emit(error)
                             break
                     if success:
                         if self.imagesNotAvailable(fsn):
                             self.downloadProductImages(fsn, fk_page_soup)
                         else:
-                            print "Skipping fetching of images for %s since I've already got them."%fsn
+                            error = "Skipping fetching of images for %s since I've already got them."%fsn
+                            self.sendException.emit(error)
                         spec_table = self.downloadSpecTable(fk_page_soup)
                         self.data_list[fsn] = spec_table
                         counter += 1
@@ -242,7 +248,6 @@ class FKRetriever(QtCore.QThread):
                             success = False
                             break
                 except urllib.ContentTooShortError:
-                    #print "Retrying image fetch for %s." %image_name
                     error = "Failed retrieving the image. Retrying."
                     self.sendException.emit(error)
                     continue
