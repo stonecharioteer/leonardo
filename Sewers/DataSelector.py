@@ -112,11 +112,41 @@ class DataSelector(QtGui.QWidget):
         self.page_selector.currentItemChanged.connect(self.changePage)
         self.input_data_set_button.clicked.connect(self.loadDataFromFile)
         self.fetch_images_attributes_button.clicked.connect(self.downloadFromFK)
-        self.fk_retriever.sendData.connect(self.prepareDataFromFK)
+        self.fk_retriever.sendData.connect(self.prepareDataRetrievedFromFK)
         self.fk_retriever.sendException.connect(self.postException)
+        self.push_to_primary_button.clicked.connect(self.pushAttrToPrimary)
+        self.remove_from_primary_button.clicked.connect(self.removeFromPrimary)
+        self.push_to_secondary_button.clicked.connect(self.pushAttrToSecondary)
+        self.remove_from_secondary_button.clicked.connect(self.removeFromSecondary)
 
     def postException(self, error_msg):
         print error_msg, datetime.datetime.now()
+
+    def pushAttrToPrimary(self):
+        self.pushFromTo(self.attributes_list_box,self.primary_attributes_list_box)
+
+    def removeFromPrimary(self):
+        self.pushFromTo(self.primary_attributes_list_box,self.attributes_list_box)
+
+    def pushAttrToSecondary(self):
+        self.pushFromTo(self.attributes_list_box,self.secondary_attributes_list_box)
+        
+    def removeFromSecondary(self):
+        self.pushFromTo(self.secondary_attributes_list_box,self.attributes_list_box)
+    
+    def pushFromTo(self,source_list_widget, destination_list_widget):
+        #identify the selected attributes
+        selected_attribute_items = source_list_widget.selectedItems()
+        #Store them in a list.
+        selected_attributes = [str(selected_attribute_item.text()) for selected_attribute_item in selected_attribute_items]
+        #Send them to the destination list.
+        destination_list_widget.setSortingEnabled(False)
+        destination_list_widget.addItems(selected_attributes)
+        destination_list_widget.setSortingEnabled(True)
+        destination_list_widget.sortItems()
+        #Remove them from the source list
+        for selected_item in selected_attribute_items:
+            source_list_widget.takeItem(source_list_widget.row(selected_item))
 
     def downloadFromFK(self):
         """Triggers FKRetriever."""
@@ -126,10 +156,8 @@ class DataSelector(QtGui.QWidget):
             self.fk_retriever.fsn_list = fsns
             self.fk_retriever.allow_run = True
 
-    def prepareDataFromFK(self, status, data_set, progress_value, completion_status, eta):
-        """Gets data from FK through thread and prepares it."""
-        print "************"
-        print "************"
+    def prepareDataRetrievedFromFK(self, status, data_set, progress_value, completion_status, eta):
+        """Gets data from FK from the thread's signal and prepares it."""
         self.fetching_progress.setValue(progress_value)
         self.putAttributes(data_set)
         if completion_status:
@@ -145,11 +173,13 @@ class DataSelector(QtGui.QWidget):
         for fsn in data_set:
             attributes+=data_set[fsn].keys()
         attributes = list(set(attributes))
-        attributes.sort()
+        self.attributes_list_box.setSortingEnabled(False)
         self.attributes_list_box.clear()
         self.primary_attributes_list_box.clear()
         self.secondary_attributes_list_box.clear()
         self.attributes_list_box.addItems(attributes)
+        self.attributes_list_box.setSortingEnabled(True)
+        self.attributes_list_box.sortItems()
     
     def getData(self):
         return self.data
