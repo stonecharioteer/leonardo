@@ -9,6 +9,7 @@ from PIL import ImageDraw
 import PIL
 
 def prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_data, parent_image_positioning, icon_positioning, icon_palette, allow_overlap, background_image_path, primary_attribute_relative_size, secondary_attribute_relative_size, bounding_box, use_simple_bg_color_strip, bg_color_strip_threshold, output_location):
+    #Shifted this to Splinter. Much better that way.
     """This method takes one fsn set, and prepares the app-image.
     ALGORITHM:
     1. If the background image is specified, check if Background image exists.

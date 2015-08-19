@@ -117,7 +117,8 @@ class FKRetriever(QtCore.QThread):
     def getItemIDFromHTML(self, html_object):
         """Takes an urllib2 html object, gets the current url from geturl and then extracts the item id."""
         upload_link = html_object.geturl()
-        item_id_prefix_position = upload_link.find(r"/p/")
+        #The item id is a 16 character string found after /p/. Its presence shows that a page has correctly loaded.
+        item_id_prefix_position = upload_link.find(r"/p/") 
         if item_id_prefix_position > -1:
             item_id_start_position = item_id_prefix_position + len(r"/p/")
             item_id_length = 16
