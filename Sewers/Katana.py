@@ -48,7 +48,19 @@ def prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_d
     counter = 0
     icons_and_coordinates = getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, "Circular","Alternate",allow_overlap)
     for icon in icons_and_coordinates:
-        base_image.paste(icon["Icon"],icon["Position"],icon["Icon"])
+        try:
+            base_image.paste(icon["Icon"],icon["Position"],icon["Icon"])
+        except:
+            print "*"*10
+            print "Error processing icon."
+            if icon["Position"] is None:
+                print "Icon Position is None"
+            else:
+                print "Icon Position: ",icon["Position"]
+                print icon["Icon"]
+            print "*"*10
+            raise
+
     #for icon in primary_attributes_and_icons_data:
     #    icon_position = getValidPlacementPoints(base_image.size, parent_image.size, parent_image_coords, None,icon, allow_overlap)
     #    base_image.paste(icon["Icon"],icon_position,icon["Icon"])
@@ -83,12 +95,15 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
             icon_list.append(secondary_icons[i])
         if icons_diff > 0:
             if len(primary_icons) == max_no_of_attributes:
-                icon_list.append(primary_icons[(least_no_of_attributes-1):(max_no_of_attributes-1)])
+                icon_list += primary_icons[(least_no_of_attributes-1):(max_no_of_attributes-1)]
             elif len(primary_icons) == max_no_of_attributes:
-                icon_list.append(secondary_icons[(least_no_of_attributes-1):(max_no_of_attributes-1)])
+                icon_list += secondary_icons[(least_no_of_attributes-1):(max_no_of_attributes-1)]
     coordinates_and_icons = []
     origin = (x_center_parent, y_center_parent)
     radius = 0.6*min(base_image.size)
+    print "*"*10
+    print icon_list
+    print "*"*10
     if icon_arrangement == "Circular":
         #generate circular coordinates.
         counter = 0
@@ -101,7 +116,7 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                 "Icon": icon,
                 "Position": valid_points[counter]
             }
-            print points[counter]
+            #print valid_points[counter]
             coordinates_and_icons.append(coord)
     return coordinates_and_icons
 
@@ -128,7 +143,7 @@ def getPointsOnCircle(origin, radius, divisions):
     while (theta <= 2*math.pi):
         points.append(getPointOnCircle(origin, radius, theta))
         theta += theta_step
-        print theta
+        #print "Angle is %f radians."%theta
     return points
 
 def getPointOnCircle(origin, radius, theta):
@@ -348,7 +363,7 @@ def getParentImageCoords(base_image_size, parent_image_size, parent_image_positi
     if parent_image_positioning != "Random":
         x_pos_factor, y_pos_factor = parent_image_positioning
     else:
-        x_pos_factor = random.uniform(0.0,1.0)
+        x_pos_factor = rangedom.uniform(0.0,1.0)
         y_pos_factor = random.uniform(0.0,1.0)    
     x_pos = int((base_width-parent_width)*x_pos_factor)
     y_pos = int((base_height-parent_height)*y_pos_factor)
@@ -375,8 +390,9 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size):
         if not found_icon:
             attributes_without_icons.append(attribute["Attribute"])
     if len(attributes_without_icons) >0:
-        print "The following attributes don't have icons. Recommend making them before progressing."
+        print "The following %s attributes don't have icons. Recommend making them before progressing." %category
         print attributes_without_icons
+        print "Looking in the %s folder."%image_search_path
     return attribute_data
 
 def getParentImage(fsn):
@@ -509,67 +525,6 @@ def getBackgroundImage(background_path):
         backgrounds = glob.glob(os.path.join(os.path.join(os.path.join(os.getcwd(),"Images"),"Backgrounds"),"Background*.*"))
         background_path = random.choice(backgrounds)
     return Image.open(background_path).convert("RGB")
-
-def main():
-    print "Loading Data..."
-    with open("raw_data.csv","r") as data_file:
-        print "Data file successfully loaded."
-        csv_handler = csv.DictReader(data_file)
-        parent_image_path = os.path.join("Images","parent_image.png")
-        background_image_path = os.path.join("Images","background.png")
-        brand_image_path = os.path.join("Images","brand_image.png")
-
-        for row in csv_handler:
-            #print row
-            fsn = row["FSN"]
-            print "Currently processing FSN: %s"%fsn
-            primary_usps = []
-            secondary_usps = []
-            for control_key in row.keys():
-                if "Primary USP" in control_key:
-                    primary_usps.append(row[control_key])
-                elif "Secondary USP" in control_key:
-                    secondary_usps.append(row[control_key])
-            print "Primary USPS are: ", ", ".join(primary_usps)
-            primary_usp_dict_list = [{"USP":usp,"Image":Image.open(os.path.join("Images",usp+".png"))} for usp in primary_usps]
-            print "Secondary USPS are: ", ", ".join(secondary_usps)
-            secondary_usp_dict_list = [{"USP":usp,"Image":Image.open(os.path.join("Images",usp+".png"))} for usp in secondary_usps]
-            print "Processing Background Image"
-            background_image = Image.open(background_image_path)
-            parent_image = Image.open(parent_image_path)
-            brand_image = Image.open(brand_image_path)
-            print "Processing Parent Image"
-            background_image_width, background_image_height  = background_image.size
-            origin_x, origin_y, max_x, max_y = 0, 0, background_image_width, background_image_height
-            parent_image_width, parent_image_height = parent_image.size
-            resized_parent_image_width = int(0.9*background_image_width)
-            resized_parent_image_height = int(resized_parent_image_width*parent_image_height/background_image_width)
-            resized_parent_image_size = (resized_parent_image_width, resized_parent_image_height)
-            resized_parent_image = parent_image.resize(resized_parent_image_size)
-            background_image.paste(resized_parent_image,(int((max_x-resized_parent_image_width)/2),(max_y-resized_parent_image_height)),resized_parent_image)
-            background_image.paste(brand_image,(50,50),brand_image)
-            
-            primary_usp_icon_height = int(0.15*background_image_height)
-            primary_usp_locations = [(200,200),(200,1300),(1100,200),(700,700),(1100,1300)]
-            counter = 0
-            random.shuffle(primary_usp_locations)
-            for usp in primary_usp_dict_list:
-                temp = usp["Image"]
-                callout = usp["USP"]#.toupper()
-                temp_icon_width, temp_icon_height = temp.size
-                resized_temp_icon_height = primary_usp_icon_height
-                resized_temp_icon_width = int(resized_temp_icon_height*temp_icon_width/temp_icon_height)
-                resized_temp_icon_size = (resized_temp_icon_width,resized_temp_icon_height)
-                resized_temp = temp.resize(resized_temp_icon_size)
-                
-                temp_location = primary_usp_locations[counter]
-                counter+=1
-                draw = ImageDraw.Draw(background_image)
-                font = ImageFont.truetype("RionaSans-Regular.ttf", 72)
-                temp_text_location = (int(temp_location[0]+temp.size[0]*0.25),int(temp_location[1]+temp.size[1]*1.3))
-                draw.text(temp_text_location,callout,(0,0,0),font=font)
-                background_image.paste(resized_temp,temp_location,resized_temp)
-            background_image.show()
 
 def getETA(start_time, counter, total):
     #from __future__ import division

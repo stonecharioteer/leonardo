@@ -8,6 +8,7 @@ from QColorButton import QColorButton
 from FKRetriever import FKRetriever
 from IconListBox import IconListBox
 from Katana import getETA
+from ProgressBar import ProgressBar
 
 class DataSelector(QtGui.QWidget):
     def __init__(self):
@@ -41,7 +42,7 @@ class DataSelector(QtGui.QWidget):
         self.fsn_text_edit.setFixedSize(450,400)
         self.category_label = QtGui.QLabel("Category:")
         self.category_combo_box = QtGui.QComboBox()
-        self.category_combo_box.addItems(["Cameras","Mobiles","Tablets"]) #Later, add this data from OINK's server.        
+        self.category_combo_box.addItems(["Camera","Mobile","Tablet"]) #Later, add this data from OINK's server.        
         self.category_combo_box.setToolTip("Select the default category for the given FSNs.\nNote that mixing various types of FSNs isn't recommended.\nThe icons won't load.")
         self.attributes_list_box = QtGui.QListWidget()
         self.attributes_list_box.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
@@ -62,7 +63,7 @@ class DataSelector(QtGui.QWidget):
         self.remove_from_secondary_button.setToolTip("Click to move the chosen attribute out of the list of secondary attributes.")
         self.fetch_images_attributes_button = QtGui.QPushButton("Download Images\nand Specs.")
         self.fetch_images_attributes_button.setToolTip("This will check if parent images are available for all the FSNs and download them if necessary from the FK site. It will also load the spec table.")
-        self.fetching_progress = QtGui.QProgressBar()
+        self.fetching_progress = ProgressBar()
         self.fetching_progress.setRange(0,100)
         self.fetching_progress.setValue(0)
         self.fetching_activity = QtGui.QLabel("All that is gold does not glitter!")
@@ -120,6 +121,7 @@ class DataSelector(QtGui.QWidget):
         self.remove_from_primary_button.clicked.connect(self.removeFromPrimary)
         self.push_to_secondary_button.clicked.connect(self.pushAttrToSecondary)
         self.remove_from_secondary_button.clicked.connect(self.removeFromSecondary)
+        self.category_combo_box.currentIndexChanged.connect(self.changeCategory)
 
     def postException(self, error_msg):
         self.fetching_activity.setText("%s @%s"%(error_msg,datetime.datetime.now().strftime("%H:%M:%S")))
@@ -156,26 +158,22 @@ class DataSelector(QtGui.QWidget):
         #Extract the primary and secondary attributes.
         primary_attributes = [str(self.primary_attributes_list_box.item(list_index).text()) for list_index in range(self.primary_attributes_list_box.count())]
         secondary_attributes = [str(self.secondary_attributes_list_box.item(list_index).text()) for list_index in range(self.secondary_attributes_list_box.count())]
-        print "******************"
-        print primary_attributes
-        print secondary_attributes
-        print "******************"
         #algorithm
         #Build a list of dictionaries with the following structure:
         output_data_format = [
-                {
-                    "FSN": None,
-                    "Category": None,
-                    "Primary USP-1 Attribute": None,
-                    "Primary USP-1 Description Text":None,
-                    "Primary USP-2 Attribute": None,
-                    "Primary USP-2 Description Text":None,
-                    "Secondary USP-1 Attribute": None,
-                    "Secondary USP-1 Description Text":None,
-                    "Secondary USP-2 Attribute": None,
-                    "Secondary USP-2 Description Text":None,
-                }
-            ]
+                    {
+                        "FSN": None,
+                        "Category": None,
+                        "Primary USP-1 Attribute": None,
+                        "Primary USP-1 Description Text":None,
+                        "Primary USP-2 Attribute": None,
+                        "Primary USP-2 Description Text":None,
+                        "Secondary USP-1 Attribute": None,
+                        "Secondary USP-1 Description Text":None,
+                        "Secondary USP-2 Attribute": None,
+                        "Secondary USP-2 Description Text":None,
+                    }
+                ]
         #In doing this, check if FSNs have far too many attributes selected, or if they have none at all.
         #To check, see if the attribute is in the fsn_data_set that FKRetriever passes.
         #End algorithm
@@ -202,6 +200,8 @@ class DataSelector(QtGui.QWidget):
                             primary_attribute_counter += 1
                             attr_key = "Primary USP-%d Attribute"%primary_attribute_counter
                             descr_key = "Primary USP-%d Description Text"%primary_attribute_counter
+                            #Check if the icon exists. If it doesn't compile a list of icons required.
+                            icon_available = Katana.checkIcon(attr_key,descr_key)
                             fsn_attributes_mapping.update({attr_key:primary_attribute,descr_key: fsn_data[primary_attribute]})
                     secondary_attribute_counter = 0
                     for secondary_attribute in secondary_attributes:
@@ -209,21 +209,28 @@ class DataSelector(QtGui.QWidget):
                             secondary_attribute_counter += 1
                             attr_key = "Secondary USP-%d Attribute"%secondary_attribute_counter
                             descr_key = "Secondary USP-%d Description Text"%secondary_attribute_counter
+                            #Check if the icon exists. If it doesn't compile a list of icons required.
+                            icon_available = Katana.checkIcon(attr_key,descr_key)
                             fsn_attributes_mapping.update({attr_key:secondary_attribute,descr_key: fsn_data[secondary_attribute]})
                     if (primary_attribute_counter == 0) or (secondary_attribute_counter == 0):
                         invalid_fsns.append(fsn)
                     output_data.append(fsn_attributes_mapping)
+                if len(invalid_fsns)>0:
+                    message = "There are %d fsns without enough primary or secondary attributes. Trying this process for FSNs of mixed category\sub-category isn't recommended." %len(invalid_fsns)
+                    self.sendAlert("Uh-oh!",message)
+                    self.validate_button.setStyleSheet("background-color: #B22222")
+                    self.validate_button.setEnabled(False)
+                else:
+                    self.data = output_data
+                    self.validate_button.setEnabled(True)
+                    self.validate_button.setStyleSheet("QPushButton{background-color: #458B00} QPushButton:hover{background-color: #78AB46};")
             elif never:
                 #(len(primary_attributes) == 0) or (len(secondary_attributes) == 0):
                 #This could be a problem in runtime. Disabling for now.
                 self.sendAlert("Cowabunga!","Please promote some attributes to primary and secondary positions. If you don't want to use secondary attributes, just add one anyway, and select equal relative icon sizes later.")
-            print output_data
-            if len(invalid_fsns)>0:
-                print "****************************"
-                print "There are %d fsns without enough primary or secondary attributes." %len(invalid_fsns)
-                print invalid_fsns
-                print "****************************"
 
+    def changeCategory(self):
+        self.makeDataFile()
 
     def sendAlert(self, title, message):
         QtGui.QMessageBox.about(self, title, message)
@@ -244,7 +251,7 @@ class DataSelector(QtGui.QWidget):
         if completion_status:
             self.fetching_activity.setText("Fee, fie, fo, fum!")
             self.fsn_mode_data_options.setEnabled(True)
-            #Map to say cowabunga?
+            self.sendAlert("Cowabunga!","Completed fetching data and images for the given list.")
         else:
             self.fetching_activity.setText("%s ETA: %s"%(status,eta.strftime("%a (%d-%b), %H:%M:%S")))
             self.fsn_mode_data_options.setEnabled(False)
@@ -316,10 +323,8 @@ class DataSelector(QtGui.QWidget):
                 for row in data_file_as_csv:
                     self.data.append(row)
                 self.data_is_ready = True
-                #print self.data
             else:
                 self.validate_button.setStyleSheet("background-color: #B22222")
                 self.validate_button.setEnabled(False)
-                #print file_headers, required_file_headers
             data_file_handler.close()
 
