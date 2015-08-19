@@ -162,7 +162,7 @@ class Splinter(QtCore.QThread):
             stripped_parent_image = Katana.getStrippedImage(Image.open(parent_image_path).convert("RGBA"), bg_color_strip_threshold)
         message = "Resizing parent image for %s."%fsn
         self.sendMessage.emit(message)
-        parent_image = Katana.getResizedImage(stripped_parent_image,0.5,"Height",base_image.size)
+        parent_image = Katana.getResizedImage(stripped_parent_image,0.25,"Height",base_image.size)
         #Based on the input control parameters, get the coordinates for the parent image.
         message = "Getting parent image coordinates corresponding to %s for %s."%(parent_image_positioning,fsn)
         self.sendMessage.emit(message)
@@ -175,7 +175,7 @@ class Splinter(QtCore.QThread):
         counter = 0
         message = "Getting icons and coordinates for %s."%(fsn)
         self.sendMessage.emit(message)
-        icons_and_coordinates = Katana.getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, "Circular","Alternate",allow_overlap)
+        icons_and_coordinates = Katana.getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, "Circular","Separate",parent_image_positioning) #allow_overlap
         for icon in icons_and_coordinates:
             try:
                 base_image.paste(icon["Icon"],icon["Position"],icon["Icon"])
