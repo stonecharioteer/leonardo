@@ -5,8 +5,10 @@ import os
 import glob
 import urllib
 import urllib2
+import httplib
 import time
 import math
+import socket
 from bs4 import BeautifulSoup
 from Katana import getETA
 from PyQt4 import QtCore

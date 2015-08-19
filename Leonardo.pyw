@@ -3,7 +3,7 @@ Leonardo is a tool that'll help Flipkart Content Artists in batch processing.
 When complete, it'll be able to help them make the secondary iconic image for the App.
 It's part of the artists' and SMEs' toolset.
 """
-import os, sys, math
+import os, sys, math, datetime
 
 from PyQt4 import QtGui, QtCore
 #Sewers is the folder containing all the modules.
@@ -75,6 +75,11 @@ class Leonardo(Turtle):
         self.layout_designer_widget.validate_button.clicked.connect(self.showPreviewScreen)
         self.preview_and_run_widget.start_progress_button.clicked.connect(self.runSplinter)
         self.hamato_yoshi.progress.connect(self.preview_and_run_widget.displayProgress)
+        self.hamato_yoshi.sendMessage.connect(self.displayActivity)
+
+    def displayActivity(self,message):
+        full_message = message + " @" + datetime.datetime.now().strftime("[%a (%d-%m)] %H:%M:%S") 
+        self.preview_and_run_widget.status_message.setText(full_message)
 
     def showPreviewScreen(self):
         #self.page_changer.item(0).setFlags(QtCore.Qt.NoItemFlags)

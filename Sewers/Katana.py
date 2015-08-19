@@ -101,9 +101,6 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
     coordinates_and_icons = []
     origin = (x_center_parent, y_center_parent)
     radius = 0.6*min(base_image.size)
-    print "*"*10
-    print icon_list
-    print "*"*10
     if icon_arrangement == "Circular":
         #generate circular coordinates.
         counter = 0
@@ -379,21 +376,31 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size):
     attributes_without_icons = []
     for attribute in attribute_data:
         found_icon = False
+        #Look for image files in the folder.
         for icon in images_in_look_in_path:
+            #If it hasn't yet found an icon, or in first run.
             if not found_icon:
                 if attribute["Attribute"].lower().strip() in icon.lower().strip():
                     icon_with_text = getIconImage(icon, attribute["Description Text"], icon_relative_size, base_image_size)
                     attribute.update({"Icon": icon_with_text})
                     found_icon = True
-                else:
-                    attribute.update({"Icon": None})
+                    #attribute.update({"Icon": None})
+            else:
+                #If it has already found an icon, do nothing.
+                break
         if not found_icon:
+            na_icon_path = os.path.join("essentials","icon_na.png")
+            icon_with_text = getIconImage(na_icon_path, attribute["Description Text"], icon_relative_size, base_image_size)
+            attribute.update({"Icon": icon_with_text})
             attributes_without_icons.append(attribute["Attribute"])
     if len(attributes_without_icons) >0:
         print "The following %s attributes don't have icons. Recommend making them before progressing." %category
         print attributes_without_icons
         print "Looking in the %s folder."%image_search_path
     return attribute_data
+
+def checkIcon(attribute,description):
+    return True
 
 def getParentImage(fsn):
     try:
@@ -407,7 +414,7 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     import textwrap
     clearance_factor_for_text = 2.0
     font_resize_factor = 0.3
-    text_as_paragraphs = textwrap.wrap(description_text,width=15)
+    text_as_paragraphs = textwrap.wrap(description_text,width=10)
     #get an image object using the icon path, and resize it to the required dimensions with respect to the height of the base image.
     icon_image = getStrippedImage(getResizedImage(Image.open(icon_path).convert("RGBA"),icon_relative_size,"height",base_image_size), threshold=30)
     #icon_image = replaceColorInImage(resized_icon_image,(255,255,255,255),(0,0,0,255))
@@ -416,7 +423,8 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     text_canvas = Image.new("RGBA",(max_w, max_h),(0,0,0,0))
     
     draw_text_handle = ImageDraw.Draw(text_canvas)
-    font_size = int(icon_image.size[1]*font_resize_factor)
+    #font_size = int(icon_image.size[1]*font_resize_factor)
+    font_size = 84 #Set default font size for now.
     font = ImageFont.truetype(os.path.join("essentials","RionaSans-Regular.ttf"), font_size)
     
     current_h, pad = 0, 10
@@ -524,7 +532,7 @@ def getBackgroundImage(background_path):
     if background_path == "Random":
         backgrounds = glob.glob(os.path.join(os.path.join(os.path.join(os.getcwd(),"Images"),"Backgrounds"),"Background*.*"))
         background_path = random.choice(backgrounds)
-    return Image.open(background_path).convert("RGB")
+    return Image.open(background_path).convert("RGBA").resize((1800,3200))
 
 def getETA(start_time, counter, total):
     #from __future__ import division

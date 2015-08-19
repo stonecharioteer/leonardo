@@ -7,7 +7,7 @@ from PrimaryButton import PrimaryButton
 from QColorButton import QColorButton
 from FKRetriever import FKRetriever
 from IconListBox import IconListBox
-from Katana import getETA
+from Katana import getETA, checkIcon
 from ProgressBar import ProgressBar
 
 class DataSelector(QtGui.QWidget):
@@ -201,7 +201,7 @@ class DataSelector(QtGui.QWidget):
                             attr_key = "Primary USP-%d Attribute"%primary_attribute_counter
                             descr_key = "Primary USP-%d Description Text"%primary_attribute_counter
                             #Check if the icon exists. If it doesn't compile a list of icons required.
-                            icon_available = Katana.checkIcon(attr_key,descr_key)
+                            #icon_available = checkIcon(attr_key,descr_key)
                             fsn_attributes_mapping.update({attr_key:primary_attribute,descr_key: fsn_data[primary_attribute]})
                     secondary_attribute_counter = 0
                     for secondary_attribute in secondary_attributes:
@@ -210,7 +210,7 @@ class DataSelector(QtGui.QWidget):
                             attr_key = "Secondary USP-%d Attribute"%secondary_attribute_counter
                             descr_key = "Secondary USP-%d Description Text"%secondary_attribute_counter
                             #Check if the icon exists. If it doesn't compile a list of icons required.
-                            icon_available = Katana.checkIcon(attr_key,descr_key)
+                            #icon_available = checkIcon(attr_key,descr_key)
                             fsn_attributes_mapping.update({attr_key:secondary_attribute,descr_key: fsn_data[secondary_attribute]})
                     if (primary_attribute_counter == 0) or (secondary_attribute_counter == 0):
                         invalid_fsns.append(fsn)

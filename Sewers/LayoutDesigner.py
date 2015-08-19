@@ -82,7 +82,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.icon_bounding_box_combobox = QtGui.QComboBox()
         self.icon_bounding_box_combobox.addItems(["None","Circle","Rectangle","Square"])
         self.use_simple_color_replacement = QtGui.QCheckBox("Use a Simple Colour Extraction Method to remove Parent Image Background.")
-        self.use_simple_color_replacement.setToolTip("If selection, the code just finds the likely background color and removes it from the entire message.\nThis method saves a large amount of runtime.\nThis is a risky method if the product image has similar colors, or if the image quality is dodgy.\nExercise with caution.")
+        self.use_simple_color_replacement.setToolTip("If selected, the code just finds the likely background color and removes it from the entire message.\nThis method saves a large amount of runtime.\nThis is a risky method if the product image has similar colors, or if the image quality is dodgy.\nExercise with caution.")
         self.background_color_threshold_label = QtGui.QLabel("Threshold for Background Color Extraction:")
         self.background_color_threshold_spinbox = QtGui.QSpinBox()
         self.background_color_threshold_spinbox.setPrefix(u"\u00B1")
