@@ -7,7 +7,7 @@ from PrimaryButton import PrimaryButton
 from QColorButton import QColorButton
 from FKRetriever import FKRetriever
 from IconListBox import IconListBox
-from Katana import getETA, checkIcon
+from Katana import getETA, checkIcon, getCategoryFolderNames
 from ProgressBar import ProgressBar
 
 class DataSelector(QtGui.QWidget):
@@ -42,7 +42,7 @@ class DataSelector(QtGui.QWidget):
         self.fsn_text_edit.setFixedSize(450,400)
         self.category_label = QtGui.QLabel("Category:")
         self.category_combo_box = QtGui.QComboBox()
-        self.category_combo_box.addItems(["Camera","Mobile","Tablet"]) #Later, add this data from OINK's server.        
+        self.category_combo_box.addItems(getCategoryFolderNames()) #Later, add this data from OINK's server.        
         self.category_combo_box.setToolTip("Select the default category for the given FSNs.\nNote that mixing various types of FSNs isn't recommended.\nThe icons won't load.")
         self.attributes_list_box = QtGui.QListWidget()
         self.attributes_list_box.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)

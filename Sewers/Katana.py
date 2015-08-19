@@ -462,6 +462,7 @@ def getValidPlacementPoints(base_image_size, parent_image_size, parent_coordinat
 
 def getBackgroundImage(background_path):
     import random, os
+    from PIL import Image
     if background_path == "Random":
         backgrounds = glob.glob(os.path.join(os.path.join(os.path.join(os.getcwd(),"Images"),"Backgrounds"),"Background*.*"))
         background_path = random.choice(backgrounds)
@@ -474,6 +475,13 @@ def getETA(start_time, counter, total):
     mean_time = time_spent.total_seconds()/counter
     ETA = start_time + datetime.timedelta(seconds=(mean_time*total))
     return ETA
+
+def getCategoryFolderNames():
+    import os, glob
+    path_to_repo = os.path.join(os.getcwd(),os.path.join("Images","Repository"))
+    path_and_folders_list = glob.glob(os.path.join(path_to_repo,"*"))
+
+    return [os.path.basename(path_and_folder_name) for path_and_folder_name in path_and_folders_list]
 
 if __name__ == "__main__":
     print "Don't use the Main Function."

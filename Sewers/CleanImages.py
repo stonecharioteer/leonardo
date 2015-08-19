@@ -14,12 +14,16 @@ def cleanImagesInPath(path_to_images_folder=None):
         counter = 0
         start_time = datetime.datetime.now()
         for image_name in images_in_folder:
-            stripped_image = Katana.getStrippedImage(Image.open(image_name).convert("RGBA"),threshold=30)
-            new_image_name = os.path.join(image_name[:image_name.find(os.path.basename(image_name))],os.path.splitext(os.path.basename(image_name))[0])+".png"
-            stripped_image.save(new_image_name)
-            counter+=1
-            eta = Katana.getETA(start_time, counter, total)
-            print "Processed %d of %d. ETA: %s" %(counter, total, eta.strftime("%a %d-%m, %H:%M:%S"))
+            isImage = (".jpg" in image_name) or (".png" in image_name)
+            if isImage:
+                stripped_image = Katana.getStrippedImage(Image.open(image_name).convert("RGBA"),threshold=30)
+                new_image_name = os.path.join(image_name[:image_name.find(os.path.basename(image_name))],os.path.splitext(os.path.basename(image_name))[0])+".png"
+                stripped_image.save(new_image_name)
+                counter+=1
+                eta = Katana.getETA(start_time, counter, total)
+                print "Processed %d of %d. ETA: %s" %(counter, total, eta.strftime("%a %d-%m, %H:%M:%S"))
+            else:
+                print "Skipped %s." %image_name
         print "Completed %d images at %s."%(counter,datetime.datetime.now().strftime("%a %d-%m, %H:%M:%S"))
 
 if __name__ == "__main__":
