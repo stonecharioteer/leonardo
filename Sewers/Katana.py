@@ -19,7 +19,6 @@ def getBackgroundImage(background_path):
 
 def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, icon_arrangement,ordering,parent_image_positioning):#allow_overlap
     import random, os, math
-    print parent_image_positioning, icon_arrangement, ordering
     #First, store the parameters in an easily-readable manner.
     #Parent image dimensions
     width_parent, height_parent = parent_image.size
@@ -33,28 +32,52 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
     primary_icons = [icon["Icon"] for icon in primary_attributes_and_icons_data]
     secondary_icons = [icon["Icon"] for icon in secondary_attributes_and_icons_data]
     #Split the operation based on whether the ordering is separate or alternate.
-    primary_radius_multiplier = 0.7 #tweak to check positioning later.
-    secondary_radius_multiplier = 0.75 #tweak to check positioning later.
     if ordering == "Separate":
         #Primary and secondary icon lines and arrangement is to be kept separate.
         #Determine the kind of parent_image_alignment, based on the original parameter.
-        if (parent_image_positioning == (0.0, 0.0)): #Club this with other corner-based positions.
+        if (parent_image_positioning in [(0.0, 0.0), (0.0, 1.0), (1.0, 0.0), (1.0, 1.0)]): #Club this with other corner-based positions.
             #parent image is placed at the top-left corner
             if icon_arrangement == "Circular":
                 #icons are to be arranged in arcs.
-                theta_range = ((0),(math.pi*0.5)) #~0deg and ~90deg. Only optimum for (0,0), when clubbing, I can change these.
+                if parent_image_positioning == (0.0,0.0):
+                    primary_radius_multiplier = 0.65
+                    secondary_radius_multiplier = 1.0
+                    theta_range = ((0),(math.pi*0.5)) #~0deg and ~90deg.
+                    primary_theta_range = (theta_range[0]-25*math.pi/180,theta_range[1]+25*math.pi/180)
+                    primary_arc_center = (x_top_left_parent, y_center_parent)
+                    secondary_theta_range = (theta_range[0]+45*math.pi/180,theta_range[1]+5*math.pi/180)
+                elif parent_image_positioning == (1.0,0.0):
+                    primary_radius_multiplier = 0.65
+                    secondary_radius_multiplier = 1.1
+                    theta_range = ((math.pi*0.5),(math.pi)) #~90deg and ~180deg.
+                    primary_theta_range = (theta_range[0]+10*math.pi/180,theta_range[1]+45*math.pi/180)
+                    primary_arc_center = (x_center_parent, y_center_parent)
+                    secondary_theta_range = (theta_range[0]+2*math.pi/180,theta_range[1]-35*math.pi/180)
+                elif parent_image_positioning == (0.0,1.0):
+                    primary_radius_multiplier = 0.76
+                    secondary_radius_multiplier = 1.15
+                    theta_range = ((math.pi*1.5),(math.pi*2.0)) #270deg and ~360deg.
+                    primary_theta_range = (theta_range[0],theta_range[1]+20*math.pi/180)
+                    primary_arc_center = (x_top_left_parent, y_center_parent)
+                    secondary_theta_range = (theta_range[0]-2*math.pi/180,theta_range[1]-38*math.pi/180)
+                elif parent_image_positioning == (1.0, 1.0):
+                    primary_radius_multiplier = 0.95
+                    secondary_radius_multiplier = 1.35
+                    theta_range = ((math.pi),(math.pi*1.5)) #180deg and ~270deg.
+                    primary_theta_range = (theta_range[0]-5*math.pi/180,theta_range[1]+1*math.pi/180)
+                    primary_arc_center = (x_top_left_parent+width_parent, y_center_parent)
+                    secondary_theta_range = (theta_range[0]+40*math.pi/180,theta_range[1]-5*math.pi/180)
                 
                 primary_plot_points_required = len(primary_icons)
-                primary_arc_center = (x_top_left_parent, y_top_left_parent+width_parent/2)
                 parent_extreme_point = (x_top_left_parent+width_parent, y_top_left_parent+height_parent)
                 diagonal_length = width_base
                 #diagonal_length = getDistanceBetweenPoints(primary_arc_center,parent_extreme_point)
                 primary_radius = primary_radius_multiplier*diagonal_length
-                primary_icon_positions = getPointsOnArc(primary_arc_center, primary_radius, primary_plot_points_required, theta_range)
+                primary_icon_positions = getPointsOnArc(primary_arc_center, primary_radius, primary_plot_points_required, primary_theta_range)
                 secondary_plot_points_required = len(secondary_icons)
-                secondary_arc_center = (x_center_parent, y_center_parent)
+                secondary_arc_center = primary_arc_center
                 secondary_radius = secondary_radius_multiplier*diagonal_length
-                secondary_icon_positions = getPointsOnArc(secondary_arc_center, secondary_radius, secondary_plot_points_required, theta_range)
+                secondary_icon_positions = getPointsOnArc(secondary_arc_center, secondary_radius, secondary_plot_points_required, secondary_theta_range)
                 coordinates_and_icons = []
                 counter = 0
                 for icon in primary_icons:
@@ -77,7 +100,7 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                 pass
             else:
                 print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
-        elif parent_image_positioning == (0.5,0.0):
+        elif parent_image_positioning in [(0.5,0.0),(0.0,0.5),(1.0,0.5),(0.5,1.0)]:
             #parent image is placed at the top-middle.
             if icon_arrangement == "Circular":
                 #icons are to be arranged in arcs.
@@ -87,58 +110,8 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                 pass
             else:
                 print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
-        elif parent_image_positioning == (1.0,0.0):
-            #parent image is placed at the top-right.
-            if icon_arrangement == "Circular":
-                #icons are to be arranged in arcs.
-                pass
-            elif icon_arrangement == "Rectangular":
-                #icons are to be laid out in arrays.
-                pass
-            else:
-                print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
-        elif parent_image_positioning == (0.0, 0.5):
-            #parent image is placed at the middle-left
-            if icon_arrangement == "Circular":
-                #icons are to be arranged in arcs.
-                pass
-            elif icon_arrangement == "Rectangular":
-                #icons are to be laid out in arrays.
-                pass
-            else:
-                print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
-        elif parent_image_positioning == (0.0,1.0):
-            #parent image is placed at the bottom-left
-            if icon_arrangement == "Circular":
-                #icons are to be arranged in arcs.
-                pass
-            elif icon_arrangement == "Rectangular":
-                #icons are to be laid out in arrays.
-                pass
-            else:
-                print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
         elif parent_image_positioning == (0.5,0.5):
-            #parent image is placed at the middle-center
-            if icon_arrangement == "Circular":
-                #icons are to be arranged in arcs.
-                pass
-            elif icon_arrangement == "Rectangular":
-                #icons are to be laid out in arrays.
-                pass
-            else:
-                print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
-        elif parent_image_positioning == (1.0,0.5):
-            #parent image is placed at the bottom-center
-            if icon_arrangement == "Circular":
-                #icons are to be arranged in arcs.
-                pass
-            elif icon_arrangement == "Rectangular":
-                #icons are to be laid out in arrays.
-                pass
-            else:
-                print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
-        elif parent_image_positioning == (1.0,1.0):
-            #parent image is placed at the bottom-right
+            #parent image is placed at the top-right.
             if icon_arrangement == "Circular":
                 #icons are to be arranged in arcs.
                 pass
@@ -149,124 +122,6 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                 print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
         else:
             print "Parent image positioning hint isn't valid. %r" %parent_image_positioning
-        #new method.
-        #redundant old method.
-        #icon_list = primary_icons + secondary_icons
-    elif ordering == "Alternate":
-        #Primary and secondary icon lines and arrangement is to be mixed up.
-        #Determine the kind of parent_image_alignment, based on the original parameter.
-        if parent_image_positioning == (0.0, 0.0):
-            #parent image is placed at the top-left corner
-            if icon_arrangement == "Circular":
-                #icons are to be arranged in arcs.
-                pass
-            elif icon_arrangement == "Rectangular":
-                #icons are to be laid out in arrays.
-                pass
-            else:
-                print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
-        elif parent_image_positioning == (0.5,0.0):
-            #parent image is placed at the top-middle.
-            if icon_arrangement == "Circular":
-                #icons are to be arranged in arcs.
-                pass
-            elif icon_arrangement == "Rectangular":
-                #icons are to be laid out in arrays.
-                pass
-            else:
-                print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
-        elif parent_image_positioning == (1.0,0.0):
-            #parent image is placed at the top-right.
-            if icon_arrangement == "Circular":
-                #icons are to be arranged in arcs.
-                pass
-            elif icon_arrangement == "Rectangular":
-                #icons are to be laid out in arrays.
-                pass
-            else:
-                print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
-        elif parent_image_positioning == (0, 0.5):
-            #parent image is placed at the middle-left
-            if icon_arrangement == "Circular":
-                #icons are to be arranged in arcs.
-                pass
-            elif icon_arrangement == "Rectangular":
-                #icons are to be laid out in arrays.
-                pass
-            else:
-                print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
-        elif parent_image_positioning == (0.0,1.0):
-            #parent image is placed at the bottom-left
-            if icon_arrangement == "Circular":
-                #icons are to be arranged in arcs.
-                pass
-            elif icon_arrangement == "Rectangular":
-                #icons are to be laid out in arrays.
-                pass
-            else:
-                print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
-        elif parent_image_positioning == (0.5,0.5):
-            #parent image is placed at the middle-center
-            if icon_arrangement == "Circular":
-                #icons are to be arranged in arcs.
-                pass
-            elif icon_arrangement == "Rectangular":
-                #icons are to be laid out in arrays.
-                pass
-            else:
-                print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
-        elif parent_image_positioning == (1.0,0.5):
-            #parent image is placed at the bottom-center
-            if icon_arrangement == "Circular":
-                #icons are to be arranged in arcs.
-                pass
-            elif icon_arrangement == "Rectangular":
-                #icons are to be laid out in arrays.
-                pass
-            else:
-                print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
-        elif parent_image_positioning == (1.0,1.0):
-            #parent image is placed at the bottom-right
-            if icon_arrangement == "Circular":
-                #icons are to be arranged in arcs.
-                pass
-            elif icon_arrangement == "Rectangular":
-                #icons are to be laid out in arrays.
-                pass
-            else:
-                print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
-        else:
-            print "Parent image positioning hint isn't valid. %r" %parent_image_positioning
-        #redundant old method.
-        """least_no_of_attributes = min(len(primary_icons),len(secondary_icons))
-                                max_no_of_attributes = max(len(primary_icons),len(secondary_icons))
-                                icons_diff = (max_no_of_attributes - least_no_of_attributes)
-                                icon_list = []
-                                for i in range(least_no_of_attributes):
-                                    icon_list.append(primary_icons[i])    
-                                    icon_list.append(secondary_icons[i])
-                                if icons_diff > 0:
-                                    if len(primary_icons) == max_no_of_attributes:
-                                        icon_list += primary_icons[(least_no_of_attributes-1):(max_no_of_attributes-1)]
-                                    elif len(primary_icons) == max_no_of_attributes:
-                                        icon_list += secondary_icons[(least_no_of_attributes-1):(max_no_of_attributes-1)]
-                            coordinates_and_icons = []
-                            origin = (x_center_parent, y_center_parent)
-                            radius = 0.6*min(base_image.size)
-                            if icon_arrangement == "Circular":
-                                #generate circular coordinates.
-                                counter = 0
-                                divisions = len(icon_list)*3
-                                points = getPointsOnCircle(origin, radius, divisions)
-                                valid_points = getValidPoints(points,divisions,base_image.size)
-                                for icon in icon_list:
-                                    counter +=1
-                                    coord = {
-                                        "Icon": icon,
-                                        "Position": valid_points[counter]
-                                    }
-                                    #print valid_points[counter]
-                                    coordinates_and_icons.append(coord)"""
     return coordinates_and_icons
 
 
