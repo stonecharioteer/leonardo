@@ -98,7 +98,10 @@ class FKRetriever(QtCore.QThread):
                 error = "Bad status line error for %s. Retrying" %fsn
                 self.sendException.emit(error)
                 continue
-
+            except httplib.IncompleteRead:
+                error = "Incomplete Read error for %s. Retrying" %fsn
+                self.sendException.emit(error)
+                continue
         soup = BeautifulSoup(html)
         #validate the soup.
         try:

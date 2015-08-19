@@ -416,7 +416,9 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     font_resize_factor = 0.3
     text_as_paragraphs = textwrap.wrap(description_text,width=10)
     #get an image object using the icon path, and resize it to the required dimensions with respect to the height of the base image.
-    icon_image = getStrippedImage(getResizedImage(Image.open(icon_path).convert("RGBA"),icon_relative_size,"height",base_image_size), threshold=30)
+    #Don't strip for now.
+    #icon_image = getStrippedImage(getResizedImage(Image.open(icon_path).convert("RGBA"),icon_relative_size,"height",base_image_size), threshold=30)
+    icon_image = getResizedImage(Image.open(icon_path).convert("RGBA"),icon_relative_size,"height",base_image_size)
     #icon_image = replaceColorInImage(resized_icon_image,(255,255,255,255),(0,0,0,255))
     #Create a blank canvas for the text.
     max_w, max_h = 500, 500
