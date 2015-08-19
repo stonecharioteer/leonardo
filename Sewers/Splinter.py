@@ -162,7 +162,8 @@ class Splinter(QtCore.QThread):
             stripped_parent_image = Katana.getStrippedImage(Image.open(parent_image_path).convert("RGBA"), bg_color_strip_threshold)
         message = "Resizing parent image for %s."%fsn
         self.sendMessage.emit(message)
-        parent_image = Katana.getResizedImage(stripped_parent_image,0.25,"Height",base_image.size)
+        parent_image_resize_factor = 0.5
+        parent_image = Katana.getResizedImage(stripped_parent_image,parent_image_resize_factor,"Height",base_image.size)
         #Based on the input control parameters, get the coordinates for the parent image.
         message = "Getting parent image coordinates corresponding to %s for %s."%(parent_image_positioning,fsn)
         self.sendMessage.emit(message)
@@ -189,6 +190,7 @@ class Splinter(QtCore.QThread):
                 self.sendMessage.emit(message)
                 raise
         image_path = os.path.join("Output",fsn+"_app_image.png")
+        base_image = base_image.convert("RGB")
         base_image.save(image_path)
         return image_path
 

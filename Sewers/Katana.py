@@ -27,31 +27,30 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
     x_top_left_parent, y_top_left_parent = parent_image_coords
     #Parent image center coordinates.
     x_center_parent, y_center_parent = (x_top_left_parent + width_parent/2), (y_top_left_parent + height_parent/2)
+    #get base image size
+    width_base, height_base = base_image.size
     #Seggregate the primary and secondary icons.
     primary_icons = [icon["Icon"] for icon in primary_attributes_and_icons_data]
     secondary_icons = [icon["Icon"] for icon in secondary_attributes_and_icons_data]
     #Split the operation based on whether the ordering is separate or alternate.
-    primary_radius_multiplier = 1.01 #tweak to check positioning later.
-    secondary_radius_multiplier = 2.5 #tweak to check positioning later.
+    primary_radius_multiplier = 0.7 #tweak to check positioning later.
+    secondary_radius_multiplier = 0.75 #tweak to check positioning later.
     if ordering == "Separate":
-        print "Separate ordering"
         #Primary and secondary icon lines and arrangement is to be kept separate.
         #Determine the kind of parent_image_alignment, based on the original parameter.
         if (parent_image_positioning == (0.0, 0.0)): #Club this with other corner-based positions.
             #parent image is placed at the top-left corner
-            print "Top left corner!"
             if icon_arrangement == "Circular":
-                print "Circular arrangement!"
                 #icons are to be arranged in arcs.
-                theta_range = ((0),(math.pi*0.6)) #~0deg and ~90deg. Only optimum for (0,0), when clubbing, I can change these.
+                theta_range = ((0),(math.pi*0.5)) #~0deg and ~90deg. Only optimum for (0,0), when clubbing, I can change these.
                 
                 primary_plot_points_required = len(primary_icons)
-                primary_arc_center = (x_center_parent, y_center_parent)
+                primary_arc_center = (x_top_left_parent, y_top_left_parent+width_parent/2)
                 parent_extreme_point = (x_top_left_parent+width_parent, y_top_left_parent+height_parent)
-                diagonal_length = getDistanceBetweenPoints(primary_arc_center,parent_extreme_point)
+                diagonal_length = width_base
+                #diagonal_length = getDistanceBetweenPoints(primary_arc_center,parent_extreme_point)
                 primary_radius = primary_radius_multiplier*diagonal_length
                 primary_icon_positions = getPointsOnArc(primary_arc_center, primary_radius, primary_plot_points_required, theta_range)
-                print primary_icon_positions
                 secondary_plot_points_required = len(secondary_icons)
                 secondary_arc_center = (x_center_parent, y_center_parent)
                 secondary_radius = secondary_radius_multiplier*diagonal_length
