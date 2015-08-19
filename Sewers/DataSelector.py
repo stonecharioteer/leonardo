@@ -12,6 +12,7 @@ from Katana import getETA
 class DataSelector(QtGui.QWidget):
     def __init__(self):
         super(DataSelector,self).__init__()
+        self.data_from_fk = None
         self.createUI()
         self.fk_retriever = FKRetriever()
         self.mapEvents()
@@ -148,6 +149,84 @@ class DataSelector(QtGui.QWidget):
         #Remove them from the source list
         for selected_item in selected_attribute_items:
             source_list_widget.takeItem(source_list_widget.row(selected_item))
+        self.makeDataFile()
+
+    def makeDataFile(self):
+        """Creates a list of dictionaries for the FSNs, using the retrieved data."""
+        #Extract the primary and secondary attributes.
+        primary_attributes = [str(self.primary_attributes_list_box.item(list_index).text()) for list_index in range(self.primary_attributes_list_box.count())]
+        secondary_attributes = [str(self.secondary_attributes_list_box.item(list_index).text()) for list_index in range(self.secondary_attributes_list_box.count())]
+        print "******************"
+        print primary_attributes
+        print secondary_attributes
+        print "******************"
+        #algorithm
+        #Build a list of dictionaries with the following structure:
+        output_data_format = [
+                {
+                    "FSN": None,
+                    "Category": None,
+                    "Primary USP-1 Attribute": None,
+                    "Primary USP-1 Description Text":None,
+                    "Primary USP-2 Attribute": None,
+                    "Primary USP-2 Description Text":None,
+                    "Secondary USP-1 Attribute": None,
+                    "Secondary USP-1 Description Text":None,
+                    "Secondary USP-2 Attribute": None,
+                    "Secondary USP-2 Description Text":None,
+                }
+            ]
+        #In doing this, check if FSNs have far too many attributes selected, or if they have none at all.
+        #To check, see if the attribute is in the fsn_data_set that FKRetriever passes.
+        #End algorithm
+        output_data = []
+        category = str(self.category_combo_box.currentText())
+        if self.data_from_fk is None:
+            self.sendAlert("Cowabunga!","Something seems to be wrong. This situation shouldn't ever happen. If there are attributes populated in the list widgets, then this shouldn't ever happen. This indicates that Leonardo failed to retrieve information from the Flipkart website or API. But if the attributes list widgets are populated, then this is ridiculously impossible.")
+        else:
+            never = False
+            if (len(primary_attributes)>0) and (len(secondary_attributes)>0):
+                #loop through each fsn key.
+                invalid_fsns = []
+                total_fsns = len(self.data_from_fk.keys())
+
+                for fsn in self.data_from_fk:
+                    fsn_data = self.data_from_fk[fsn]
+                    fsn_attributes_mapping = {
+                        "FSN": fsn,
+                        "Category": category
+                    }
+                    primary_attribute_counter = 0
+                    for primary_attribute in primary_attributes:
+                        if primary_attribute in fsn_data.keys():
+                            primary_attribute_counter += 1
+                            attr_key = "Primary USP-%d Attribute"%primary_attribute_counter
+                            descr_key = "Primary USP-%d Description Text"%primary_attribute_counter
+                            fsn_attributes_mapping.update({attr_key:primary_attribute,descr_key: fsn_data[primary_attribute]})
+                    secondary_attribute_counter = 0
+                    for secondary_attribute in secondary_attributes:
+                        if secondary_attribute in fsn_data.keys():
+                            secondary_attribute_counter += 1
+                            attr_key = "Secondary USP-%d Attribute"%secondary_attribute_counter
+                            descr_key = "Secondary USP-%d Description Text"%secondary_attribute_counter
+                            fsn_attributes_mapping.update({attr_key:secondary_attribute,descr_key: fsn_data[secondary_attribute]})
+                    if (primary_attribute_counter == 0) or (secondary_attribute_counter == 0):
+                        invalid_fsns.append(fsn)
+                    output_data.append(fsn_attributes_mapping)
+            elif never:
+                #(len(primary_attributes) == 0) or (len(secondary_attributes) == 0):
+                #This could be a problem in runtime. Disabling for now.
+                self.sendAlert("Cowabunga!","Please promote some attributes to primary and secondary positions. If you don't want to use secondary attributes, just add one anyway, and select equal relative icon sizes later.")
+            print output_data
+            if len(invalid_fsns)>0:
+                print "****************************"
+                print "There are %d fsns without enough primary or secondary attributes." %len(invalid_fsns)
+                print invalid_fsns
+                print "****************************"
+
+
+    def sendAlert(self, title, message):
+        QtGui.QMessageBox.about(self, title, message)
 
     def downloadFromFK(self):
         """Triggers FKRetriever."""
@@ -161,6 +240,7 @@ class DataSelector(QtGui.QWidget):
         """Gets data from FK from the thread's signal and prepares it."""
         self.fetching_progress.setValue(progress_value)
         self.putAttributes(data_set)
+        self.data_from_fk = data_set
         if completion_status:
             self.fetching_activity.setText("Fee, fie, fo, fum!")
             self.fsn_mode_data_options.setEnabled(True)
