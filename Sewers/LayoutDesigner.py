@@ -12,7 +12,7 @@ class LayoutDesigner(QtGui.QWidget):
         super(LayoutDesigner,self).__init__()
         self.createUI()
         self.mapEvents()
-        self.primary_attr_icon_size_spin_box.setValue(10)
+        self.primary_attr_icon_size_spin_box.setValue(7)
 
     def createUI(self):
         #self.output_images_location_widget = FileLocationWidget("Output")
@@ -48,7 +48,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.icon_positioning_label = QtGui.QLabel("Icon Positioning:")
         self.icon_positioning_combobox = QtGui.QComboBox()
         self.icon_positioning_combobox.setToolTip("Choose the way you want the icons positioned around the parent image.")
-        self.icon_positions = ["Rectangular","Planetary"]
+        self.icon_positions = ["Circular","Rectangular"]
         self.icon_positioning_combobox.addItems(self.icon_positions)
         self.palette_selection_label = QtGui.QLabel("Icon Palette:")
         self.palette_selection_combobox = QtGui.QComboBox()
@@ -62,7 +62,7 @@ class LayoutDesigner(QtGui.QWidget):
 
         self.background_selection_label = QtGui.QLabel("Background Image:")
         self.background_selection_combobox = QtGui.QComboBox()
-        self.background_selection_combobox.setToolTip("Choose a background to use for all the FSNs.\nYou may also pick the random option to provide variety.\nIf you need to add more backgrounds to this list, just add them to the Images\\Backgrounds folder.\nEnsure that the first word of the image is Background, with an uppercase B.\nFormat doesn't matter. Please use images of 9:16 aspect ratio.\nPortrait mode only.")
+        self.background_selection_combobox.setToolTip("Choose a background to use for all the FSNs.\nYou may also pick the random option to provide variety.\nIf you need to add more backgrounds to this list, just add them to the Images\\Backgrounds folder.\nEnsure that the first word of the image is Background, with an uppercase B.\nFormat doesn't matter. Please use images of 9:16 aspect ratio.\nYes, portrait mode only.")
         self.background_selection_combobox.setMaximumWidth(200)
         self.backgrounds = glob.glob(os.path.join(os.path.join(os.path.join(os.getcwd(),"Images"),"Backgrounds"),"Background*.*")) + ["Random"]
         self.background_selection_combobox.addItems(self.backgrounds)
@@ -72,12 +72,12 @@ class LayoutDesigner(QtGui.QWidget):
         self.primary_attr_icon_size_spin_box = QtGui.QSpinBox()
         self.primary_attr_icon_size_spin_box.setSuffix("%")
         self.primary_attr_icon_size_spin_box.setToolTip("This sets the size of the primary attribute icons, at a percentage relative to the background image.")
-        self.primary_attr_icon_size_spin_box.setRange(5,20)
+        self.primary_attr_icon_size_spin_box.setRange(5,8)
         self.secondary_attr_icon_size_label = QtGui.QLabel("Set Secondary Attribute Icon\nRelative Size:")
         self.secondary_attr_icon_size_spin_box = QtGui.QSpinBox()
         self.secondary_attr_icon_size_spin_box  .setSuffix("%")
         self.secondary_attr_icon_size_spin_box.setToolTip("This sets the size of the secondary attribute icons, at a percentage relative to the background image.")
-        self.secondary_attr_icon_size_spin_box.setRange(5,10)
+        self.secondary_attr_icon_size_spin_box.setRange(5,8)
         self.icon_bounding_box_label = QtGui.QLabel("Icon Bounding Box Shape:")
         self.icon_bounding_box_combobox = QtGui.QComboBox()
         self.icon_bounding_box_combobox.addItems(["None","Circle","Rectangle","Square"])

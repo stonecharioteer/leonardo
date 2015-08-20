@@ -17,7 +17,14 @@ def getBackgroundImage(background_path):
         background_path = random.choice(backgrounds)
     return Image.open(background_path).convert("RGBA").resize((1800,3200))
 
-def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, icon_arrangement,ordering,parent_image_positioning):#allow_overlap
+def getFlipkartIconImage():
+    import os
+    from PIL import Image
+    fk_logo_path = os.path.join("essentials","fk_logo.png")
+
+    return Image.open(fk_logo_path).convert("RGBA")
+def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, icon_arrangement,ordering,parent_image_positioning):
+    #This is the way I'm getting icon positions now.
     import random, os, math
     #First, store the parameters in an easily-readable manner.
     #Parent image dimensions
@@ -41,18 +48,18 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                 #icons are to be arranged in arcs.
                 if parent_image_positioning == (0.0,0.0):
                     primary_radius_multiplier = 0.65
-                    secondary_radius_multiplier = 1.0
+                    secondary_radius_multiplier = 1.05
                     theta_range = ((0),(math.pi*0.5)) #~0deg and ~90deg.
                     primary_theta_range = (theta_range[0]-25*math.pi/180,theta_range[1]+25*math.pi/180)
                     primary_arc_center = (x_top_left_parent, y_center_parent)
-                    secondary_theta_range = (theta_range[0]+45*math.pi/180,theta_range[1]+5*math.pi/180)
+                    secondary_theta_range = (theta_range[0]+45*math.pi/180,theta_range[1]+15*math.pi/180)
                 elif parent_image_positioning == (1.0,0.0):
                     primary_radius_multiplier = 0.65
-                    secondary_radius_multiplier = 1.1
+                    secondary_radius_multiplier = 1.0
                     theta_range = ((math.pi*0.5),(math.pi)) #~90deg and ~180deg.
                     primary_theta_range = (theta_range[0]+10*math.pi/180,theta_range[1]+45*math.pi/180)
                     primary_arc_center = (x_center_parent, y_center_parent)
-                    secondary_theta_range = (theta_range[0]+2*math.pi/180,theta_range[1]-35*math.pi/180)
+                    secondary_theta_range = (theta_range[0]+2*math.pi/180,theta_range[1]-25*math.pi/180)
                 elif parent_image_positioning == (0.0,1.0):
                     primary_radius_multiplier = 0.76
                     secondary_radius_multiplier = 1.15
@@ -62,11 +69,11 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                     secondary_theta_range = (theta_range[0]-2*math.pi/180,theta_range[1]-38*math.pi/180)
                 elif parent_image_positioning == (1.0, 1.0):
                     primary_radius_multiplier = 0.95
-                    secondary_radius_multiplier = 1.35
+                    secondary_radius_multiplier = 1.25
                     theta_range = ((math.pi),(math.pi*1.5)) #180deg and ~270deg.
                     primary_theta_range = (theta_range[0]-5*math.pi/180,theta_range[1]+1*math.pi/180)
                     primary_arc_center = (x_top_left_parent+width_parent, y_center_parent)
-                    secondary_theta_range = (theta_range[0]+40*math.pi/180,theta_range[1]-5*math.pi/180)
+                    secondary_theta_range = (theta_range[0]+33*math.pi/180,theta_range[1]-7*math.pi/180)
                 
                 primary_plot_points_required = len(primary_icons)
                 parent_extreme_point = (x_top_left_parent+width_parent, y_top_left_parent+height_parent)
@@ -102,6 +109,9 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                 print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
         elif parent_image_positioning in [(0.5,0.0),(0.0,0.5),(1.0,0.5),(0.5,1.0)]:
             #parent image is placed at the top-middle.
+            print "Parent image is placed at ", parent_image_positioning
+            raw_input(">")
+
             if icon_arrangement == "Circular":
                 #icons are to be arranged in arcs.
                 pass
@@ -112,6 +122,8 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                 print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
         elif parent_image_positioning == (0.5,0.5):
             #parent image is placed at the top-right.
+            print "Parent image is placed at ",parent_image_positioning
+            raw_input(">")
             if icon_arrangement == "Circular":
                 #icons are to be arranged in arcs.
                 pass
@@ -339,6 +351,7 @@ def getStrippedImage(image, threshold):
     return stripped_image
 
 def getIconCoords(primary_attributes_and_icons_data, secondary_attributes_and_icons_data, parent_image_positioning, base_image_size, parent_image_size):
+    #Not using this anywhere
     coords_list = []
     current_x = -50
     current_y = int(0.10*base_image_size[1])
@@ -368,14 +381,15 @@ def getResizedImage(image_to_resize,resize_factor,resize_by,base_image_size):
 def getParentImageCoords(base_image_size, parent_image_size, parent_image_positioning):
     base_width, base_height = base_image_size
     parent_width, parent_height = parent_image_size
-    if parent_image_positioning != "Random":
-        x_pos_factor, y_pos_factor = parent_image_positioning
-    else:
-        x_pos_factor = rangedom.uniform(0.0,1.0)
-        y_pos_factor = random.uniform(0.0,1.0)    
+    x_pos_factor, y_pos_factor = parent_image_positioning
     x_pos = int((base_width-parent_width)*x_pos_factor)
     y_pos = int((base_height-parent_height)*y_pos_factor)
-    return (x_pos,y_pos)
+    return (x_pos, y_pos)
+
+def getRandomParentImagePlacementPoints():
+    import random
+    #return (random.choice([0.0,0.5,1.0]), random.choice([0.0,0.5,1.0]))
+    return (random.choice([0.0,1.0]), random.choice([0.0,1.0]))
 
 def getParentImage(fsn):
     try:

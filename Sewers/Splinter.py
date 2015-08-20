@@ -167,16 +167,19 @@ class Splinter(QtCore.QThread):
         #Based on the input control parameters, get the coordinates for the parent image.
         message = "Getting parent image coordinates corresponding to %s for %s."%(parent_image_positioning,fsn)
         self.sendMessage.emit(message)
+        if parent_image_positioning == "Random":
+            parent_image_positioning = Katana.getRandomParentImagePlacementPoints()
         parent_image_coords = Katana.getParentImageCoords(base_image.size,parent_image.size, parent_image_positioning)
+        print "*"*10
+        print "Parent image Coords: ", parent_image_coords
+        print "*"*10
         message = "Pasting the parent image for %s."%(fsn)
         self.sendMessage.emit(message)
         base_image.paste(parent_image, parent_image_coords, parent_image)
-        #icon_coords = Katana.getIconCoords(primary_attributes_and_icons_data, secondary_attributes_and_icons_data, 
-        #                            parent_image_positioning, base_image.size, parent_image.size)
         counter = 0
         message = "Getting icons and coordinates for %s."%(fsn)
         self.sendMessage.emit(message)
-        icons_and_coordinates = Katana.getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, "Circular","Separate",parent_image_positioning) #allow_overlap
+        icons_and_coordinates = Katana.getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, "Circular","Separate",parent_image_positioning)
         for icon in icons_and_coordinates:
             try:
                 base_image.paste(icon["Icon"],icon["Position"],icon["Icon"])
@@ -189,8 +192,11 @@ class Splinter(QtCore.QThread):
                     message = "Encountered a problem while pasting the icon on base image at %s for %s." %(icon["Position"],fsn)
                 self.sendMessage.emit(message)
                 raise
-        image_path = os.path.join("Output",fsn+"_app_image.png")
+        #Paste the FK icon.
+        fk_icon = Katana.getFlipkartIconImage()
+        base_image.paste(fk_icon,((base_image.size[0]-fk_icon.size[0]),0),fk_icon) #Place the FK icon on the top-right corner.
         base_image = base_image.convert("RGB")
+        image_path = os.path.join("Output",fsn+"_app_image.png")
         base_image.save(image_path)
         return image_path
 
