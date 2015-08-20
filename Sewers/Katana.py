@@ -76,9 +76,9 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                     secondary_theta_range = (theta_range[0]+33*math.pi/180,theta_range[1]-7*math.pi/180)
                 
                 primary_plot_points_required = len(primary_icons)
-                parent_extreme_point = (x_top_left_parent+width_parent, y_top_left_parent+height_parent)
-                diagonal_length = width_base
+                #parent_extreme_point = (x_top_left_parent+width_parent, y_top_left_parent+height_parent)
                 #diagonal_length = getDistanceBetweenPoints(primary_arc_center,parent_extreme_point)
+                diagonal_length = width_base
                 primary_radius = primary_radius_multiplier*diagonal_length
                 primary_icon_positions = getPointsOnArc(primary_arc_center, primary_radius, primary_plot_points_required, primary_theta_range)
                 secondary_plot_points_required = len(secondary_icons)
@@ -120,13 +120,46 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                 pass
             else:
                 print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
-        elif parent_image_positioning == (0.5,0.5):
+        elif parent_image_positioning == (0.5, 0.5):
             #parent image is placed at the top-right.
             print "Parent image is placed at ",parent_image_positioning
-            raw_input(">")
             if icon_arrangement == "Circular":
                 #icons are to be arranged in arcs.
-                pass
+                primary_radius_multiplier = 0.78
+                secondary_radius_multiplier = 0.7
+                theta_range = (0,(math.pi*0.5)) #~0deg and ~90deg.
+                primary_theta_range = (175*math.pi/180, 410*math.pi/180)
+                primary_arc_center = (width_base/2-240, height_base/2-height_parent/2+100)
+                primary_plot_points_required = len(primary_icons)
+                #parent_extreme_point = (x_top_left_parent+width_parent, y_top_left_parent+height_parent)
+                #diagonal_length = getDistanceBetweenPoints(primary_arc_center,parent_extreme_point)
+                diagonal_length = width_base/2
+                primary_radius = primary_radius_multiplier*diagonal_length
+                primary_icon_positions = getPointsOnArc(primary_arc_center, primary_radius, primary_plot_points_required, primary_theta_range)
+                
+                secondary_theta_range = (355*math.pi/180, (360+230)*math.pi/180)
+                secondary_plot_points_required = len(secondary_icons)
+                secondary_arc_center = (width_base/2-260, height_base/2+height_parent/2-150)
+                secondary_radius = secondary_radius_multiplier*diagonal_length
+                secondary_icon_positions = getPointsOnArc(secondary_arc_center, secondary_radius, secondary_plot_points_required, secondary_theta_range)
+                coordinates_and_icons = []
+                counter = 0
+                for icon in primary_icons:
+                    coord = {
+                        "Icon": icon,
+                        "Position":primary_icon_positions[counter]
+                    }
+                    coordinates_and_icons.append(coord)
+                    counter+=1
+                counter = 0
+                for icon in secondary_icons:
+                    coord = {
+                        "Icon": icon,
+                        "Position":secondary_icon_positions[counter]
+                    }
+                    coordinates_and_icons.append(coord)
+                    counter+=1
+
             elif icon_arrangement == "Rectangular":
                 #icons are to be laid out in arrays.
                 pass
@@ -451,7 +484,7 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     
     draw_text_handle = ImageDraw.Draw(text_canvas)
     #font_size = int(icon_image.size[1]*font_resize_factor)
-    font_size = 84 #Set default font size for now.
+    font_size = 72 #Set default font size for now.
     font = ImageFont.truetype(os.path.join("essentials","RionaSans-Regular.ttf"), font_size)
     
     current_h, pad = 0, 10
