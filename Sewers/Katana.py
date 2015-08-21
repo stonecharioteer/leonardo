@@ -122,7 +122,7 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                 print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
         elif parent_image_positioning == (0.5, 0.5):
             #parent image is placed at the top-right.
-            print "Parent image is placed at ",parent_image_positioning
+            print "Parent image is placed at ", parent_image_positioning
             if icon_arrangement == "Circular":
                 #icons are to be arranged in arcs.
                 primary_radius_multiplier = 0.78

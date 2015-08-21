@@ -10,14 +10,21 @@ class PreviewRunWidget(QtGui.QGroupBox):
         self.createUI()
     
     def createUI(self):
-    	self.start_progress_button = QtGui.QPushButton("Run Queue!")
+        self.process_one_button = QtGui.QPushButton("Process Random FSN\nfrom Queue")
+    	self.start_progress_button = QtGui.QPushButton("Start Processing All!")
         self.start_progress_button.setFixedSize(200,50)
+        buttons_stylesheet = """QPushButton{background-color: #66CD00; color: white}; QPushButton::hover{background-color:#cccce5; color: black}"""
+        self.start_progress_button.setStyleSheet(buttons_stylesheet)
+
     	self.image_viewer_widget = ImageViewerWidget()
     	self.progress_bar = ProgressBar()
     	self.live_progress = QtGui.QWidget()
         self.status_message = QtGui.QLabel("The Cake is a Lie.")
+        buttons_layout = QtGui.QHBoxLayout()
+        buttons_layout.addWidget(self.process_one_button,0, QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        buttons_layout.addWidget(self.start_progress_button,0, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
     	live_progress_layout = QtGui.QVBoxLayout()
-    	live_progress_layout.addWidget(self.start_progress_button,0,QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+    	live_progress_layout.addLayout(buttons_layout, 0)
     	live_progress_layout.addWidget(self.image_viewer_widget,2,QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         live_progress_layout.addSpacing(10)
     	live_progress_layout.addWidget(self.progress_bar,0)
@@ -46,6 +53,7 @@ class PreviewRunWidget(QtGui.QGroupBox):
         else:
             self.progress_bar.setValue(100)
             self.status_message.setText("Remember, remember, the 5th of November.")
+
 
 
 
