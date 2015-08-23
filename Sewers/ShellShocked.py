@@ -13,5 +13,9 @@ def showSplashScreen(min_time=None):
     return splash
 
 def setWindowTheme():
+    #import random
+    #style = random.choice(QtGui.QStyleFactory.keys())
+    #print "Chosen application style is :%s" %style
+    #QtGui.qApp.setStyle(style)
     QtGui.qApp.setStyle(QtCore.QString(u'Plastique'))
 

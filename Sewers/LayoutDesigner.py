@@ -46,23 +46,26 @@ class LayoutDesigner(QtGui.QWidget):
         preview_layout = QtGui.QVBoxLayout()
         preview_layout.addWidget(self.update_preview_button,0)
         preview_layout.addWidget(self.preview_widget,3)
-        preview_group_box = QtGui.QGroupBox()
+        preview_group_box = QtGui.QGroupBox("Preview")
         preview_group_box.setLayout(preview_layout)
         return preview_group_box
 
     def createSettingsWidget(self):
 
         #Create the settings panels. Use a QToolBox
+        self.settings_group_box = QtGui.QGroupBox("Settings")
 
         self.settings_tool_box = QtGui.QToolBox()
-        self.settings_tool_box.setStyleSheet("QToolBox {border: 2px solid black}")
         self.layout_panel = self.getLayoutPanel()
         self.font_panel = self.getFontPanel()
         self.advanced_panel = self.getAdvancedPanel()
         self.settings_tool_box.addItem(self.layout_panel, "Layout and Icon Positions")
         self.settings_tool_box.addItem(self.font_panel, "Icon Text Font Settings")
         self.settings_tool_box.addItem(self.advanced_panel, "Advanced Settings")
-        return self.settings_tool_box
+        settings_layout = QtGui.QHBoxLayout()
+        settings_layout.addWidget(self.settings_tool_box)
+        self.settings_group_box.setLayout(settings_layout)
+        return self.settings_group_box
 
     def getLayoutPanel(self):
         #Create the layout selector.
@@ -83,22 +86,24 @@ class LayoutDesigner(QtGui.QWidget):
         self.parent_image_position_position_radiobuttons[1][1].setChecked(True)
         #Map the layout_selector to a layout.
         self.parent_image_position_selector_layout = QtGui.QGridLayout()
+        #Create a checkbox that allows randomly choosing a position.
+        self.use_random_parent_image_position = QtGui.QCheckBox("Randomize")
+        self.use_random_parent_image_position.setToolTip("This makes the program pick a random position for the product image.\nThis provides true variation in icon positions as well.")
+        self.parent_image_position_selector_layout.addWidget(self.use_random_parent_image_position,0,0,1,3,QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop)
+
         self.background_preview_space = QtGui.QLabel()
         self.background_preview_space.setFixedSize(170, 300)        
         self.background_preview_space.setStyleSheet("QLabel {background-color: grey; border: 1px solid black;}")
         self.background_preview_space.setToolTip("Preview of the selected background image.")
-        self.parent_image_position_selector_layout.addWidget(self.background_preview_space,0,0,3,3,QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop)
+        self.parent_image_position_selector_layout.addWidget(self.background_preview_space,1,0,3,3,QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop)
         halignment = [QtCore.Qt.AlignLeft, QtCore.Qt.AlignHCenter, QtCore.Qt.AlignRight]
         valignment = [QtCore.Qt.AlignTop, QtCore.Qt.AlignVCenter, QtCore.Qt.AlignBottom]
         for i in range(3):
             for j in range(3):
-                self.parent_image_position_selector_layout.addWidget(self.parent_image_position_position_radiobuttons[i][j],i,j,1,1,halignment[j]|valignment[i])
+                self.parent_image_position_selector_layout.addWidget(self.parent_image_position_position_radiobuttons[i][j],i+1,j,1,1,halignment[j]|valignment[i])
         self.parent_image_position_selector = QtGui.QGroupBox("Parent Image Position:")
         self.parent_image_position_selector.setLayout(self.parent_image_position_selector_layout)
         self.parent_image_position_selector.setFixedSize(192,335)
-        #Create a checkbox that allows randomly choosing a position.
-        self.use_random_parent_image_position = QtGui.QCheckBox("Random Product Image Position")
-        self.use_random_parent_image_position.setToolTip("This makes the program pick a random position for the product image.\nThis provides true variation in icon positions as well.")
         
         #Create label and dropdown for background
         self.background_selection_label = QtGui.QLabel("Background Image:")
@@ -120,12 +125,11 @@ class LayoutDesigner(QtGui.QWidget):
         #Create layout and return the overall widget.
         layout_panel_layout = QtGui.QGridLayout()
         layout_panel_layout.addWidget(self.background_selection_label,0,0)
-        layout_panel_layout.addWidget(self.background_selection_combobox,0,1)
-        layout_panel_layout.addWidget(self.use_random_parent_image_position,1,0,1,2)
-        layout_panel_layout.addWidget(self.parent_image_position_selector,2,0,4,2)
-        layout_panel_layout.addWidget(self.icon_arrangement_label, 6, 0, 1, 2)
-        layout_panel_layout.addWidget(self.icon_arrangement_circular, 7, 0, 1, 1)
-        layout_panel_layout.addWidget(self.icon_arrangement_rectangular, 7, 1, 1, 1)
+        layout_panel_layout.addWidget(self.background_selection_combobox,0,1,1,2)
+        layout_panel_layout.addWidget(self.parent_image_position_selector,1,1,6,2, QtCore.Qt.AlignTop)
+        layout_panel_layout.addWidget(self.icon_arrangement_label, 3, 0, 1, 2)
+        layout_panel_layout.addWidget(self.icon_arrangement_circular, 4, 0, 1, 1)
+        layout_panel_layout.addWidget(self.icon_arrangement_rectangular, 5, 0, 1, 1)
         layout_panel = QtGui.QWidget()
         layout_panel.setLayout(layout_panel_layout)
         return layout_panel
@@ -237,10 +241,10 @@ class LayoutDesigner(QtGui.QWidget):
         self.secondary_attr_icon_size_spin_box.setMaximum(maximum_primary_value)
    
     def toggleRandomParentPosition(self):
-        if self.use_random_parent_image_position.isChecked():
-            self.parent_image_position_selector.setEnabled(False)
-        else:
-            self.parent_image_position_selector.setEnabled(True)
+        state = not(self.use_random_parent_image_position.isChecked())
+        for radiobuttons_row in self.parent_image_position_position_radiobuttons:
+            for radiobutton in radiobuttons_row:
+                radiobutton.setEnabled(state)
 
     def changeBackground(self):
         self.current_background = str(self.background_selection_combobox.currentText())
