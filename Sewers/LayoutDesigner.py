@@ -92,7 +92,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.parent_image_position_selector_layout.addWidget(self.use_random_parent_image_position,0,0,1,3,QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop)
 
         self.background_preview_space = QtGui.QLabel()
-        self.background_preview_space.setFixedSize(170, 300)        
+        self.background_preview_space.setFixedSize(170, 280)        
         self.background_preview_space.setStyleSheet("QLabel {background-color: grey; border: 1px solid black;}")
         self.background_preview_space.setToolTip("Preview of the selected background image.")
         self.parent_image_position_selector_layout.addWidget(self.background_preview_space,1,0,3,3,QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop)
@@ -115,8 +115,15 @@ class LayoutDesigner(QtGui.QWidget):
 
         #Create icon positions toggle buttons. Set default to circular.
         self.icon_arrangement_label = QtGui.QLabel("Icon Arrangement:")
-        self.icon_arrangement_circular = QtGui.QPushButton("Circular Arrangement")
-        self.icon_arrangement_rectangular = QtGui.QPushButton("Rectangular Arrangement")
+        self.icon_arrangement_circular = IconButton(os.path.join("essentials","circular_layout.png"))
+        self.icon_arrangement_circular.setSize(48,48)
+        self.icon_arrangement_circular.setCheckable(True)
+        self.icon_arrangement_circular.setChecked(True)
+        self.icon_arrangement_circular.setToolTip("This layout arranges the icons around the product image in arcs.")
+        self.icon_arrangement_rectangular = IconButton(os.path.join("essentials","rectangular_layout.png"))
+        self.icon_arrangement_rectangular.setSize(48,48)
+        self.icon_arrangement_rectangular.setCheckable(True)
+        self.icon_arrangement_rectangular.setToolTip("This layout arranges the icons around the product image in linear stacks.")
         self.icon_arrangement_group = QtGui.QButtonGroup()
         self.icon_arrangement_group.addButton(self.icon_arrangement_circular)
         self.icon_arrangement_group.addButton(self.icon_arrangement_rectangular)
@@ -124,14 +131,15 @@ class LayoutDesigner(QtGui.QWidget):
 
         #Create layout and return the overall widget.
         layout_panel_layout = QtGui.QGridLayout()
-        layout_panel_layout.addWidget(self.background_selection_label,0,0)
-        layout_panel_layout.addWidget(self.background_selection_combobox,0,1,1,2)
-        layout_panel_layout.addWidget(self.parent_image_position_selector,1,1,6,2, QtCore.Qt.AlignTop)
-        layout_panel_layout.addWidget(self.icon_arrangement_label, 3, 0, 1, 2)
-        layout_panel_layout.addWidget(self.icon_arrangement_circular, 4, 0, 1, 1)
-        layout_panel_layout.addWidget(self.icon_arrangement_rectangular, 5, 0, 1, 1)
+        layout_panel_layout.addWidget(self.background_selection_label,0, 0)
+        layout_panel_layout.addWidget(self.background_selection_combobox,1,0,1,2)
+        layout_panel_layout.addWidget(self.parent_image_position_selector,0,3,10,2, QtCore.Qt.AlignTop)
+        layout_panel_layout.addWidget(self.icon_arrangement_label, 2, 0, 1, 1)
+        layout_panel_layout.addWidget(self.icon_arrangement_circular, 3, 0, 1, 1, QtCore.Qt.AlignRight)
+        layout_panel_layout.addWidget(self.icon_arrangement_rectangular, 3, 1, 1, 1, QtCore.Qt.AlignLeft)
         layout_panel = QtGui.QWidget()
         layout_panel.setLayout(layout_panel_layout)
+        self.changeBackground()
         return layout_panel
 
     def getFontPanel(self):
@@ -270,7 +278,11 @@ class LayoutDesigner(QtGui.QWidget):
                         return (j/number_of_rows_or_columns,i/number_of_rows_or_columns)
 
     def getIconPosition(self):
-        return str(self.icon_positioning_combobox.currentText())
+        if self.icon_arrangement_circular.isChecked():
+            position = "Circular"
+        else:
+            position = "Rectangular"
+        return position
     def getIconPalette(self):
         return "Black" #Fix this later.
     def getOverlap(self):
