@@ -21,7 +21,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.validate_button  = IconButton(os.path.join("essentials","validate.png"))
         self.validate_button.setToolTip("Validate and Proceed")
         final_ui_layout = QtGui.QGridLayout()
-        final_ui_layout.addWidget(self.settings_group_box,0,0,6,4, QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        final_ui_layout.addWidget(self.settings_group_box,0,0,10,4)
         final_ui_layout.addWidget(self.preview_group_box,0,4,10,4, QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         final_ui_layout.addWidget(self.validate_button,10,9,1,1, QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
         self.over_all_group_box = QtGui.QGroupBox("Design")
@@ -55,12 +55,13 @@ class LayoutDesigner(QtGui.QWidget):
         #Create the settings panels. Use a QToolBox
 
         self.settings_tool_box = QtGui.QToolBox()
+        self.settings_tool_box.setStyleSheet("QToolBox {border: 2px solid black}")
         self.layout_panel = self.getLayoutPanel()
         self.font_panel = self.getFontPanel()
         self.advanced_panel = self.getAdvancedPanel()
-        self.settings_tool_box.addWidget("Layout and Icon Positions", self.layout_panel)
-        self.settings_tool_box.addWidget("Icon Text Font Settings", self.font_panel)
-        self.settings_tool_box.addWidget("Advanced Settings", self.advanced_panel)
+        self.settings_tool_box.addItem(self.layout_panel, "Layout and Icon Positions")
+        self.settings_tool_box.addItem(self.font_panel, "Icon Text Font Settings")
+        self.settings_tool_box.addItem(self.advanced_panel, "Advanced Settings")
         return self.settings_tool_box
 
     def getLayoutPanel(self):
@@ -138,7 +139,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.font_size_spinbox.setRange(30,72)
         self.font_color_label = QtGui.QLabel("Font Color:")
         self.font_color_combobox = QtGui.QComboBox()
-        self.font_color_combobox.addItems["Black","White","FK Blue","FK Yellow","Auto Select","Choose Manually"]
+        self.font_color_combobox.addItems(["Black","White","FK Blue","FK Yellow","Auto Select","Choose Manually"])
         self.font_color_picker = QColorButton()
 
         font_panel_layout = QtGui.QGridLayout()
@@ -223,6 +224,7 @@ class LayoutDesigner(QtGui.QWidget):
         advanced_panel_layout.addWidget(self.icon_bounding_box_label,7,0)
         advanced_panel_layout.addWidget(self.icon_bounding_box_combobox,7,1)
         advanced_panel_layout.addWidget(self.allow_overlap_checkbox,8,0,1,2)
+        advanced_panel = QtGui.QWidget()
         advanced_panel.setLayout(advanced_panel_layout)
         return advanced_panel
 
