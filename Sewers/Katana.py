@@ -23,6 +23,7 @@ def getFlipkartIconImage():
     fk_logo_path = os.path.join("essentials","fk_logo.png")
 
     return Image.open(fk_logo_path).convert("RGBA")
+
 def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, icon_arrangement,ordering,parent_image_positioning):
     #This is the way I'm getting icon positions now.
     import random, os, math
@@ -110,11 +111,64 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
         elif parent_image_positioning in [(0.5,0.0),(0.0,0.5),(1.0,0.5),(0.5,1.0)]:
             #parent image is placed at the top-middle.
             print "Parent image is placed at ", parent_image_positioning
-            raw_input(">")
-
             if icon_arrangement == "Circular":
                 #icons are to be arranged in arcs.
-                pass
+                if parent_image_positioning == (0.5,0.0):
+                    primary_radius_multiplier = 0.80
+                    secondary_radius_multiplier = 2.00
+                    theta_range = ((0),(math.pi)) #~0deg and ~180deg.
+                    primary_theta_range = (0,230*math.pi/180)
+                    primary_arc_center = ((x_top_left_parent+90), (y_center_parent+200))
+                    secondary_theta_range = (65*math.pi/180,125*math.pi/180)
+                elif parent_image_positioning == (1.0,0.0):
+                    primary_radius_multiplier = 0.65
+                    secondary_radius_multiplier = 1.0
+                    theta_range = ((math.pi*0.5),(math.pi)) #~90deg and ~180deg.
+                    primary_theta_range = (theta_range[0]+10*math.pi/180,theta_range[1]+45*math.pi/180)
+                    primary_arc_center = (x_center_parent, y_center_parent)
+                    secondary_theta_range = (theta_range[0]+2*math.pi/180,theta_range[1]-25*math.pi/180)
+                elif parent_image_positioning == (0.0,1.0):
+                    primary_radius_multiplier = 0.76
+                    secondary_radius_multiplier = 1.15
+                    theta_range = ((math.pi*1.5),(math.pi*2.0)) #270deg and ~360deg.
+                    primary_theta_range = (theta_range[0],theta_range[1]+20*math.pi/180)
+                    primary_arc_center = (x_top_left_parent, y_center_parent)
+                    secondary_theta_range = (theta_range[0]-2*math.pi/180,theta_range[1]-38*math.pi/180)
+                elif parent_image_positioning == (1.0, 1.0):
+                    primary_radius_multiplier = 0.95
+                    secondary_radius_multiplier = 1.25
+                    theta_range = ((math.pi),(math.pi*1.5)) #180deg and ~270deg.
+                    primary_theta_range = (theta_range[0]-5*math.pi/180,theta_range[1]+1*math.pi/180)
+                    primary_arc_center = (x_top_left_parent+width_parent, y_center_parent)
+                    secondary_theta_range = (theta_range[0]+33*math.pi/180,theta_range[1]-7*math.pi/180)
+                
+                primary_plot_points_required = len(primary_icons)
+                #parent_extreme_point = (x_top_left_parent+width_parent, y_top_left_parent+height_parent)
+                #diagonal_length = getDistanceBetweenPoints(primary_arc_center,parent_extreme_point)
+                diagonal_length = width_base/2
+                primary_radius = primary_radius_multiplier*diagonal_length
+                primary_icon_positions = getPointsOnArc(primary_arc_center, primary_radius, primary_plot_points_required, primary_theta_range)
+                secondary_plot_points_required = len(secondary_icons)
+                secondary_arc_center = primary_arc_center
+                secondary_radius = secondary_radius_multiplier*diagonal_length
+                secondary_icon_positions = getPointsOnArc(secondary_arc_center, secondary_radius, secondary_plot_points_required, secondary_theta_range)
+                coordinates_and_icons = []
+                counter = 0
+                for icon in primary_icons:
+                    coord = {
+                        "Icon": icon,
+                        "Position":primary_icon_positions[counter]
+                    }
+                    coordinates_and_icons.append(coord)
+                    counter+=1
+                counter = 0
+                for icon in secondary_icons:
+                    coord = {
+                        "Icon": icon,
+                        "Position":secondary_icon_positions[counter]
+                    }
+                    coordinates_and_icons.append(coord)
+                    counter+=1
             elif icon_arrangement == "Rectangular":
                 #icons are to be laid out in arrays.
                 pass
@@ -122,7 +176,6 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                 print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
         elif parent_image_positioning == (0.5, 0.5):
             #parent image is placed at the top-right.
-            print "Parent image is placed at ", parent_image_positioning
             if icon_arrangement == "Circular":
                 #icons are to be arranged in arcs.
                 primary_radius_multiplier = 0.78
