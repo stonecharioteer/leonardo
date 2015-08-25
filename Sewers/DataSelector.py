@@ -129,7 +129,7 @@ class DataSelector(QtGui.QWidget):
 
     def exportData(self):
         import pandas as pd
-        data_frame = pd.DataFrame.from_dict(self.data_from_fk)
+        data_frame = pd.DataFrame.from_dict(self.data_from_fk).transpose()
         data_frame.to_csv("something.csv")
         #get save file name
         #dump data into said file.

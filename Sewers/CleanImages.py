@@ -14,7 +14,7 @@ def cleanImagesInPath(path_to_images_folder=None):
         counter = 0
         start_time = datetime.datetime.now()
         for image_name in images_in_folder:
-            isImage = (".jpg" in image_name) or (".png" in image_name)
+            isImage = (".jpg" in image_name) or (".png" in image_name) or (".jpeg" in image_name)
             if isImage:
                 stripped_image = Katana.getStrippedImage(Image.open(image_name).convert("RGBA"),threshold=30)
                 new_image_name = os.path.join(image_name[:image_name.find(os.path.basename(image_name))],os.path.splitext(os.path.basename(image_name))[0])+".png"
