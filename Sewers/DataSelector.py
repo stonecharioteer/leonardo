@@ -129,11 +129,37 @@ class DataSelector(QtGui.QWidget):
 
     def exportData(self):
         import pandas as pd
-        data_frame = pd.DataFrame.from_dict(self.data_from_fk).transpose()
-        data_frame.to_csv("something.csv")
-        #get save file name
-        #dump data into said file.
-        pass
+        import xlsxwriter
+        #Get the output location.
+        output_path = str(QtGui.QFileDialog.getExistingDirectory(self, "Select the output folder.", os.getcwd(), 
+                                                    QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks))
+        #Calculate the different types of FSNs based on prefix.
+        if output_path:
+            file_path = os.path.join(output_path,"flipkart_data_%s.xlsx"%datetime.datetime.now().strftime("%Y%m%d_%H%M%S"))
+            file_handler = pd.ExcelWriter(file_path,engine="xlsxwriter")
+            fsns_list = self.data_from_fk.keys()
+            prefixes = list(set([fsn[:3] for fsn in fsns_list]))
+            prefixes.sort()
+            seggregated_data_set = {}
+            #Split data based on FSN prefix.
+            for prefix in prefixes:
+                valid_fsns = [fsn for fsn in fsns_list if prefix==fsn[:3]]
+                seggregated_data_set[prefix] = {}
+                for fsn in valid_fsns:
+                    seggregated_data_set[prefix][fsn] = self.data_from_fk[fsn]
+                #Create dataframes for each data set.
+                prefix_data_set = pd.DataFrame.from_dict(seggregated_data_set[prefix])
+                #Save the dataframe in an excel file with the entire dataset in one sheet, and individual sheets containing prefix-wise data, stored in the output folder.
+                prefix_data_set.T.to_excel(file_handler, prefix)
+            file_handler.save()
+        pd.DataFrame.from_dict(self.data_from_fk).T.to_csv(os.path.join(output_path,"flipkart_data_%s.csv"%datetime.datetime.now().strftime("%Y%m%d_%H%M%S")))
+        os.startfile(file_path,"open")
+        self.sendAlert("Success","Success exported data for %d possible verticals into %s."%(len(prefixes),os.path.basename(file_path)))
+
+        #    data_frame = pd.DataFrame.from_dict(self.data_from_fk).transpose()
+        #    data_frame.to_csv("something.csv")
+            #get save file name
+            #dump data into said file.
 
     def postException(self, error_msg):
         self.fetching_activity.setText("%s @%s"%(error_msg,datetime.datetime.now().strftime("%H:%M:%S")))

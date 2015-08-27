@@ -170,7 +170,7 @@ class FKRetriever(QtCore.QThread):
                         try:
                             current_string_value = str(spec_subrow.string).strip()
                         except:
-                            current_string_value = "Error Obtaining String Value"
+                            current_string_value = "Error Obtaining String Value From Flipkart Page"
                         if counter >1:
                             if (last_found_entity == "specsKey") and (current_class == "specsValue"):
                                 if (len(last_found_string_value) > 0) and (last_found_string_value != ""):
