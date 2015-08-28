@@ -1,4 +1,4 @@
-#!usr/bin/
+#!usr/bin/python
 from __future__ import division
 import datetime
 import os

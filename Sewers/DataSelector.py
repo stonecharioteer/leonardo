@@ -84,12 +84,11 @@ class DataSelector(QtGui.QWidget):
         self.fsn_mode_data_options.setEnabled(False)
         fsn_mode_layout = QtGui.QGridLayout()
         fsn_mode_layout.addWidget(self.fsn_text_edit,0,0,7,1)
-        fsn_mode_layout.addWidget(self.fetch_images_attributes_button,0,1,1,2,  QtCore.Qt.AlignVCenter)
-        fsn_mode_layout.addWidget(self.export_scraped_data_button,1,1,1,2,  QtCore.Qt.AlignVCenter)
+        fsn_mode_layout.addWidget(self.fetch_images_attributes_button,0,1,1,2,  QtCore.Qt.AlignBottom)
         fsn_mode_layout.addWidget(self.fetching_progress,0,3,1,5, QtCore.Qt.AlignBottom)
         fsn_mode_layout.addWidget(self.fetching_activity,1,3,1,5, QtCore.Qt.AlignTop)
-
-        fsn_mode_layout.addWidget(self.fsn_mode_data_options,3,1,4,7, QtCore.Qt.AlignTop)
+        fsn_mode_layout.addWidget(self.export_scraped_data_button,1,1,1,2,  QtCore.Qt.AlignTop)
+        fsn_mode_layout.addWidget(self.fsn_mode_data_options,2,1,5,7, QtCore.Qt.AlignTop)
         self.fsn_mode_widget.setLayout(fsn_mode_layout)
 
         #CSV Mode Widget
