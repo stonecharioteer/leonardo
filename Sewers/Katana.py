@@ -8,6 +8,15 @@ from PIL import ImageFont
 from PIL import ImageDraw
 import PIL
 
+def getRadians(degrees):
+    import math
+    if (degrees == 0) or (degrees == 360):
+        radians = 0.0
+    elif degrees > 0:
+        radians = degrees*math.pi/180.0
+    elif degrees < 0:
+        radians = (360-degrees)*math.pi/180
+    return radians
 
 def getBackgroundImage(background_path):
     import random, os
@@ -109,30 +118,31 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
             else:
                 print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
         elif parent_image_positioning in [(0.5,0.0),(0.0,0.5),(1.0,0.5),(0.5,1.0)]:
-            #parent image is placed at the top-middle.
             print "Parent image is placed at ", parent_image_positioning
             if icon_arrangement == "Circular":
                 #icons are to be arranged in arcs.
                 if parent_image_positioning == (0.5,0.0):
+                    #parent image is placed at the top-middle.
                     primary_radius_multiplier = 0.80
                     secondary_radius_multiplier = 2.00
                     theta_range = ((0),(math.pi)) #~0deg and ~180deg.
                     primary_theta_range = (0,230*math.pi/180)
                     primary_arc_center = ((x_top_left_parent+90), (y_center_parent+200))
                     secondary_theta_range = (65*math.pi/180,125*math.pi/180)
-                elif parent_image_positioning == (1.0,0.0):
-                    primary_radius_multiplier = 0.65
-                    secondary_radius_multiplier = 1.0
-                    theta_range = ((math.pi*0.5),(math.pi)) #~90deg and ~180deg.
-                    primary_theta_range = (theta_range[0]+10*math.pi/180,theta_range[1]+45*math.pi/180)
-                    primary_arc_center = (x_center_parent, y_center_parent)
-                    secondary_theta_range = (theta_range[0]+2*math.pi/180,theta_range[1]-25*math.pi/180)
+                elif parent_image_positioning == (0.0,0.5):
+                    #parent image is placed at the left-middle.
+                    primary_radius_multiplier = 1.4
+                    secondary_radius_multiplier = 1.8
+                    theta_range = (getRadians(300),getRadians(270+170))
+                    primary_theta_range = (theta_range[0],theta_range[1])
+                    primary_arc_center = (-x_center_parent, y_center_parent)
+                    secondary_theta_range = (theta_range[0]-getRadians(10),theta_range[1]+getRadians(10))
                 elif parent_image_positioning == (0.0,1.0):
-                    primary_radius_multiplier = 0.76
-                    secondary_radius_multiplier = 1.15
+                    primary_radius_multiplier = 1.25
+                    secondary_radius_multiplier = 1.55
                     theta_range = ((math.pi*1.5),(math.pi*2.0)) #270deg and ~360deg.
                     primary_theta_range = (theta_range[0],theta_range[1]+20*math.pi/180)
-                    primary_arc_center = (x_top_left_parent, y_center_parent)
+                    primary_arc_center = (0, height_base/2)
                     secondary_theta_range = (theta_range[0]-2*math.pi/180,theta_range[1]-38*math.pi/180)
                 elif parent_image_positioning == (1.0, 1.0):
                     primary_radius_multiplier = 0.95
