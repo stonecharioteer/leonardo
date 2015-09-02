@@ -22,7 +22,7 @@ def getBackgroundImage(background_path):
     import random, os
     from PIL import Image
     if background_path == "Random":
-        backgrounds = glob.glob(os.path.join(os.path.join(os.path.join(os.getcwd(),"Images"),"Backgrounds"),"Background*.*"))
+        backgrounds = glob.glob(os.path.join(os.getcwd(),"Images","Backgrounds","Background*.*"))
         background_path = random.choice(backgrounds)
     return Image.open(background_path).convert("RGBA").resize((1800,3200))
 
@@ -489,14 +489,14 @@ def getRandomParentImagePlacementPoints():
 
 def getParentImage(fsn):
     try:
-        parent_image_path = glob.glob(os.path.join(os.path.join(os.path.join(os.getcwd(),"Images"),"Parent Images"),"%s*.*"%fsn))[0]
+        parent_image_path = glob.glob(os.path.join(os.getcwd(),"Images","Parent Images","%s*.*"%fsn))[0]
     except:
         parent_image_path = os.path.join("essentials","na_parent_image.png")
     return parent_image_path
 
 def getIcons(attribute_data, category, icon_relative_size, base_image_size):
     #print attribute_data, category
-    look_in_path = os.path.join(os.path.join(os.path.join(os.getcwd(),"Images"),"Repository"),category)
+    look_in_path = os.path.join(os.getcwd(),"Images","Repository",category)
     image_search_path = os.path.join(look_in_path, "*.*")
     images_in_look_in_path = glob.glob(image_search_path)
     #print look_in_path,"\n",image_search_path
@@ -660,7 +660,7 @@ def getETA(start_time, counter, total):
 
 def getCategoryFolderNames():
     import os, glob
-    path_to_repo = os.path.join(os.getcwd(),os.path.join("Images","Repository"))
+    path_to_repo = os.path.join(os.getcwd(),"Images","Repository")
     path_and_folders_list = glob.glob(os.path.join(path_to_repo,"*"))
 
     return [os.path.basename(path_and_folder_name) for path_and_folder_name in path_and_folders_list]

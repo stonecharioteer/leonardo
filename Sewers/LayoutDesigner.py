@@ -245,23 +245,40 @@ class LayoutDesigner(QtGui.QWidget):
         self.image_margin_spinbox.setToolTip("Select a margin, in pixels, for the background image.\nAll items, except the Flipkart Logo, will be placed taking the margin into account.")
         
         advanced_panel_layout = QtGui.QGridLayout()
-        advanced_panel_layout.addWidget(self.image_margin_label,0,0, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.image_margin_spinbox,0,1, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.product_image_scale_label,1,0, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.product_image_scale_spinbox,1,1, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.primary_attr_icon_size_label,2,0, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.primary_attr_icon_size_spin_box,2,1, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.secondary_attr_icon_size_label,3,0, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.secondary_attr_icon_size_spin_box,3,1, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.use_simple_color_replacement,4,0,1,2, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.background_color_threshold_label,5,0, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.background_color_threshold_spinbox,5,1, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.palette_selection_label,6,0, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.palette_selection_combobox,6,1, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.palette_selection_button,6,2, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.icon_bounding_box_label,7,0, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.icon_bounding_box_combobox,7,1, QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.allow_overlap_checkbox,8,0,1,2, QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
+        advanced_panel_layout.addWidget(self.image_margin_label,0,0, 
+                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        advanced_panel_layout.addWidget(self.image_margin_spinbox,0,1, 
+                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        advanced_panel_layout.addWidget(self.product_image_scale_label,1,0, 
+                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        advanced_panel_layout.addWidget(self.product_image_scale_spinbox,1,1, 
+                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        advanced_panel_layout.addWidget(self.primary_attr_icon_size_label,2,0, 
+                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        advanced_panel_layout.addWidget(self.primary_attr_icon_size_spin_box,2,1, 
+                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        advanced_panel_layout.addWidget(self.secondary_attr_icon_size_label,3,0, 
+                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        advanced_panel_layout.addWidget(self.secondary_attr_icon_size_spin_box,3,1, 
+                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        advanced_panel_layout.addWidget(self.use_simple_color_replacement,4,0,1,2, 
+                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        advanced_panel_layout.addWidget(self.background_color_threshold_label,5,0, 
+                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        advanced_panel_layout.addWidget(self.background_color_threshold_spinbox,5,1, 
+                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        advanced_panel_layout.addWidget(self.palette_selection_label,6,0, 
+                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        advanced_panel_layout.addWidget(self.palette_selection_combobox,6,1, 
+                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        advanced_panel_layout.addWidget(self.palette_selection_button,6,2, 
+                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        advanced_panel_layout.addWidget(self.icon_bounding_box_label,7,0, 
+                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        advanced_panel_layout.addWidget(self.icon_bounding_box_combobox,7,1, 
+                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        advanced_panel_layout.addWidget(self.allow_overlap_checkbox,8,0,1,2, 
+                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         advanced_panel_layout.setColumnStretch(0,0)
         advanced_panel_layout.setColumnStretch(1,0)
         advanced_panel_layout.setColumnStretch(2,10)
