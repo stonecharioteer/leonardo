@@ -170,9 +170,9 @@ class Splinter(QtCore.QThread):
         if parent_image_positioning == "Random":
             parent_image_positioning = Katana.getRandomParentImagePlacementPoints()
         parent_image_coords = Katana.getParentImageCoords(base_image.size,parent_image.size, parent_image_positioning)
-        print "*"*10
-        print "Parent image Coords: ", parent_image_coords
-        print "*"*10
+        #print "*"*10
+        #print "Parent image Coords: ", parent_image_coords
+        #print "*"*10
         message = "Pasting the parent image for %s."%(fsn)
         self.sendMessage.emit(message)
         base_image.paste(parent_image, parent_image_coords, parent_image)

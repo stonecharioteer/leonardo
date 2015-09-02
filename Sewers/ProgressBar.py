@@ -15,5 +15,3 @@ class ProgressBar(QProgressBar):
                  width: 20px;
              }""" #05B8CC
 		self.setStyleSheet(progress_bar_style)
-
-		pass
