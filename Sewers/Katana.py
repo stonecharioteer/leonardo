@@ -143,12 +143,14 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                     primary_radius_multiplier = 1.4
                     secondary_radius_multiplier = 1.8
                     theta_range = (getRadians(300),getRadians(270+170))
+                    #Arc center positions
                     primary_arc_center = (-x_center_parent, y_center_parent)
                     secondary_arc_center = primary_arc_center
-                    primary_theta_range = (theta_range[0],theta_range[1])
-                    secondary_theta_range = (theta_range[0]-getRadians(10),theta_range[1]+getRadians(10))
+                    #Angles
+                    primary_theta_range = (getRadians(300),getRadians(270+170))
+                    secondary_theta_range = (getRadians(300),getRadians(370))
                 elif parent_image_positioning == (0.5, 1.0):
-                    #Needs tweaking.
+                    #Validated and perfected.
                     primary_radius_multiplier = 0.8
                     secondary_radius_multiplier = 2.00
                     theta_range = (getRadians(180),getRadians(360+50))
