@@ -83,7 +83,7 @@ class LayoutDesigner(QtGui.QWidget):
                 self.parent_image_position_selector_radiobuttons_group.addButton(self.parent_image_position_position_radiobuttons[i][j])
                 self.parent_image_position_position_radiobuttons[i][j].setToolTip("This sets the position of the parent image to the %s %s of the image.\nPlease note that the representation isn't exact and\nthe final image layout may vary as constraints dictate." %(vpos[i], hpos[j]))
         self.parent_image_position_selector_radiobuttons_group.setExclusive(True)
-        self.parent_image_position_position_radiobuttons[1][0].setChecked(True) #Default position
+        self.parent_image_position_position_radiobuttons[2][1].setChecked(True) #Default position
         #Map the layout_selector to a layout.
         self.parent_image_position_selector_layout = QtGui.QGridLayout()
         #Create a checkbox that allows randomly choosing a position.

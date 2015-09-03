@@ -135,10 +135,23 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                     primary_arc_center = ((width_base*0.35), (height_base*0.4))
                     secondary_arc_center = ((width_base*0.35), (height_base*0.25))
                     #Angles
-                    primary_theta_range = (0,225*math.pi/180)
-                    secondary_theta_range = (65*math.pi/180,125*math.pi/180)
+                    primary_theta_range = (0, getRadians(225))
+                    secondary_theta_range = (getRadians(65), getRadians(125))
+                elif parent_image_positioning == (0.5, 1.0):
+                    #Validated and perfected.
+                    #Not very happy with this though.
+                    #parent image is placed at the bottom middle.
+                    primary_radius_multiplier = 0.85
+                    secondary_radius_multiplier = 2.08
+                    #Arc center positions
+                    primary_arc_center = ((width_base*0.35), (height_base*0.6))
+                    secondary_arc_center = ((width_base*0.35), (height_base*0.75))
+                    #Angles
+                    theta_range = (getRadians(245), getRadians(270+25))
+                    primary_theta_range = (getRadians(270-65), getRadians(270+95))
+                    secondary_theta_range = (getRadians(270-24), getRadians(270+35))
                 elif parent_image_positioning == (0.0,0.5):
-                    #Needs tweaking.
+                    #Validated and perfected.
                     #parent image is placed at the left-middle.
                     primary_radius_multiplier = 1.4
                     secondary_radius_multiplier = 1.8
@@ -149,17 +162,9 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                     #Angles
                     primary_theta_range = (getRadians(300),getRadians(270+170))
                     secondary_theta_range = (getRadians(300),getRadians(370))
-                elif parent_image_positioning == (0.5, 1.0):
-                    #Validated and perfected.
-                    primary_radius_multiplier = 0.8
-                    secondary_radius_multiplier = 2.00
-                    theta_range = (getRadians(180),getRadians(360+50))
-                    primary_theta_range = (theta_range[0],theta_range[1])
-                    primary_arc_center = ((x_top_left_parent+90), (y_center_parent-300))
-                    secondary_theta_range = (getRadians(180+65),getRadians(360-40))
-                    secondary_arc_center = primary_arc_center
                 elif parent_image_positioning == (1.0, 0.5):
                     #Needs tweaking.
+                    #parent image is placed at the right-middle
                     primary_radius_multiplier = 1.4
                     secondary_radius_multiplier = 1.8
                     theta_range = (getRadians(90),getRadians(270)) #180deg and ~270deg.
