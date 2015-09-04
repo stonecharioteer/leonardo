@@ -358,5 +358,5 @@ class LayoutDesigner(QtGui.QWidget):
     def getParentImageResizeReference(self):
         return "Height" #Make widget for this.
     def getParentImageResizeFactor(self):
-        return 42 #Make widget for this
+        return 42/100 #Make widget for this
             

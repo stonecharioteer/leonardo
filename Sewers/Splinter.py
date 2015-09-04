@@ -146,7 +146,9 @@ class Splinter(QtCore.QThread):
         #First resize the parent image.
         message = "Resizing parent image for %s."%fsn
         self.sendMessage.emit(message)
-        resized_parent_image = Katana.getResizedImage(Image.open(parent_image_path).convert("RGBA"),self.parent_image_resize_factor, self.parent_image_resize_reference, base_image.size) 
+        original_parent_image = Image.open(parent_image_path).convert("RGBA")
+        #resized_parent_image = Katana.getResizedImage(original_parent_image, self.parent_image_resize_factor, self.parent_image_resize_reference, base_image.size)
+        resized_parent_image = Katana.getResizedImage(original_parent_image, self.parent_image_resize_factor, self.parent_image_resize_reference, base_image.size)
         #Use the selected background colour strip algorithm 
         #to strip the parent image of its colour.
         if use_simple_bg_color_strip:
