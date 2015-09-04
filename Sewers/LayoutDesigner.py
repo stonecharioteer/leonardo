@@ -198,8 +198,8 @@ class LayoutDesigner(QtGui.QWidget):
         self.product_image_scale_label = QtGui.QLabel("Parent Image Scale:")
         self.product_image_scale_spinbox = QtGui.QDoubleSpinBox()
         self.product_image_scale_spinbox.setToolTip("Choose a scaling factor for the parent image.\nIdeally, 42% is the right answer.")
+        self.product_image_scale_spinbox.setRange(10,100)
         self.product_image_scale_spinbox.setValue(42)
-        self.product_image_scale_spinbox.setRange(25,50)
         self.product_image_scale_spinbox.setSuffix("%")
         #Widget for controlling icon color.
         self.palette_selection_label = QtGui.QLabel("Icon Palette:")
@@ -208,6 +208,12 @@ class LayoutDesigner(QtGui.QWidget):
         palettes_list = ["Black","Based on Input Color","From Input File"]
         self.palette_selection_combobox.addItems(palettes_list)
         self.palette_selection_button = QColorButton()
+        print self.palette_selection_button.size()
+        self.palette_selection_combobox.setMinimumHeight(self.palette_selection_button.size().height())
+        palette_layout = QtGui.QHBoxLayout()
+        palette_layout.addWidget(self.palette_selection_combobox,0,QtCore.Qt.AlignRight)
+        palette_layout.addWidget(self.palette_selection_button,0,QtCore.Qt.AlignLeft)
+        palette_layout.addStretch(10)
         #Widget for controlling primary and secondary attribute icon sizes.
         self.primary_attr_icon_size_label = QtGui.QLabel("Set Primary Attribute Icon\nRelative Size:")
         self.primary_attr_icon_size_spin_box = QtGui.QSpinBox()
@@ -243,42 +249,104 @@ class LayoutDesigner(QtGui.QWidget):
         self.image_margin_spinbox.setValue(5.0)
         self.image_margin_spinbox.setSuffix("px")
         self.image_margin_spinbox.setToolTip("Select a margin, in pixels, for the background image.\nAll items, except the Flipkart Logo, will be placed taking the margin into account.")
-        
+        #Parent Image resize factor and reference controls.
+        self.parent_image_resize_reference_instruction = QtGui.QLabel("Resize Parent Image By:")
+        self.parent_image_resize_reference = QtGui.QComboBox()
+        self.parent_image_resize_reference.addItems(["Height","Width"])
+        self.parent_image_resize_reference.setToolTip("Choose whether to resize the product image with respect to the height or the width of the base image.")
+        #Aspect Ratio controls.
+        self.final_image_aspect_ratio_instruction = QtGui.QLabel("Aspect Ratio:")
+        self.final_image_aspect_ratio_input_box_1 = QtGui.QSpinBox()
+        self.final_image_aspect_ratio_colon = QtGui.QLabel(":")
+        self.final_image_aspect_ratio_input_box_2 = QtGui.QSpinBox()
+        self.final_image_aspect_ratio_input_box_1.setRange(1,100)
+        self.final_image_aspect_ratio_input_box_2.setRange(1,100)
+        self.final_image_aspect_ratio_input_box_1.setValue(9)
+        self.final_image_aspect_ratio_input_box_2.setValue(14)
+        self.final_image_aspect_ratio_input_box_1.setToolTip("Select the width aspect ratio factor.")
+        self.final_image_aspect_ratio_input_box_2.setToolTip("Select the height aspect ratio factor.")
+        self.aspect_ratio_widget_layout = QtGui.QHBoxLayout()
+        self.aspect_ratio_widget_layout.addWidget(self.final_image_aspect_ratio_input_box_1,0,
+                                            QtCore.Qt.AlignRight)
+        self.aspect_ratio_widget_layout.addWidget(self.final_image_aspect_ratio_colon,0)
+        self.aspect_ratio_widget_layout.addWidget(self.final_image_aspect_ratio_input_box_2,0,
+                                            QtCore.Qt.AlignLeft)
+        self.aspect_ratio_widget_layout.addStretch(10)
+        #Layout
+        left_center_alignment = QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter
+        left_top_alignment = QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop
         advanced_panel_layout = QtGui.QGridLayout()
-        advanced_panel_layout.addWidget(self.image_margin_label,0,0, 
-                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.image_margin_spinbox,0,1, 
-                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.product_image_scale_label,1,0, 
-                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.product_image_scale_spinbox,1,1, 
-                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.primary_attr_icon_size_label,2,0, 
-                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.primary_attr_icon_size_spin_box,2,1, 
-                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.secondary_attr_icon_size_label,3,0, 
-                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.secondary_attr_icon_size_spin_box,3,1, 
-                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.use_simple_color_replacement,4,0,1,2, 
-                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.background_color_threshold_label,5,0, 
-                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.background_color_threshold_spinbox,5,1, 
-                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.palette_selection_label,6,0, 
-                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.palette_selection_combobox,6,1, 
-                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.palette_selection_button,6,2, 
-                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.icon_bounding_box_label,7,0, 
-                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.icon_bounding_box_combobox,7,1, 
-                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        advanced_panel_layout.addWidget(self.allow_overlap_checkbox,8,0,1,2, 
-                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
+        row, column = 0, 0
+        advanced_panel_layout.addWidget(self.image_margin_label, row, column, 
+                                    left_center_alignment)
+        column += 1
+        advanced_panel_layout.addWidget(self.image_margin_spinbox, row, column, 
+                                    left_center_alignment)
+        row += 1
+        column = 0
+        advanced_panel_layout.addWidget(self.product_image_scale_label, row, column, 
+                                    left_center_alignment)
+        column += 1
+        advanced_panel_layout.addWidget(self.product_image_scale_spinbox, row, column, 
+                                    left_center_alignment)
+        row += 1
+        column = 0
+        advanced_panel_layout.addWidget(self.parent_image_resize_reference_instruction, row, column,
+                                    left_center_alignment)
+        column += 1
+        advanced_panel_layout.addWidget(self.parent_image_resize_reference, row, column,
+                                    left_center_alignment)
+        row += 1
+        column = 0
+        advanced_panel_layout.addWidget(self.final_image_aspect_ratio_instruction, row, column, 
+                                    left_center_alignment)
+        column += 1
+        advanced_panel_layout.addLayout(self.aspect_ratio_widget_layout, row, column, 
+                                    left_center_alignment)
+        row += 1
+        column = 0
+        advanced_panel_layout.addWidget(self.primary_attr_icon_size_label, row, column, 
+                                    left_center_alignment)
+        column += 1 
+        advanced_panel_layout.addWidget(self.primary_attr_icon_size_spin_box, row, column, 
+                                    left_center_alignment)
+        row += 1
+        column = 0
+        advanced_panel_layout.addWidget(self.secondary_attr_icon_size_label, row, column, 
+                                    left_center_alignment)
+        column += 1
+        advanced_panel_layout.addWidget(self.secondary_attr_icon_size_spin_box, row, column, 
+                                    left_center_alignment)
+        row += 1
+        column = 0
+        advanced_panel_layout.addWidget(self.background_color_threshold_label, row, column, 
+                                    left_center_alignment)
+        column += 1
+        advanced_panel_layout.addWidget(self.background_color_threshold_spinbox, row, column, 
+                                    left_center_alignment)
+        row += 1
+        column = 0
+        advanced_panel_layout.addWidget(self.palette_selection_label, row, column, 
+                                    left_center_alignment)
+        column += 1
+        advanced_panel_layout.addLayout(palette_layout, row, column, 
+                                    left_center_alignment)
+        row += 1
+        column = 0
+        advanced_panel_layout.addWidget(self.icon_bounding_box_label, row, column, 
+                                    left_center_alignment)
+        column += 1
+        advanced_panel_layout.addWidget(self.icon_bounding_box_combobox, row, column, 
+                                    left_center_alignment)
+        row += 1
+        column = 0
+        advanced_panel_layout.addWidget(self.use_simple_color_replacement, row, column,1,2, 
+                                    left_center_alignment)
+        row += 1
+        column = 0
+        advanced_panel_layout.addWidget(self.allow_overlap_checkbox, row, column, 1, 2, 
+                                    left_top_alignment)
+
         advanced_panel_layout.setColumnStretch(0,0)
         advanced_panel_layout.setColumnStretch(1,0)
         advanced_panel_layout.setColumnStretch(2,10)
@@ -290,7 +358,9 @@ class LayoutDesigner(QtGui.QWidget):
         advanced_panel_layout.setRowStretch(5,0)
         advanced_panel_layout.setRowStretch(6,0)
         advanced_panel_layout.setRowStretch(7,0)
-        advanced_panel_layout.setRowStretch(8,10)
+        advanced_panel_layout.setRowStretch(8,0)
+        advanced_panel_layout.setRowStretch(9,0)
+        advanced_panel_layout.setRowStretch(10,10)
         advanced_panel = QtGui.QWidget()
         advanced_panel.setLayout(advanced_panel_layout)
         return advanced_panel
@@ -356,7 +426,11 @@ class LayoutDesigner(QtGui.QWidget):
     def getColorStripThreshold(self):
         return self.background_color_threshold_spinbox.value()
     def getParentImageResizeReference(self):
-        return "Height" #Make widget for this.
+        return str(self.parent_image_resize_reference.currentText())
     def getParentImageResizeFactor(self):
-        return 42/100 #Make widget for this
-            
+        resize = int(self.product_image_scale_spinbox.value())/100
+        return resize
+    def getAspectRatio(self):
+        width = int(self.final_image_aspect_ratio_input_box_1.value())
+        height = int(self.final_image_aspect_ratio_input_box_2.value())
+        return height, width
