@@ -27,7 +27,7 @@ if __name__ == """__main__""":
 	#data_frame[0].set_value(indices[0],0,(200,255,255,0))
 	#data_frame[0].set_value(indices[0],0,(200,255,255,0))
 	#data_frame[0].set_value(indices[-1],0,(200,255,255,0))
-	data_frame[0].loc[indices[-1]:] = (200,255,255,0)
+	data_frame[0].loc[indices[-1]] = (200,255,255,0)
 
 
 	print np.array(data_frame)

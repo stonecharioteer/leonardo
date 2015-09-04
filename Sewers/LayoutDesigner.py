@@ -355,5 +355,8 @@ class LayoutDesigner(QtGui.QWidget):
         return self.use_simple_color_replacement.isChecked()
     def getColorStripThreshold(self):
         return self.background_color_threshold_spinbox.value()
-
+    def getParentImageResizeReference(self):
+        return "Height" #Make widget for this.
+    def getParentImageResizeFactor(self):
+        return 42 #Make widget for this
             
