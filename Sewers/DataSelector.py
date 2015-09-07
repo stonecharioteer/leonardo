@@ -319,7 +319,7 @@ class DataSelector(QtGui.QWidget):
             check it and declare whether it's valid or not.
             It does it based on:
             1. File headers: 
-                FSN, Category, Primary USP[1-5] Attribute; Primary USP[1-5] Description; Secondary USP[1-5] Attribute; Secondary USP[1-5] Description;
+                FSN, Brand, Category, Primary USP[1-5] Attribute; Primary USP[1-5] Description; Secondary USP[1-5] Attribute; Secondary USP[1-5] Description;
             2. At least 1 row of data.
         """
         #Get the file name.
@@ -333,7 +333,7 @@ class DataSelector(QtGui.QWidget):
                 file_headers = row.keys()
             file_headers.sort()
             required_file_headers = [
-                        "FSN","Category",
+                        "FSN","Brand","Category",
                         "Primary USP-1 Attribute","Primary USP-1 Description Text",
                         "Primary USP-2 Attribute","Primary USP-2 Description Text",
                         "Primary USP-3 Attribute","Primary USP-3 Description Text",

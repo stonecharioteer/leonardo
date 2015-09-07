@@ -49,6 +49,11 @@ class Splinter(QtCore.QThread):
                     counter+=1
                     self.sendMessage.emit("Starting to process %d of %d FSNs."%(counter,total))
                     fsn = row["FSN"]
+                    if "Brand" in row.keys():
+                        brand = row["Brand"]
+                    else:
+                        print "No brand for %s (%s)."%(fsn,category)
+                        brand = None
                     category = row["Category"]
                     primary_attribute_data = []
                     primary_attributes = []
@@ -89,7 +94,7 @@ class Splinter(QtCore.QThread):
                                     description_text = " "
                             secondary_attribute_data.append({"Attribute":attribute_name,"Description Text":description_text})
                     self.sendMessage.emit("Preparing app image for %d of %d FSNs."%(counter,total))
-                    image_name = self.prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_data, self.parent_image_position, self.icon_positioning, self.icon_palette, self.allow_overlap, self.background_image_path, self.primary_attribute_relative_size, self.secondary_attribute_relative_size, self.bounding_box, self.use_simple_bg_color_strip, self.bg_color_strip_threshold, self.output_location)
+                    image_name = self.prepareAppImage(fsn, brand, category, primary_attribute_data, secondary_attribute_data, self.parent_image_position, self.icon_positioning, self.icon_palette, self.allow_overlap, self.background_image_path, self.primary_attribute_relative_size, self.secondary_attribute_relative_size, self.bounding_box, self.use_simple_bg_color_strip, self.bg_color_strip_threshold, self.output_location)
                     eta = Katana.getETA(start_time, counter, total)
                     images_list.append(image_name)
                     if counter < total:
@@ -104,7 +109,7 @@ class Splinter(QtCore.QThread):
                     self.sendMessage.emit("Completed %d in %ss." %(counter, datetime.datetime.now() - start_time))
                 self.allow_run = False
 
-    def prepareAppImage(self, fsn, category, primary_attribute_data, secondary_attribute_data, parent_image_positioning, icon_positioning, icon_palette, allow_overlap, background_image_path, primary_attribute_relative_size, secondary_attribute_relative_size, bounding_box, use_simple_bg_color_strip, bg_color_strip_threshold, output_location):
+    def prepareAppImage(self, fsn, brand, category, primary_attribute_data, secondary_attribute_data, parent_image_positioning, icon_positioning, icon_palette, allow_overlap, background_image_path, primary_attribute_relative_size, secondary_attribute_relative_size, bounding_box, use_simple_bg_color_strip, bg_color_strip_threshold, output_location):
         #moved here from Katana.
         """This method takes one fsn set, and prepares the app-image.
         ALGORITHM:
@@ -173,7 +178,7 @@ class Splinter(QtCore.QThread):
             #Later, this should be extended to remove any background color.
             message = "Stripping parent image background using simple strip algorithm for %s."%fsn
             self.sendMessage.emit(message)
-            parent_image = Katana.replaceColorInImage(resized_parent_image, (255,255,255,255),(0,0,0,0), bg_color_strip_threshold)
+            parent_image = Katana.replaceColorInImage(resized_parent_image, (255,255,255,255), (0,0,0,0), bg_color_strip_threshold)
         else:
             #The complex movement algorithm takes thing by strokes.
             #First, it identifies the background colour, reading the
@@ -212,11 +217,15 @@ class Splinter(QtCore.QThread):
                     message = "Encountered a problem while pasting the icon on base image at %s for %s." %(icon["Position"],fsn)
                 self.sendMessage.emit(message)
                 raise
-        #Paste the FK icon.
-        fk_icon = Katana.getFlipkartIconImage()
-        base_image.paste(fk_icon,(int((base_image.size[0]-fk_icon.size[0])-fk_icon.size[0]*0.05),int(fk_icon.size[1]*0.05)),fk_icon) #Place the FK icon on the top-right corner.
-        brand_icon = Katana.getBrandImage(fsn)
-        base_image.paste(brand_icon,(int(brand_icon.size[0]*0.03),int(brand_icon.size[1]*0.2)),brand_icon) #Place the FK icon on the top-right corner.
+        #Paste the FK and Brand Icon
+        #Place the FK icon on the top-left corner.
+        fk_brand_icon =Katana.getMergedFlipkartBrandImage(brand)
+        base_image.paste(fk_brand_icon,(int(fk_brand_icon.size[0]*0.05),int(fk_brand_icon.size[1]*0.05)),fk_brand_icon)
+
+        #fk_icon = Katana.getFlipkartIconImage()
+        #base_image.paste(fk_icon,(int((base_image.size[0]-fk_icon.size[0])-fk_icon.size[0]*0.05),int(fk_icon.size[1]*0.05)),fk_icon) #Place the FK icon on the top-right corner.
+        #brand_icon = Katana.getBrandImage(fsn)
+        #base_image.paste(brand_icon,(int(brand_icon.size[0]*0.03),int(brand_icon.size[1]*0.2)),brand_icon) 
 
         base_image = base_image.convert("RGB")
         image_path = os.path.join("Output",fsn+"_app_image.png")

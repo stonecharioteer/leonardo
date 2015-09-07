@@ -75,7 +75,7 @@ def getMergedFlipkartBrandImage(brand=None):
         line_bottom = (int(line_bottom_x), int(line_bottom_y))
         line_path = [line_top, line_bottom]
         line_thickness = int(padding_factor/30*(flipkart_image.size[0]+brand_image.size[0]))
-        final_image_drawing_handle.line(line_path, (0,0,0,150), line_thickness)
+        final_image_drawing_handle.line(line_path, (0,0,0,200), line_thickness)
         final_image.save("FK_"+brand+".png")
 
 
@@ -538,6 +538,8 @@ def getResizedImage(image_to_resize,resize_factor,resize_by,base_image_size):
         resized_height = resize_factor*base_image_height
         resized_width = image_to_resize_original_width*resized_height/image_to_resize_original_height
     resized_dimensions = (int(resized_width),int(resized_height))
+    if (resized_height > image_to_resize_original_height) or (resized_width > image_to_resize_original_width):
+        print "Requested image is being stretched. Use caution when doing this."
     resized_image = image_to_resize.resize(resized_dimensions)
     return resized_image
 
@@ -602,7 +604,11 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     import textwrap
     clearance_factor_for_text = 2.0
     font_resize_factor = 0.3
-    text_as_paragraphs = textwrap.wrap(description_text,width=10)
+    text_lengths = [len(word) for word in description_text.split(" ")]
+    max_text_length = max(text_lengths)
+    wrap_width = max_text_length if max_text_length > 10 else 10
+
+    text_as_paragraphs = textwrap.wrap(description_text, width=wrap_width)
     #get an image object using the icon path, and resize it to the required dimensions with respect to the height of the base image.
     #Don't strip for now.
     #icon_image = getStrippedImage(getResizedImage(Image.open(icon_path).convert("RGBA"),icon_relative_size,"height",base_image_size), threshold=30)
@@ -617,7 +623,7 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     font_size = 72 #Set default font size for now.
     font = ImageFont.truetype(os.path.join("essentials","RionaSans-Regular.ttf"), font_size)
     
-    current_h, pad = 0, 10
+    current_h, pad = 0, 10 #this is the padding.
     #Ref: http://stackoverflow.com/questions/1970807/center-middle-align-text-with-pil
     for line in text_as_paragraphs:
         w, h = draw_text_handle.textsize(line, font=font)
