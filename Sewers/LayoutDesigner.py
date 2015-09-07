@@ -208,7 +208,6 @@ class LayoutDesigner(QtGui.QWidget):
         palettes_list = ["Black","Based on Input Color","From Input File"]
         self.palette_selection_combobox.addItems(palettes_list)
         self.palette_selection_button = QColorButton()
-        print self.palette_selection_button.size()
         self.palette_selection_combobox.setMinimumHeight(self.palette_selection_button.size().height())
         palette_layout = QtGui.QHBoxLayout()
         palette_layout.addWidget(self.palette_selection_combobox,0,QtCore.Qt.AlignRight)
@@ -272,6 +271,8 @@ class LayoutDesigner(QtGui.QWidget):
         self.aspect_ratio_widget_layout.addWidget(self.final_image_aspect_ratio_input_box_2,0,
                                             QtCore.Qt.AlignLeft)
         self.aspect_ratio_widget_layout.addStretch(10)
+        #Checkbox to allow icons without text.
+        self.allow_textless_icons_checkbox = QtGui.QCheckBox("Allow Icons Without Text")
         #Layout
         left_center_alignment = QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter
         left_top_alignment = QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop
@@ -345,22 +346,18 @@ class LayoutDesigner(QtGui.QWidget):
         row += 1
         column = 0
         advanced_panel_layout.addWidget(self.allow_overlap_checkbox, row, column, 1, 2, 
+                                    left_center_alignment)
+        row += 1
+        column = 0
+        advanced_panel_layout.addWidget(self.allow_textless_icons_checkbox, row, column, 1, 2, 
                                     left_top_alignment)
 
         advanced_panel_layout.setColumnStretch(0,0)
         advanced_panel_layout.setColumnStretch(1,0)
         advanced_panel_layout.setColumnStretch(2,10)
-        advanced_panel_layout.setRowStretch(0,0)
-        advanced_panel_layout.setRowStretch(1,0)
-        advanced_panel_layout.setRowStretch(2,0)
-        advanced_panel_layout.setRowStretch(3,0)
-        advanced_panel_layout.setRowStretch(4,0)
-        advanced_panel_layout.setRowStretch(5,0)
-        advanced_panel_layout.setRowStretch(6,0)
-        advanced_panel_layout.setRowStretch(7,0)
-        advanced_panel_layout.setRowStretch(8,0)
-        advanced_panel_layout.setRowStretch(9,0)
-        advanced_panel_layout.setRowStretch(10,10)
+        for row_number in range(row):
+            advanced_panel_layout.setRowStretch(row_number,0)
+        advanced_panel_layout.setRowStretch(row,10)
         advanced_panel = QtGui.QWidget()
         advanced_panel.setLayout(advanced_panel_layout)
         return advanced_panel
@@ -434,3 +431,5 @@ class LayoutDesigner(QtGui.QWidget):
         width = int(self.final_image_aspect_ratio_input_box_1.value())
         height = int(self.final_image_aspect_ratio_input_box_2.value())
         return height, width
+    def allowTextlessIcons(self):
+        return self.allow_textless_icons_checkbox.isChecked()

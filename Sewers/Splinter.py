@@ -31,6 +31,7 @@ class Splinter(QtCore.QThread):
         self.bg_color_strip_threshold = 20
         self.parent_image_resize_reference = "Height"
         self.parent_image_resize_factor = 42
+        self.allow_textless_icons = False
         self.output_location = None
 
         if not self.isRunning():
@@ -64,13 +65,29 @@ class Splinter(QtCore.QThread):
                     #print primary_attributes_count
                     for i in range(int(primary_attributes_count)):
                         index = i+1
-                        primary_attribute_data.append({"Attribute":row["Primary USP-%d Attribute"%index],"Description Text":row["Primary USP-%d Description Text"%index]})
+                        attribute_name = row["Primary USP-%d Attribute"%index].strip()
+                        if len(attribute_name) != 0:
+                            description_text = row["Primary USP-%d Description Text"%index].strip()
+                            if (len(description_text) == 0):
+                                if(not self.allow_textless_icons):
+                                    description_text = attribute_name
+                                else:
+                                    description_text = " "
+                            primary_attribute_data.append({"Attribute":attribute_name,"Description Text":description_text})
                     secondary_attributes_count = len(secondary_attributes)/2
                     secondary_attribute_data = [] 
                     #print secondary_attributes_count
                     for i in range(int(secondary_attributes_count)):
                         index = i+1
-                        secondary_attribute_data.append({"Attribute":row["Secondary USP-%d Attribute"%index],"Description Text":row["Secondary USP-%d Description Text"%index]})
+                        attribute_name = row["Secondary USP-%d Attribute"%index].strip()
+                        if len(attribute_name) != 0:
+                            description_text = row["Secondary USP-%d Description Text"%index].strip()
+                            if (len(description_text) == 0):
+                                if(not self.allow_textless_icons):
+                                    description_text = attribute_name
+                                else:
+                                    description_text = " "
+                            secondary_attribute_data.append({"Attribute":attribute_name,"Description Text":description_text})
                     self.sendMessage.emit("Preparing app image for %d of %d FSNs."%(counter,total))
                     image_name = self.prepareAppImage(fsn, category, primary_attribute_data, secondary_attribute_data, self.parent_image_position, self.icon_positioning, self.icon_palette, self.allow_overlap, self.background_image_path, self.primary_attribute_relative_size, self.secondary_attribute_relative_size, self.bounding_box, self.use_simple_bg_color_strip, self.bg_color_strip_threshold, self.output_location)
                     eta = Katana.getETA(start_time, counter, total)
@@ -197,7 +214,10 @@ class Splinter(QtCore.QThread):
                 raise
         #Paste the FK icon.
         fk_icon = Katana.getFlipkartIconImage()
-        base_image.paste(fk_icon,((base_image.size[0]-fk_icon.size[0]),0),fk_icon) #Place the FK icon on the top-right corner.
+        base_image.paste(fk_icon,(int((base_image.size[0]-fk_icon.size[0])-fk_icon.size[0]*0.05),int(fk_icon.size[1]*0.05)),fk_icon) #Place the FK icon on the top-right corner.
+        brand_icon = Katana.getBrandImage(fsn)
+        base_image.paste(brand_icon,(int(brand_icon.size[0]*0.03),int(brand_icon.size[1]*0.2)),brand_icon) #Place the FK icon on the top-right corner.
+
         base_image = base_image.convert("RGB")
         image_path = os.path.join("Output",fsn+"_app_image.png")
         base_image.save(image_path)

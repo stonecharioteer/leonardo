@@ -106,6 +106,7 @@ class Leonardo(Turtle):
         self.hamato_yoshi.bg_color_strip_threshold = self.layout_designer_widget.getColorStripThreshold()
         self.hamato_yoshi.parent_image_resize_reference = self.layout_designer_widget.getParentImageResizeReference()
         self.hamato_yoshi.parent_image_resize_factor = self.layout_designer_widget.getParentImageResizeFactor()
+        self.hamato_yoshi.allow_textless_icons = self.layout_designer_widget.allowTextlessIcons()
         self.hamato_yoshi.output_location = os.getcwd()
         self.hamato_yoshi.allow_run = True
     
