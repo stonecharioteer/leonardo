@@ -12,7 +12,8 @@ class LayoutDesigner(QtGui.QWidget):
         super(LayoutDesigner,self).__init__()
         self.createUI()
         self.mapEvents()
-        self.primary_attr_icon_size_spin_box.setValue(7)
+        self.primary_attr_icon_size_spin_box.setValue(8)
+        self.secondary_attr_icon_size_spin_box.setValue(3)
 
     def createUI(self):
         #Modularized.
@@ -230,6 +231,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.icon_bounding_box_combobox.addItems(["None","Circle","Rectangle","Square"])
         #For changing color replacement algorithm.
         self.use_simple_color_replacement = QtGui.QCheckBox("Use a Simple Colour Extraction Method to remove Parent Image Background.")
+        self.use_simple_color_replacement.setChecked(True)
         self.use_simple_color_replacement.setToolTip("If selected, the code just finds the likely background color and removes it from the entire message.\nThis method saves a large amount of runtime.\nThis is a risky method if the product image has similar colors, or if the image quality is dodgy.\nExercise with caution.")
         #For changing background color replacement algorithm's threshold.
         self.background_color_threshold_label = QtGui.QLabel("Threshold for Background Color Extraction:")

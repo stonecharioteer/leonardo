@@ -257,8 +257,7 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                 #icons are to be arranged in arcs.
                 primary_radius_multiplier = 0.78
                 secondary_radius_multiplier = 0.7
-                theta_range = (0,(math.pi*0.5)) #~0deg and ~90deg.
-                primary_theta_range = (175*math.pi/180, 410*math.pi/180)
+                primary_theta_range = (getRadians(0), getRadians(180))
                 primary_arc_center = (width_base/2-240, height_base/2-height_parent/2+100)
                 primary_plot_points_required = len(primary_icons)
                 #parent_extreme_point = (x_top_left_parent+width_parent, y_top_left_parent+height_parent)
@@ -267,7 +266,7 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                 primary_radius = primary_radius_multiplier*diagonal_length
                 primary_icon_positions = getPointsOnArc(primary_arc_center, primary_radius, primary_plot_points_required, primary_theta_range)
                 
-                secondary_theta_range = (355*math.pi/180, (360+230)*math.pi/180)
+                secondary_theta_range = (getRadians(180), getRadians(360))
                 secondary_plot_points_required = len(secondary_icons)
                 secondary_arc_center = (width_base/2-260, height_base/2+height_parent/2-150)
                 secondary_radius = secondary_radius_multiplier*diagonal_length
@@ -322,14 +321,36 @@ def getPointsOnCircle(origin, radius, divisions):
 def getPointOnCircle(origin, radius, theta):
     return (int(origin[0]+radius*math.cos(theta)),int(origin[1]+radius*math.sin(theta)))
 
+def getDegreeFromRadians(theta):
+    return theta*180/math.pi
+
 def getPointsOnArc(origin, radius, divisions, theta_range):
     theta_max = max(theta_range)
-    theta = min(theta_range)
-    theta_step = ((theta_max-theta)/divisions)
-    points = []
-    while (theta <= theta_max):
-        points.append(getPointOnCircle(origin, radius, theta))
-        theta += theta_step
+    theta_min = min(theta_range)
+    theta_step = (theta_max-theta_min)/divisions
+    theta_diff = theta_max-theta_min
+    print "%d Divisions"%divisions
+    print "Max angle: %f, Min: %f"% (getDegreeFromRadians(theta_max), getDegreeFromRadians(theta_min) )
+    if divisions == 1:
+        thetas = [0.5*theta_diff+theta_min]
+    elif divisions == 2:
+        thetas = [0.25*theta_diff+theta_min, 0.75*theta_diff+theta_min]
+    elif divisions == 3:
+        thetas = [0.25*theta_diff+theta_min, 0.5*theta_diff+theta_min, 0.75*theta_diff+theta_min]
+    elif divisions == 4:
+        thetas = [0*theta_diff+theta_min, 0.25*theta_diff+theta_min, 0.75*theta_diff+theta_min, 1.0*theta_diff+theta_min]
+    elif divisions == 5:
+        thetas = [0*theta_diff+theta_min, 0.25*theta_diff+theta_min, 0.5*theta_diff+theta_min, 0.75*theta_diff+theta_min, 1.0*theta_diff+theta_min]
+    else:
+        #old method.
+        theta = theta_min
+        thetas = []
+        while (theta <= theta_max):
+            thetas.append(theta)
+            theta += theta_step
+    
+    print [getDegreeFromRadians(theta) for theta in thetas]
+    points = [getPointOnCircle(origin, radius, theta) for theta in thetas]
     return points
 
 def getPointOnCircleCartesian(origin_x,origin_y,radius,ref_x=None,ref_y=None):
@@ -538,8 +559,8 @@ def getResizedImage(image_to_resize,resize_factor,resize_by,base_image_size):
         resized_height = resize_factor*base_image_height
         resized_width = image_to_resize_original_width*resized_height/image_to_resize_original_height
     resized_dimensions = (int(resized_width),int(resized_height))
-    if (resized_height > image_to_resize_original_height) or (resized_width > image_to_resize_original_width):
-        print "Requested image is being stretched. Use caution when doing this."
+    #if (resized_height > image_to_resize_original_height) or (resized_width > image_to_resize_original_width):
+    #    print "Requested image is being stretched. Use caution when doing this."
     resized_image = image_to_resize.resize(resized_dimensions)
     return resized_image
 
@@ -590,10 +611,10 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size):
             icon_with_text = getIconImage(na_icon_path, attribute["Description Text"], icon_relative_size, base_image_size)
             attribute.update({"Icon": icon_with_text})
             attributes_without_icons.append(attribute["Attribute"])
-    if (len(attributes_without_icons) > 0):
-        print "The following %s attributes don't have icons. Recommend making them before progressing." %category
-        print attributes_without_icons
-        print "Looking in the %s folder."%image_search_path
+    #if (len(attributes_without_icons) > 0):
+    #    print "The following %s attributes don't have icons. Recommend making them before progressing." %category
+    #    print attributes_without_icons
+    #    print "Looking in the %s folder."%image_search_path
     return attribute_data
 
 def checkIcon(attribute,description):
