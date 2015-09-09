@@ -110,7 +110,6 @@ class Splinter(QtCore.QThread):
                 self.allow_run = False
 
     def prepareAppImage(self, fsn, brand, category, primary_attribute_data, secondary_attribute_data, parent_image_positioning, icon_positioning, icon_palette, allow_overlap, background_image_path, primary_attribute_relative_size, secondary_attribute_relative_size, bounding_box, use_simple_bg_color_strip, bg_color_strip_threshold, output_location):
-        #moved here from Katana.
         """This method takes one fsn set, and prepares the app-image.
         ALGORITHM:
         1. If the background image is specified, 
@@ -170,7 +169,19 @@ class Splinter(QtCore.QThread):
         self.sendMessage.emit(message)
         original_parent_image = Image.open(parent_image_path).convert("RGBA")
         #resized_parent_image = Katana.getResizedImage(original_parent_image, self.parent_image_resize_factor, self.parent_image_resize_reference, base_image.size)
-        resized_parent_image = Katana.getResizedImage(original_parent_image, self.parent_image_resize_factor, self.parent_image_resize_reference, base_image.size)
+        #Check the resize reference for the smartfit option. Create use a local parent_image_resize_reference value to control this.
+        if self.parent_image_resize_reference == "Smart Fit":
+            parent_image_resize_reference = "Height" if original_parent_image.size[1]>original_parent_image.size[0] else "Width"
+            if parent_image_resize_reference == "Width":
+                parent_image_resize_factor = 1.5*self.parent_image_resize_factor
+            else:
+                parent_image_resize_factor = self.parent_image_resize_factor
+        else:
+            parent_image_resize_reference = self.self.parent_image_resize_reference
+        
+
+        print "Smart Fit resulted in %s selection."%parent_image_resize_reference
+        resized_parent_image = Katana.getResizedImage(original_parent_image, parent_image_resize_factor, parent_image_resize_reference, base_image.size)
         #Use the selected background colour strip algorithm 
         #to strip the parent image of its colour.
         if use_simple_bg_color_strip:

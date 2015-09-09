@@ -13,7 +13,8 @@ class LayoutDesigner(QtGui.QWidget):
         self.createUI()
         self.mapEvents()
         self.primary_attr_icon_size_spin_box.setValue(8)
-        self.secondary_attr_icon_size_spin_box.setValue(3)
+        self.secondary_attr_icon_size_spin_box.setValue(8)
+        self.parent_image_resize_reference.setCurrentIndex(2)
 
     def createUI(self):
         #Modularized.
@@ -253,7 +254,7 @@ class LayoutDesigner(QtGui.QWidget):
         #Parent Image resize factor and reference controls.
         self.parent_image_resize_reference_instruction = QtGui.QLabel("Resize Parent Image By:")
         self.parent_image_resize_reference = QtGui.QComboBox()
-        self.parent_image_resize_reference.addItems(["Height","Width"])
+        self.parent_image_resize_reference.addItems(["Height","Width","Smart Fit"])
         self.parent_image_resize_reference.setToolTip("Choose whether to resize the product image with respect to the height or the width of the base image.")
         #Aspect Ratio controls.
         self.final_image_aspect_ratio_instruction = QtGui.QLabel("Aspect Ratio:")

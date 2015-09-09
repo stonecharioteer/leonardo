@@ -10,7 +10,7 @@ import PIL
 
 def getRadians(degrees):
     import math
-    if (degrees == 0) or (degrees == 360):
+    if (degrees == 0):
         radians = 0.0
     elif degrees > 0:
         radians = degrees*math.pi/180.0
@@ -84,6 +84,7 @@ def getMergedFlipkartBrandImage(brand=None):
 def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, icon_arrangement,ordering,parent_image_positioning):
     #This is the way I'm getting icon positions now.
     import random, os, math
+    #print "Parent Image is at: ", parent_image_positioning
     #First, store the parameters in an easily-readable manner.
     #Parent image dimensions
     width_parent, height_parent = parent_image.size
@@ -252,12 +253,13 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
             else:
                 print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
         elif parent_image_positioning == (0.5, 0.5):
-            #parent image is placed at the top-right.
+            #parent image is placed at the center-middle.
             if icon_arrangement == "Circular":
                 #icons are to be arranged in arcs.
+                #print "Center Position!"
                 primary_radius_multiplier = 0.78
                 secondary_radius_multiplier = 0.7
-                primary_theta_range = (getRadians(0), getRadians(180))
+                primary_theta_range = (getRadians(180), getRadians(360))
                 primary_arc_center = (width_base/2-240, height_base/2-height_parent/2+100)
                 primary_plot_points_required = len(primary_icons)
                 #parent_extreme_point = (x_top_left_parent+width_parent, y_top_left_parent+height_parent)
@@ -266,7 +268,7 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                 primary_radius = primary_radius_multiplier*diagonal_length
                 primary_icon_positions = getPointsOnArc(primary_arc_center, primary_radius, primary_plot_points_required, primary_theta_range)
                 
-                secondary_theta_range = (getRadians(180), getRadians(360))
+                secondary_theta_range = (getRadians(0), getRadians(180))
                 secondary_plot_points_required = len(secondary_icons)
                 secondary_arc_center = (width_base/2-260, height_base/2+height_parent/2-150)
                 secondary_radius = secondary_radius_multiplier*diagonal_length
@@ -329,16 +331,16 @@ def getPointsOnArc(origin, radius, divisions, theta_range):
     theta_min = min(theta_range)
     theta_step = (theta_max-theta_min)/divisions
     theta_diff = theta_max-theta_min
-    print "%d Divisions"%divisions
-    print "Max angle: %f, Min: %f"% (getDegreeFromRadians(theta_max), getDegreeFromRadians(theta_min) )
+    #print "%d Divisions"%divisions
+    #print "Max angle: %f, Min: %f"% (getDegreeFromRadians(theta_max), getDegreeFromRadians(theta_min) )
     if divisions == 1:
         thetas = [0.5*theta_diff+theta_min]
     elif divisions == 2:
         thetas = [0.25*theta_diff+theta_min, 0.75*theta_diff+theta_min]
     elif divisions == 3:
-        thetas = [0.25*theta_diff+theta_min, 0.5*theta_diff+theta_min, 0.75*theta_diff+theta_min]
+        thetas = [0.15*theta_diff+theta_min, 0.5*theta_diff+theta_min, 0.85*theta_diff+theta_min]
     elif divisions == 4:
-        thetas = [0*theta_diff+theta_min, 0.25*theta_diff+theta_min, 0.75*theta_diff+theta_min, 1.0*theta_diff+theta_min]
+        thetas = [0*theta_diff+theta_min, 0.33*theta_diff+theta_min, 0.66*theta_diff+theta_min, 1.0*theta_diff+theta_min]
     elif divisions == 5:
         thetas = [0*theta_diff+theta_min, 0.25*theta_diff+theta_min, 0.5*theta_diff+theta_min, 0.75*theta_diff+theta_min, 1.0*theta_diff+theta_min]
     else:
@@ -349,7 +351,7 @@ def getPointsOnArc(origin, radius, divisions, theta_range):
             thetas.append(theta)
             theta += theta_step
     
-    print [getDegreeFromRadians(theta) for theta in thetas]
+    #print [getDegreeFromRadians(theta) for theta in thetas]
     points = [getPointOnCircle(origin, radius, theta) for theta in thetas]
     return points
 
