@@ -53,8 +53,7 @@ class LayoutDesigner(QtGui.QWidget):
         return preview_group_box
 
     def createSettingsWidget(self):
-
-        #Create the settings panels. Use a QToolBox
+        #Create the settings panels.
         self.settings_group_box = QtGui.QGroupBox("Settings")
 
         self.settings_tool_box = QtGui.QToolBox()
@@ -249,8 +248,9 @@ class LayoutDesigner(QtGui.QWidget):
         self.image_margin_spinbox = QtGui.QDoubleSpinBox()
         self.image_margin_spinbox.setRange(0.0, 10.0)
         self.image_margin_spinbox.setValue(5.0)
-        self.image_margin_spinbox.setSuffix("px")
-        self.image_margin_spinbox.setToolTip("Select a margin, in pixels, for the background image.\nAll items, except the Flipkart Logo, will be placed taking the margin into account.")
+        self.image_margin_spinbox.setSingleStep(0.05)
+        self.image_margin_spinbox.setSuffix("%")
+        self.image_margin_spinbox.setToolTip("Select a margin, as a percentage of the background, for the background image.")
         #Parent Image resize factor and reference controls.
         self.parent_image_resize_reference_instruction = QtGui.QLabel("Resize Parent Image By:")
         self.parent_image_resize_reference = QtGui.QComboBox()
@@ -408,31 +408,46 @@ class LayoutDesigner(QtGui.QWidget):
         else:
             position = "Rectangular"
         return position
+        
     def getIconPalette(self):
         return "Black" #Fix this later.
+
     def getOverlap(self):
         return self.allow_overlap_checkbox.isChecked()
+
     def getBackgroundImage(self):
         self.changeBackground()
         return self.current_background
+
     def getIconBoundingBox(self):
         return str(self.icon_bounding_box_combobox.currentText())
+
     def getPrimaryAttrRelativeSize(self):
         return (self.primary_attr_icon_size_spin_box.value()/100)
+
     def getSecondaryAttrRelativeSize(self):
         return (self.secondary_attr_icon_size_spin_box.value()/100)
+
     def useSimpleColorStripAlgorithm(self):
         return self.use_simple_color_replacement.isChecked()
+
     def getColorStripThreshold(self):
         return self.background_color_threshold_spinbox.value()
+
     def getParentImageResizeReference(self):
         return str(self.parent_image_resize_reference.currentText())
+
     def getParentImageResizeFactor(self):
         resize = int(self.product_image_scale_spinbox.value())/100
         return resize
+
     def getAspectRatio(self):
         width = int(self.final_image_aspect_ratio_input_box_1.value())
         height = int(self.final_image_aspect_ratio_input_box_2.value())
         return height, width
+
     def allowTextlessIcons(self):
         return self.allow_textless_icons_checkbox.isChecked()
+
+    def getMargin(self):
+         return (self.image_margin_spinbox.value()/100)

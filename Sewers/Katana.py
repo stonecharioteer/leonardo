@@ -18,6 +18,10 @@ def getRadians(degrees):
         radians = (360-degrees)*math.pi/180
     return radians
 
+def getBaseImage():
+    from PIL import Image
+    return Image.new("RGBA",(1800,3200),(0,0,0,0))
+
 def getBackgroundImage(background_path):
     import random, os
     from PIL import Image
@@ -84,7 +88,7 @@ def getMergedFlipkartBrandImage(brand=None):
 def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, icon_arrangement,ordering,parent_image_positioning):
     #This is the way I'm getting icon positions now.
     import random, os, math
-    #print "Parent Image is at: ", parent_image_positioning
+    print "Parent Image is at: ", parent_image_positioning
     #First, store the parameters in an easily-readable manner.
     #Parent image dimensions
     width_parent, height_parent = parent_image.size
@@ -109,34 +113,31 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                     #Validated.
                     primary_radius_multiplier = 0.65
                     secondary_radius_multiplier = 1.05
-                    theta_range = ((0),(math.pi*0.5)) #~0deg and ~90deg.
-                    primary_theta_range = (theta_range[0]-25*math.pi/180,theta_range[1]+25*math.pi/180)
+                    primary_theta_range = (getRadians(0),getRadians(90))
                     primary_arc_center = (x_top_left_parent, y_center_parent)
-                    secondary_theta_range = (theta_range[0]+45*math.pi/180,theta_range[1]+15*math.pi/180)
+                    secondary_theta_range = (getRadians(0),getRadians(90))
                 elif parent_image_positioning == (1.0,0.0):
                     #Validated.
                     primary_radius_multiplier = 0.65
                     secondary_radius_multiplier = 1.0
-                    theta_range = ((math.pi*0.5),(math.pi)) #~90deg and ~180deg.
-                    primary_theta_range = (theta_range[0]+10*math.pi/180,theta_range[1]+45*math.pi/180)
+                    primary_theta_range = (getRadians(90),getRadians(180))
                     primary_arc_center = (x_center_parent, y_center_parent)
-                    secondary_theta_range = (theta_range[0]+2*math.pi/180,theta_range[1]-25*math.pi/180)
+                    secondary_theta_range = (getRadians(90),getRadians(180))
                 elif parent_image_positioning == (0.0,1.0):
                     #Validated.
                     primary_radius_multiplier = 0.76
                     secondary_radius_multiplier = 1.15
-                    theta_range = ((math.pi*1.5),(math.pi*2.0)) #270deg and ~360deg.
-                    primary_theta_range = (theta_range[0],theta_range[1]+20*math.pi/180)
+                    primary_theta_range = (getRadians(270),getRadians(360))
                     primary_arc_center = (x_top_left_parent, y_center_parent)
-                    secondary_theta_range = (theta_range[0]-2*math.pi/180,theta_range[1]-38*math.pi/180)
+                    secondary_theta_range = (getRadians(270),getRadians(360))
                 elif parent_image_positioning == (1.0, 1.0):
                     #Validated.
                     primary_radius_multiplier = 0.95
                     secondary_radius_multiplier = 1.25
                     theta_range = ((math.pi),(math.pi*1.5)) #180deg and ~270deg.
-                    primary_theta_range = (theta_range[0]-5*math.pi/180,theta_range[1]+1*math.pi/180)
+                    primary_theta_range = (getRadians(180),getRadians(270))
                     primary_arc_center = (x_top_left_parent+width_parent, y_center_parent)
-                    secondary_theta_range = (theta_range[0]+33*math.pi/180,theta_range[1]-7*math.pi/180)
+                    secondary_theta_range = (getRadians(180),getRadians(270))
                 
                 primary_plot_points_required = len(primary_icons)
                 #parent_extreme_point = (x_top_left_parent+width_parent, y_top_left_parent+height_parent)
@@ -184,8 +185,8 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                     primary_arc_center = ((width_base*0.35), (height_base*0.4))
                     secondary_arc_center = ((width_base*0.35), (height_base*0.25))
                     #Angles
-                    primary_theta_range = (0, getRadians(225))
-                    secondary_theta_range = (getRadians(65), getRadians(125))
+                    primary_theta_range = (getRadians(0), getRadians(180))
+                    secondary_theta_range = (getRadians(0), getRadians(180))
                 elif parent_image_positioning == (0.5, 1.0):
                     #Validated and perfected.
                     #Not very happy with this though.
@@ -196,31 +197,30 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                     primary_arc_center = ((width_base*0.35), (height_base*0.6))
                     secondary_arc_center = ((width_base*0.35), (height_base*0.75))
                     #Angles
-                    theta_range = (getRadians(245), getRadians(270+25))
-                    primary_theta_range = (getRadians(270-65), getRadians(270+95))
-                    secondary_theta_range = (getRadians(270-24), getRadians(270+35))
+                    primary_theta_range = (getRadians(180), getRadians(360))
+                    secondary_theta_range = (getRadians(180), getRadians(360))
                 elif parent_image_positioning == (0.0,0.5):
                     #Validated and perfected.
                     #parent image is placed at the left-middle.
                     primary_radius_multiplier = 1.4
                     secondary_radius_multiplier = 1.8
-                    theta_range = (getRadians(300),getRadians(270+170))
                     #Arc center positions
                     primary_arc_center = (-x_center_parent, y_center_parent)
                     secondary_arc_center = primary_arc_center
                     #Angles
-                    primary_theta_range = (getRadians(300),getRadians(270+170))
-                    secondary_theta_range = (getRadians(300),getRadians(370))
+                    primary_theta_range = (getRadians(270),getRadians(360+90))
+                    secondary_theta_range = (getRadians(270),getRadians(360+90))
                 elif parent_image_positioning == (1.0, 0.5):
                     #Needs tweaking.
                     #parent image is placed at the right-middle
-                    primary_radius_multiplier = 1.4
-                    secondary_radius_multiplier = 1.8
-                    theta_range = (getRadians(90),getRadians(270)) #180deg and ~270deg.
-                    primary_theta_range = (getRadians(90-10),getRadians(270-10))
-                    primary_arc_center = (2*width_base-x_center_parent, y_center_parent)
-                    secondary_theta_range = (getRadians(90-40),getRadians(270-40))
+                    primary_radius_multiplier = 0.6
+                    secondary_radius_multiplier = 1.0
+                    #Arc center positions
+                    primary_arc_center = (x_center_parent, y_center_parent)
                     secondary_arc_center = primary_arc_center
+                    #Angles
+                    primary_theta_range = (getRadians(90),getRadians(270))
+                    secondary_theta_range = (getRadians(90),getRadians(270))
                 
                 primary_plot_points_required = len(primary_icons)
                 diagonal_length = width_base/2 #This isn't the diagonal perse. It's the maximum allowable radius.

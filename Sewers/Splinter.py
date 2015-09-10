@@ -32,6 +32,7 @@ class Splinter(QtCore.QThread):
         self.parent_image_resize_reference = "Height"
         self.parent_image_resize_factor = 42
         self.allow_textless_icons = False
+        self.margin = 0.05
         self.output_location = None
 
         if not self.isRunning():
@@ -156,7 +157,8 @@ class Splinter(QtCore.QThread):
         #Get the background image.
         message = "Getting background image for %s."%fsn
         self.sendMessage.emit(message)
-        base_image = Katana.getBackgroundImage(background_image_path)
+        background_image = Katana.getBackgroundImage(background_image_path)
+        base_image = Katana.getBaseImage()
         #Get the primary and secondary attribute icons.
         message = "Getting primary attribute data image for %s."%fsn
         self.sendMessage.emit(message)
@@ -178,9 +180,7 @@ class Splinter(QtCore.QThread):
                 parent_image_resize_factor = self.parent_image_resize_factor
         else:
             parent_image_resize_reference = self.self.parent_image_resize_reference
-        
-
-        print "Smart Fit resulted in %s selection."%parent_image_resize_reference
+        #print "Smart Fit resulted in %s selection."%parent_image_resize_reference
         resized_parent_image = Katana.getResizedImage(original_parent_image, parent_image_resize_factor, parent_image_resize_reference, base_image.size)
         #Use the selected background colour strip algorithm 
         #to strip the parent image of its colour.
@@ -237,10 +237,20 @@ class Splinter(QtCore.QThread):
         #base_image.paste(fk_icon,(int((base_image.size[0]-fk_icon.size[0])-fk_icon.size[0]*0.05),int(fk_icon.size[1]*0.05)),fk_icon) #Place the FK icon on the top-right corner.
         #brand_icon = Katana.getBrandImage(fsn)
         #base_image.paste(brand_icon,(int(brand_icon.size[0]*0.03),int(brand_icon.size[1]*0.2)),brand_icon) 
-
-        base_image = base_image.convert("RGB")
+        final_image = background_image.copy()
+        margin = 1 - self.margin
+        resized_dimensions = (
+                            int(margin*base_image.size[0]),
+                            int(margin*base_image.size[1])
+                        )
+        resized_base_image = base_image.resize(resized_dimensions)
+        base_image_x = (background_image.size[0]-resized_base_image.size[0])/2
+        base_image_y = (background_image.size[1]-resized_base_image.size[1])/2
+        base_image_coords = (int(base_image_x), int(base_image_y))
+        final_image.paste(resized_base_image,base_image_coords,resized_base_image)
+        final_image = final_image.convert("RGB")
         image_path = os.path.join("Output",fsn+"_app_image.png")
-        base_image.save(image_path)
+        final_image.save(image_path)
         return image_path
 
 
