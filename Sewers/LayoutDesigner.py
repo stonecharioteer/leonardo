@@ -12,9 +12,20 @@ class LayoutDesigner(QtGui.QWidget):
         super(LayoutDesigner,self).__init__()
         self.createUI()
         self.mapEvents()
+        self.setStartingDefaults()
+
+    def setStartingDefaults(self):
         self.primary_attr_icon_size_spin_box.setValue(8)
         self.secondary_attr_icon_size_spin_box.setValue(8)
         self.parent_image_resize_reference.setCurrentIndex(2)
+        self.use_simple_color_replacement.setChecked(False)
+        self.background_color_threshold_spinbox.setValue(20)
+        self.product_image_scale_spinbox.setValue(42)
+        self.image_margin_spinbox.setValue(5.0)
+        self.final_image_aspect_ratio_input_box_1.setValue(9)
+        self.final_image_aspect_ratio_input_box_2.setValue(14)
+        self.parent_image_position_position_radiobuttons[1][1].setChecked(True)
+        self.icon_arrangement_circular.setChecked(True)
 
     def createUI(self):
         #Modularized.
@@ -84,7 +95,6 @@ class LayoutDesigner(QtGui.QWidget):
                 self.parent_image_position_selector_radiobuttons_group.addButton(self.parent_image_position_position_radiobuttons[i][j])
                 self.parent_image_position_position_radiobuttons[i][j].setToolTip("This sets the position of the parent image to the %s %s of the image.\nPlease note that the representation isn't exact and\nthe final image layout may vary as constraints dictate." %(vpos[i], hpos[j]))
         self.parent_image_position_selector_radiobuttons_group.setExclusive(True)
-        self.parent_image_position_position_radiobuttons[1][1].setChecked(True) #Default position
         #Map the layout_selector to a layout.
         self.parent_image_position_selector_layout = QtGui.QGridLayout()
         #Create a checkbox that allows randomly choosing a position.
@@ -119,7 +129,6 @@ class LayoutDesigner(QtGui.QWidget):
         self.icon_arrangement_circular = IconButton(os.path.join("essentials","circular_layout.png"))
         self.icon_arrangement_circular.setSize(48,48)
         self.icon_arrangement_circular.setCheckable(True)
-        self.icon_arrangement_circular.setChecked(True)
         self.icon_arrangement_circular.setToolTip("This layout arranges the icons around the product image in arcs.")
         self.icon_arrangement_rectangular = IconButton(os.path.join("essentials","rectangular_layout.png"))
         self.icon_arrangement_rectangular.setSize(48,48)
@@ -200,7 +209,6 @@ class LayoutDesigner(QtGui.QWidget):
         self.product_image_scale_spinbox = QtGui.QDoubleSpinBox()
         self.product_image_scale_spinbox.setToolTip("Choose a scaling factor for the parent image.\nIdeally, 42% is the right answer.")
         self.product_image_scale_spinbox.setRange(10,100)
-        self.product_image_scale_spinbox.setValue(42)
         self.product_image_scale_spinbox.setSuffix("%")
         #Widget for controlling icon color.
         self.palette_selection_label = QtGui.QLabel("Icon Palette:")
@@ -231,14 +239,12 @@ class LayoutDesigner(QtGui.QWidget):
         self.icon_bounding_box_combobox.addItems(["None","Circle","Rectangle","Square"])
         #For changing color replacement algorithm.
         self.use_simple_color_replacement = QtGui.QCheckBox("Use a Simple Colour Extraction Method to remove Parent Image Background.")
-        self.use_simple_color_replacement.setChecked(True)
         self.use_simple_color_replacement.setToolTip("If selected, the code just finds the likely background color and removes it from the entire message.\nThis method saves a large amount of runtime.\nThis is a risky method if the product image has similar colors, or if the image quality is dodgy.\nExercise with caution.")
         #For changing background color replacement algorithm's threshold.
         self.background_color_threshold_label = QtGui.QLabel("Threshold for Background Color Extraction:")
         self.background_color_threshold_spinbox = QtGui.QSpinBox()
         self.background_color_threshold_spinbox.setPrefix(u"\u00B1")
         self.background_color_threshold_spinbox.setRange(0,255)
-        self.background_color_threshold_spinbox.setValue(20)
         self.background_color_threshold_spinbox.setToolTip("Choose a threshold for the background color elimination algorithm.\n Note that setting a very high threshold will remove most of the colours from the image.\nExercise with caution.\nA value around 10-30 is recommended. 20 has been found to be optimum.")
         #To allow icons to overlap the parent image.
         self.allow_overlap_checkbox = QtGui.QCheckBox("Allow Icons to Overlap the Parent Image")
@@ -247,7 +253,6 @@ class LayoutDesigner(QtGui.QWidget):
         self.image_margin_label = QtGui.QLabel("Margin:")
         self.image_margin_spinbox = QtGui.QDoubleSpinBox()
         self.image_margin_spinbox.setRange(0.0, 10.0)
-        self.image_margin_spinbox.setValue(5.0)
         self.image_margin_spinbox.setSingleStep(0.05)
         self.image_margin_spinbox.setSuffix("%")
         self.image_margin_spinbox.setToolTip("Select a margin, as a percentage of the background, for the background image.")
@@ -263,8 +268,6 @@ class LayoutDesigner(QtGui.QWidget):
         self.final_image_aspect_ratio_input_box_2 = QtGui.QSpinBox()
         self.final_image_aspect_ratio_input_box_1.setRange(1,100)
         self.final_image_aspect_ratio_input_box_2.setRange(1,100)
-        self.final_image_aspect_ratio_input_box_1.setValue(9)
-        self.final_image_aspect_ratio_input_box_2.setValue(14)
         self.final_image_aspect_ratio_input_box_1.setToolTip("Select the width aspect ratio factor.")
         self.final_image_aspect_ratio_input_box_2.setToolTip("Select the height aspect ratio factor.")
         self.aspect_ratio_widget_layout = QtGui.QHBoxLayout()
@@ -408,7 +411,7 @@ class LayoutDesigner(QtGui.QWidget):
         else:
             position = "Rectangular"
         return position
-        
+
     def getIconPalette(self):
         return "Black" #Fix this later.
 

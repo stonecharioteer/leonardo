@@ -25,10 +25,11 @@ def getBaseImage():
 def getBackgroundImage(background_path):
     import random, os
     from PIL import Image
+    import PIL
     if background_path == "Random":
         backgrounds = glob.glob(os.path.join(os.getcwd(),"Images","Backgrounds","Background*.*"))
         background_path = random.choice(backgrounds)
-    return Image.open(background_path).convert("RGBA").resize((1800,3200))
+    return Image.open(background_path).convert("RGBA").resize((1800,3200),resample=PIL.Image.ANTIALIAS)
 
 def getFlipkartIconImage():
     import os
@@ -80,7 +81,7 @@ def getMergedFlipkartBrandImage(brand=None):
         line_path = [line_top, line_bottom]
         line_thickness = int(padding_factor/30*(flipkart_image.size[0]+brand_image.size[0]))
         final_image_drawing_handle.line(line_path, (0,0,0,200), line_thickness)
-        final_image.save("FK_"+brand+".png")
+        final_image.save("FK_"+brand+".png",dpi=(300,300))
 
 
     return final_image
@@ -213,20 +214,28 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                 elif parent_image_positioning == (1.0, 0.5):
                     #Needs tweaking.
                     #parent image is placed at the right-middle
-                    primary_radius_multiplier = 0.6
-                    secondary_radius_multiplier = 1.0
+                    primary_radius_multiplier = 1.65
+                    secondary_radius_multiplier = 2.05
                     #Arc center positions
-                    primary_arc_center = (x_center_parent, y_center_parent)
-                    secondary_arc_center = primary_arc_center
+                    primary_arc_center = (int(x_top_left_parent+width_parent), int(y_center_parent*0.9))
+                    secondary_arc_center = (int(x_top_left_parent+width_parent), int(y_center_parent*0.9))
                     #Angles
-                    primary_theta_range = (getRadians(90),getRadians(270))
-                    secondary_theta_range = (getRadians(90),getRadians(270))
+                    primary_theta_range = (getRadians(180-50), getRadians(180+50))
+                    secondary_theta_range = (getRadians(180-50), getRadians(180+50))
                 
                 primary_plot_points_required = len(primary_icons)
-                diagonal_length = width_base/2 #This isn't the diagonal perse. It's the maximum allowable radius.
+                #This isn't the diagonal per se. It's the maximum allowable radius.
+                diagonal_length = width_base/2 
                 #I need to detach this from the individual multipliers and use a better system.
                 primary_radius = primary_radius_multiplier*diagonal_length
-                primary_icon_positions = getPointsOnArc(primary_arc_center, primary_radius, primary_plot_points_required, primary_theta_range)
+                
+                primary_icon_positions = getPointsOnArc(
+                                                primary_arc_center, 
+                                                primary_radius, 
+                                                primary_plot_points_required, 
+                                                primary_theta_range
+                                            )
+
                 secondary_plot_points_required = len(secondary_icons)
                 secondary_radius = secondary_radius_multiplier*diagonal_length
                 secondary_icon_positions = getPointsOnArc(secondary_arc_center, secondary_radius, secondary_plot_points_required, secondary_theta_range)
@@ -299,23 +308,6 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
         else:
             print "Parent image positioning hint isn't valid. %r" %parent_image_positioning
     return coordinates_and_icons
-
-
-def getValidPoints(points, divisions, base_image_size):
-    """Given a list of points and the number of points required, it'll return only those 
-    points that're within a bounding box dictated by a (max_x, max_y) 
-    value obtained from PIL.Image.Image.size"""
-    import random
-    max_x, max_y = base_image_size
-    counter = 1
-    random.shuffle(points)
-    valid_points = []
-    while len(valid_points) <= divisions:
-        for point in points:
-            point_x, point_y = point
-            if (0 <= point_x <= max_x) and (0 <= point_y <= max_y):
-                valid_points.append(point)
-    return valid_points
     
 def getPointsOnCircle(origin, radius, divisions):
     return getPointsOnArc(origin, radius, divisions, (0,2*math.pi)) #What is a circle, but an arc between 0 and 2*Pi?
@@ -536,22 +528,9 @@ def getStrippedImage(image, threshold):
     stripped_image = Image.fromarray(image_data,mode="RGBA")
     return stripped_image
 
-def getIconCoords(primary_attributes_and_icons_data, secondary_attributes_and_icons_data, parent_image_positioning, base_image_size, parent_image_size):
-    #Not using this anywhere
-    coords_list = []
-    current_x = -50
-    current_y = int(0.10*base_image_size[1])
-    for icon in primary_attributes_and_icons_data:
-        coords_list.append((current_x,current_y))
-        current_x += int(0.20*base_image_size[0])
-    current_x = int(0.18*base_image_size[0])
-    current_y = int(base_image_size[1]*0.8)
-    for icon in secondary_attributes_and_icons_data:
-        coords_list.append((current_x,current_y))
-        current_x += int(0.1*base_image_size[0])
-    return coords_list
 
 def getResizedImage(image_to_resize,resize_factor,resize_by,base_image_size):
+    import PIL
     image_to_resize_original_width, image_to_resize_original_height = image_to_resize.size
     base_image_width, base_image_height = base_image_size
     if resize_by == "Width":
@@ -563,7 +542,7 @@ def getResizedImage(image_to_resize,resize_factor,resize_by,base_image_size):
     resized_dimensions = (int(resized_width),int(resized_height))
     #if (resized_height > image_to_resize_original_height) or (resized_width > image_to_resize_original_width):
     #    print "Requested image is being stretched. Use caution when doing this."
-    resized_image = image_to_resize.resize(resized_dimensions)
+    resized_image = image_to_resize.resize(resized_dimensions, resample=PIL.Image.ANTIALIAS)
     return resized_image
 
 def getParentImageCoords(base_image_size, parent_image_size, parent_image_positioning):

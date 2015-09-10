@@ -7,6 +7,7 @@ import math
 import random
 
 from PIL import Image
+import PIL
 from PyQt4 import QtCore
 import Katana
 
@@ -95,7 +96,19 @@ class Splinter(QtCore.QThread):
                                     description_text = " "
                             secondary_attribute_data.append({"Attribute":attribute_name,"Description Text":description_text})
                     self.sendMessage.emit("Preparing app image for %d of %d FSNs."%(counter,total))
-                    image_name = self.prepareAppImage(fsn, brand, category, primary_attribute_data, secondary_attribute_data, self.parent_image_position, self.icon_positioning, self.icon_palette, self.allow_overlap, self.background_image_path, self.primary_attribute_relative_size, self.secondary_attribute_relative_size, self.bounding_box, self.use_simple_bg_color_strip, self.bg_color_strip_threshold, self.output_location)
+
+                    image_name = self.prepareAppImage(
+                                                fsn, brand, category, 
+                                                primary_attribute_data, secondary_attribute_data, 
+                                                self.parent_image_position, self.icon_positioning, 
+                                                self.icon_palette, self.allow_overlap, 
+                                                self.background_image_path, 
+                                                self.primary_attribute_relative_size, 
+                                                self.secondary_attribute_relative_size, 
+                                                self.bounding_box, self.use_simple_bg_color_strip, 
+                                                self.bg_color_strip_threshold, self.output_location
+                                            )
+
                     eta = Katana.getETA(start_time, counter, total)
                     images_list.append(image_name)
                     if counter < total:
@@ -229,28 +242,32 @@ class Splinter(QtCore.QThread):
                 self.sendMessage.emit(message)
                 raise
         #Paste the FK and Brand Icon
-        #Place the FK icon on the top-left corner.
-        fk_brand_icon =Katana.getMergedFlipkartBrandImage(brand)
-        base_image.paste(fk_brand_icon,(int(fk_brand_icon.size[0]*0.05),int(fk_brand_icon.size[1]*0.05)),fk_brand_icon)
-
-        #fk_icon = Katana.getFlipkartIconImage()
-        #base_image.paste(fk_icon,(int((base_image.size[0]-fk_icon.size[0])-fk_icon.size[0]*0.05),int(fk_icon.size[1]*0.05)),fk_icon) #Place the FK icon on the top-right corner.
-        #brand_icon = Katana.getBrandImage(fsn)
-        #base_image.paste(brand_icon,(int(brand_icon.size[0]*0.03),int(brand_icon.size[1]*0.2)),brand_icon) 
+        fk_brand_icon = Katana.getMergedFlipkartBrandImage(brand)
+        
+        base_image.paste(
+                    fk_brand_icon, 
+                    (int(fk_brand_icon.size[0]*0.05), 
+                    int(fk_brand_icon.size[1]*0.05)), 
+                    fk_brand_icon
+                )
+        
         final_image = background_image.copy()
         margin = 1 - self.margin
         resized_dimensions = (
                             int(margin*base_image.size[0]),
                             int(margin*base_image.size[1])
                         )
-        resized_base_image = base_image.resize(resized_dimensions)
+        resized_base_image = base_image.resize(resized_dimensions,resample=PIL.Image.ANTIALIAS)
         base_image_x = (background_image.size[0]-resized_base_image.size[0])/2
         base_image_y = (background_image.size[1]-resized_base_image.size[1])/2
-        base_image_coords = (int(base_image_x), int(base_image_y))
+        base_image_coords = (
+                        int(base_image_x), 
+                        int(base_image_y)
+                    )
         final_image.paste(resized_base_image,base_image_coords,resized_base_image)
         final_image = final_image.convert("RGB")
         image_path = os.path.join("Output",fsn+"_app_image.png")
-        final_image.save(image_path)
+        final_image.save(image_path,dpi=(300,300))
         return image_path
 
 
