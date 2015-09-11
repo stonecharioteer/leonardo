@@ -79,7 +79,7 @@ def getMergedFlipkartBrandImage(brand=None):
         line_bottom_y = (1-padding_factor*0.5)*flipkart_image.size[1]
         line_bottom = (int(line_bottom_x), int(line_bottom_y))
         line_path = [line_top, line_bottom]
-        line_thickness = int(padding_factor/30*(flipkart_image.size[0]+brand_image.size[0]))
+        line_thickness = int(padding_factor/15*(flipkart_image.size[0]+brand_image.size[0]))
         final_image_drawing_handle.line(line_path, (0,0,0,200), line_thickness)
         final_image.save("FK_"+brand+".png",dpi=(300,300))
 
@@ -126,11 +126,11 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                     secondary_theta_range = (getRadians(90),getRadians(180))
                 elif parent_image_positioning == (0.0,1.0):
                     #Validated.
-                    primary_radius_multiplier = 0.76
+                    primary_radius_multiplier = 0.67
                     secondary_radius_multiplier = 1.15
-                    primary_theta_range = (getRadians(270),getRadians(360))
+                    primary_theta_range = (getRadians(270-5),getRadians(360-4))
                     primary_arc_center = (x_top_left_parent, y_center_parent)
-                    secondary_theta_range = (getRadians(270),getRadians(360))
+                    secondary_theta_range = (getRadians(270-2),getRadians(360-50))
                 elif parent_image_positioning == (1.0, 1.0):
                     #Validated.
                     primary_radius_multiplier = 0.95
@@ -215,13 +215,13 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                     #Needs tweaking.
                     #parent image is placed at the right-middle
                     primary_radius_multiplier = 1.65
-                    secondary_radius_multiplier = 2.05
+                    secondary_radius_multiplier = 2.10
                     #Arc center positions
                     primary_arc_center = (int(x_top_left_parent+width_parent), int(y_center_parent*0.9))
                     secondary_arc_center = (int(x_top_left_parent+width_parent), int(y_center_parent*0.9))
                     #Angles
                     primary_theta_range = (getRadians(180-50), getRadians(180+50))
-                    secondary_theta_range = (getRadians(180-50), getRadians(180+50))
+                    secondary_theta_range = (getRadians(180-35), getRadians(180+35))
                 
                 primary_plot_points_required = len(primary_icons)
                 #This isn't the diagonal per se. It's the maximum allowable radius.
