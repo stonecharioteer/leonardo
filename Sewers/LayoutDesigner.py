@@ -50,7 +50,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.update_preview_button = QtGui.QPushButton("Update")
         self.preview_widget = QtGui.QLabel("Preview goes here.")
         size_modifier = 3
-        self.preview_widget.setFixedSize(90*size_modifier, 160*size_modifier)
+        self.preview_widget.setFixedSize(90*size_modifier, 140*size_modifier)
         preview_widget_style_sheet = """
                                 QLabel {
                                     background-color: grey;

@@ -20,16 +20,16 @@ def getRadians(degrees):
 
 def getBaseImage():
     from PIL import Image
-    return Image.new("RGBA",(1800,3200),(0,0,0,0))
+    return Image.new("RGBA", (1800, 2800), (0,0,0,0))
 
 def getBackgroundImage(background_path):
     import random, os
     from PIL import Image
     import PIL
     if background_path == "Random":
-        backgrounds = glob.glob(os.path.join(os.getcwd(),"Images","Backgrounds","Background*.*"))
+        backgrounds = glob.glob(os.path.join(os.getcwd(), "Images", "Backgrounds", "Background*.*"))
         background_path = random.choice(backgrounds)
-    return Image.open(background_path).convert("RGBA").resize((1800,3200),resample=PIL.Image.ANTIALIAS)
+    return Image.open(background_path).convert("RGBA").resize((1800,2800), resample=PIL.Image.ANTIALIAS)
 
 def getFlipkartIconImage():
     import os
@@ -266,20 +266,21 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
             if icon_arrangement == "Circular":
                 #icons are to be arranged in arcs.
                 #print "Center Position!"
-                primary_radius_multiplier = 0.78
-                secondary_radius_multiplier = 0.7
-                primary_theta_range = (getRadians(180), getRadians(360))
+                primary_radius_multiplier = 0.95
+                secondary_radius_multiplier = 0.95
+
+                primary_theta_range = (getRadians(270-57), getRadians(270+57))
+                secondary_theta_range = (getRadians(90-57), getRadians(90+57))
+
                 primary_arc_center = (width_base/2-240, height_base/2-height_parent/2+100)
+                secondary_arc_center = (width_base/2-260, height_base/2+height_parent/2-150)
+                
                 primary_plot_points_required = len(primary_icons)
-                #parent_extreme_point = (x_top_left_parent+width_parent, y_top_left_parent+height_parent)
-                #diagonal_length = getDistanceBetweenPoints(primary_arc_center,parent_extreme_point)
                 diagonal_length = width_base/2
                 primary_radius = primary_radius_multiplier*diagonal_length
                 primary_icon_positions = getPointsOnArc(primary_arc_center, primary_radius, primary_plot_points_required, primary_theta_range)
                 
-                secondary_theta_range = (getRadians(0), getRadians(180))
                 secondary_plot_points_required = len(secondary_icons)
-                secondary_arc_center = (width_base/2-260, height_base/2+height_parent/2-150)
                 secondary_radius = secondary_radius_multiplier*diagonal_length
                 secondary_icon_positions = getPointsOnArc(secondary_arc_center, secondary_radius, secondary_plot_points_required, secondary_theta_range)
                 coordinates_and_icons = []

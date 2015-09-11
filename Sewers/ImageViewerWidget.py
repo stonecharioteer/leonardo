@@ -23,7 +23,7 @@ class ImageViewerWidget(QtGui.QWidget):
         self.right.addWidget(self.right_button)
         self.right.addWidget(self.right_empty)
         self.image_holder = QtGui.QLabel()
-        self.image_holder.setFixedSize(90*3,160*3)
+        self.image_holder.setFixedSize(90*3,140*3)
         layout = QtGui.QHBoxLayout()
         layout.addWidget(self.left,0,QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         layout.addWidget(self.image_holder,2,QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
