@@ -220,7 +220,7 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                     primary_arc_center = (int(x_top_left_parent+width_parent), int(y_center_parent*0.9))
                     secondary_arc_center = (int(x_top_left_parent+width_parent), int(y_center_parent*0.9))
                     #Angles
-                    primary_theta_range = (getRadians(180-50), getRadians(180+50))
+                    primary_theta_range = (getRadians(180-40), getRadians(180+40))
                     secondary_theta_range = (getRadians(180-35), getRadians(180+35))
                 
                 primary_plot_points_required = len(primary_icons)

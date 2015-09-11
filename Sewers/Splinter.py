@@ -192,7 +192,7 @@ class Splinter(QtCore.QThread):
             else:
                 parent_image_resize_factor = self.parent_image_resize_factor
         else:
-            parent_image_resize_reference = self.self.parent_image_resize_reference
+            parent_image_resize_reference = self.parent_image_resize_reference
         #print "Smart Fit resulted in %s selection."%parent_image_resize_reference
         resized_parent_image = Katana.getResizedImage(original_parent_image, parent_image_resize_factor, parent_image_resize_reference, base_image.size)
         #Use the selected background colour strip algorithm 

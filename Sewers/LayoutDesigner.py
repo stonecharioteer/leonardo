@@ -17,14 +17,16 @@ class LayoutDesigner(QtGui.QWidget):
     def setStartingDefaults(self):
         self.primary_attr_icon_size_spin_box.setValue(8)
         self.secondary_attr_icon_size_spin_box.setValue(8)
-        self.parent_image_resize_reference.setCurrentIndex(2)
+        self.parent_image_resize_reference.setCurrentIndex(1)
+        self.product_image_scale_spinbox.setValue(60)
+        
         self.use_simple_color_replacement.setChecked(False)
         self.background_color_threshold_spinbox.setValue(30)
-        self.product_image_scale_spinbox.setValue(30)
+        
         self.image_margin_spinbox.setValue(5.0)
         self.final_image_aspect_ratio_input_box_1.setValue(9)
         self.final_image_aspect_ratio_input_box_2.setValue(14)
-        self.parent_image_position_position_radiobuttons[1][2].setChecked(True)
+        self.parent_image_position_position_radiobuttons[1][1].setChecked(True)
         self.icon_arrangement_circular.setChecked(True)
 
     def createUI(self):
