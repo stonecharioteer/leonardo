@@ -31,6 +31,10 @@ class Leonardo(Turtle):
                     "Icon": os.path.join("essentials","data.png")
                     },
                     {
+                    "Name": "Fine Tune",
+                    "Icon": os.path.join("essentials","marching.png")
+                    },
+                    {
                     "Name": "Layout Design",
                     "Icon": os.path.join("essentials","layout.png")
                     },
@@ -40,9 +44,10 @@ class Leonardo(Turtle):
                     }
                 ]
         self.page_changer.addElements(page_control_list)
-        self.page_changer.setFixedSize(120, 400)
+        self.page_changer.setFixedSize(120, 600)
         self.page_changer.item(1).setFlags(QtCore.Qt.NoItemFlags)
         self.page_changer.item(2).setFlags(QtCore.Qt.NoItemFlags)
+        self.page_changer.item(3).setFlags(QtCore.Qt.NoItemFlags)
 
         #Initialize the individual widget pages
         self.data_selector_widget = DataSelector()

@@ -52,16 +52,18 @@ def getMergedFlipkartBrandImage(brand=None):
     flipkart_image = getFlipkartIconImage()
     padding_factor = 0.05
     if brand is None:
-        print "No brand given!"
+        #print "No brand given!"
         final_image = flipkart_image
     else:
         #Open the brand image.
         original_brand_image = getBrandImage_new(brand)
         #Scale the brand image respective to the flipkart image's height.
         brand_image = getResizedImage(original_brand_image,1,"Height",flipkart_image.size)
+        
         #Start a canvas whose length is 1.2x that of fk + brand.
         canvas_width = (flipkart_image.size[0] + brand_image.size[0])*(1+2*padding_factor)
         canvas_height = flipkart_image.size[1]
+
         canvas_size = (int(canvas_width), int(canvas_height))
         final_image = Image.new("RGBA",canvas_size,(255,255,255,0))
         #Paste the fk logo onto the left.
@@ -80,9 +82,8 @@ def getMergedFlipkartBrandImage(brand=None):
         line_bottom = (int(line_bottom_x), int(line_bottom_y))
         line_path = [line_top, line_bottom]
         line_thickness = int(padding_factor/15*(flipkart_image.size[0]+brand_image.size[0]))
-        final_image_drawing_handle.line(line_path, (0,0,0,200), line_thickness)
-        final_image.save("FK_"+brand+".png",dpi=(300,300))
-
+        final_image_drawing_handle.line(line_path, (0,0,0,200), line_thickness)        
+        #final_image.save("FK_"+brand+".png",dpi=(300,300))
 
     return final_image
 
@@ -126,9 +127,10 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                     secondary_theta_range = (getRadians(90),getRadians(180))
                 elif parent_image_positioning == (0.0,1.0):
                     #Validated.
-                    primary_radius_multiplier = 0.67
-                    secondary_radius_multiplier = 1.15
-                    primary_theta_range = (getRadians(270-5),getRadians(360-4))
+                    #BottomLeft
+                    primary_radius_multiplier = 0.70
+                    secondary_radius_multiplier = 1.03
+                    primary_theta_range = (getRadians(270+5),getRadians(360-15))
                     primary_arc_center = (x_top_left_parent, y_center_parent)
                     secondary_theta_range = (getRadians(270-2),getRadians(360-50))
                 elif parent_image_positioning == (1.0, 1.0):
@@ -136,9 +138,9 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                     primary_radius_multiplier = 0.95
                     secondary_radius_multiplier = 1.25
                     theta_range = ((math.pi),(math.pi*1.5)) #180deg and ~270deg.
-                    primary_theta_range = (getRadians(180),getRadians(270))
+                    primary_theta_range = (getRadians(180+28),getRadians(270-12))
                     primary_arc_center = (x_top_left_parent+width_parent, y_center_parent)
-                    secondary_theta_range = (getRadians(180),getRadians(270))
+                    secondary_theta_range = (getRadians(180+28),getRadians(270-12))
                 
                 primary_plot_points_required = len(primary_icons)
                 #parent_extreme_point = (x_top_left_parent+width_parent, y_top_left_parent+height_parent)
@@ -203,14 +205,14 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                 elif parent_image_positioning == (0.0,0.5):
                     #Validated and perfected.
                     #parent image is placed at the left-middle.
-                    primary_radius_multiplier = 1.4
-                    secondary_radius_multiplier = 1.8
+                    primary_radius_multiplier = 1.1
+                    secondary_radius_multiplier = 1.6
                     #Arc center positions
                     primary_arc_center = (-x_center_parent, y_center_parent)
                     secondary_arc_center = primary_arc_center
                     #Angles
                     primary_theta_range = (getRadians(270),getRadians(360+90))
-                    secondary_theta_range = (getRadians(270),getRadians(360+90))
+                    secondary_theta_range = (getRadians(270+30),getRadians(360-10))
                 elif parent_image_positioning == (1.0, 0.5):
                     #Needs tweaking.
                     #parent image is placed at the right-middle
@@ -220,8 +222,8 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                     primary_arc_center = (int(x_top_left_parent+width_parent), int(y_center_parent*0.9))
                     secondary_arc_center = (int(x_top_left_parent+width_parent), int(y_center_parent*0.9))
                     #Angles
-                    primary_theta_range = (getRadians(180-40), getRadians(180+40))
-                    secondary_theta_range = (getRadians(180-35), getRadians(180+35))
+                    primary_theta_range = (getRadians(180-35), getRadians(180+35))
+                    secondary_theta_range = (getRadians(180-30), getRadians(180+30))
                 
                 primary_plot_points_required = len(primary_icons)
                 #This isn't the diagonal per se. It's the maximum allowable radius.
@@ -266,14 +268,14 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
             if icon_arrangement == "Circular":
                 #icons are to be arranged in arcs.
                 #print "Center Position!"
-                primary_radius_multiplier = 0.95
-                secondary_radius_multiplier = 0.95
+                primary_radius_multiplier = 0.8
+                secondary_radius_multiplier = 0.8
+                sweep_angle = 70
+                primary_theta_range = (getRadians(270-sweep_angle), getRadians(270+sweep_angle))
+                secondary_theta_range = (getRadians(90-sweep_angle), getRadians(90+sweep_angle))
 
-                primary_theta_range = (getRadians(270-57), getRadians(270+57))
-                secondary_theta_range = (getRadians(90-57), getRadians(90+57))
-
-                primary_arc_center = (width_base/2-240, height_base/2-height_parent/2+100)
-                secondary_arc_center = (width_base/2-260, height_base/2+height_parent/2-150)
+                primary_arc_center = (int(x_center_parent-0.4*width_parent), y_top_left_parent+height_parent*0.3)
+                secondary_arc_center = (int(x_center_parent-0.4*width_parent), y_top_left_parent+height_parent-height_parent*0.5)
                 
                 primary_plot_points_required = len(primary_icons)
                 diagonal_length = width_base/2
@@ -377,7 +379,7 @@ def replaceColorInImage(image, original_colour, replacement_color, threshold):
     #print image.size
     #print image_data.shape
     #raw_input("Waiting!")
-    rows, columns,rgba = image_data.shape
+    rows, columns, rgba = image_data.shape
     original_r, original_g, original_b, original_a = original_colour
     for row in range(rows):
         for column in range(columns):
@@ -605,6 +607,7 @@ def checkIcon(attribute,description):
 def getIconImage(icon_path, description_text, icon_relative_size, base_image_size):
     """This method generates an image object which contains the icon image as well as the description text."""
     import textwrap
+    import numpy as np
     clearance_factor_for_text = 2.0
     font_resize_factor = 0.3
     text_lengths = [len(word) for word in description_text.split(" ")]
@@ -619,8 +622,23 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     #icon_image = replaceColorInImage(resized_icon_image,(255,255,255,255),(0,0,0,255))
     #Create a blank canvas for the text.
     max_w, max_h = 500, 500
+    icon_text_color = (193, 40, 28) #Microwave
+    icon_text_color = (25, 84, 102) #Rice cooker Blue
+    icon_text_color = (107,111,116) #something
+    icon_text_color = (122, 73, 97) #TV
+    icon_text_color = (30, 92, 89) #Dark Blue for hair dryer
+    icon_text_color = (30, 68, 96) #Water purifier
+    icon_text_color = (92, 46, 46) #Brown coffee, air fryer and furniture
+    icon_text_color = (92, 46, 46) #sofa
+    icon_text_color = (58, 141, 190) #iron box
+    icon_text_color = (255, 62, 13) #red
+    icon_text_color = (0,0,0) #air fryer 2, ICT powerbank, Smart Watch
     text_canvas = Image.new("RGBA",(max_w, max_h),(0,0,0,0))
-    
+    if icon_text_color != (0,0,0):
+        icon_image_array = np.array(icon_image)
+        icon_image_array[(icon_image_array == (0,0,0,255)).all(axis = -1)] = (icon_text_color[0],icon_text_color[1],icon_text_color[2],255)
+        icon_image = Image.fromarray(icon_image_array,"RGBA")
+
     draw_text_handle = ImageDraw.Draw(text_canvas)
     #font_size = int(icon_image.size[1]*font_resize_factor)
     font_size = 72 #Set default font size for now.
@@ -630,7 +648,7 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     #Ref: http://stackoverflow.com/questions/1970807/center-middle-align-text-with-pil
     for line in text_as_paragraphs:
         w, h = draw_text_handle.textsize(line, font=font)
-        draw_text_handle.text(((int((max_w-w)/2)), current_h), line, (0,0,0), font=font)
+        draw_text_handle.text(((int((max_w-w)/2)), current_h), line, icon_text_color, font=font)
         current_h += h + pad
     
     #merge both images now.

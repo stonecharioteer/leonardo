@@ -1,5 +1,5 @@
 from __future__ import division
-import os, glob, random
+import os, glob, random, json
 from PyQt4 import QtGui, QtCore
 from FSNTextEdit import FSNTextEdit
 from IconButton import IconButton
@@ -15,34 +15,55 @@ class LayoutDesigner(QtGui.QWidget):
         self.setStartingDefaults()
 
     def setStartingDefaults(self):
+        """Sets the defaults for the settings.
+        At a later stage, I need to read from and export to a JSON file. 
+        That way, things will be much smoother and I can have saved settings.
+        """
+
+        #Default primary and secondary icon sizes.
         self.primary_attr_icon_size_spin_box.setValue(8)
         self.secondary_attr_icon_size_spin_box.setValue(8)
-        self.parent_image_resize_reference.setCurrentIndex(1)
-        self.product_image_scale_spinbox.setValue(60)
-        
-        self.use_simple_color_replacement.setChecked(False)
-        self.background_color_threshold_spinbox.setValue(30)
-        
+        #Default primary image resize reference.
+        self.parent_image_resize_reference.setCurrentIndex(2)
+        #Default primary or product image resize percentage value.
+        self.product_image_scale_spinbox.setValue(42)
+        #Default color replacement algorithm
+        self.use_simple_color_replacement.setChecked(True)
+        #Default Color stripping threshold
+        self.background_color_threshold_spinbox.setValue(8)
+        #Default Palette selection method.
+        self.palette_selection_combobox.setCurrentIndex(1)
+        #Default Image margin percentage.
         self.image_margin_spinbox.setValue(5.0)
+        #Default Aspect ratio
         self.final_image_aspect_ratio_input_box_1.setValue(9)
         self.final_image_aspect_ratio_input_box_2.setValue(14)
-        self.parent_image_position_position_radiobuttons[1][1].setChecked(True)
+        #Default Parent Image position y and x.
+        y = 2
+        x = 2
+        self.parent_image_position_position_radiobuttons[y][x].setChecked(True)
+        #Default Icon arrangement method.
         self.icon_arrangement_circular.setChecked(True)
 
-    def createUI(self):
-        #Modularized.
+    def createUI(self):        
         self.preview_group_box = self.createPreviewWidget()
         self.settings_group_box = self.createSettingsWidget()
         self.validate_button  = IconButton(os.path.join("essentials","validate.png"))
         self.validate_button.setToolTip("Validate and Proceed")
+        
         final_ui_layout = QtGui.QGridLayout()
-        final_ui_layout.addWidget(self.settings_group_box,0,0,10,4)
-        final_ui_layout.addWidget(self.preview_group_box,0,4,10,4, QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-        final_ui_layout.addWidget(self.validate_button,10,9,1,1, QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
+        final_ui_layout.addWidget(self.settings_group_box,0, 0, 10, 4)
+        final_ui_layout.addWidget(self.preview_group_box,0, 4, 10, 4, 
+                                QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        final_ui_layout.addWidget(self.validate_button,10, 9, 1, 1, 
+                                QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
+        
         self.over_all_group_box = QtGui.QGroupBox("Design")
         self.over_all_group_box.setLayout(final_ui_layout)
+        
         over_all_layout_wrapper = QtGui.QHBoxLayout()
         over_all_layout_wrapper.addWidget(self.over_all_group_box)
+        
         self.setLayout(over_all_layout_wrapper)
 
     def createPreviewWidget(self):
@@ -76,8 +97,18 @@ class LayoutDesigner(QtGui.QWidget):
         self.settings_tool_box.addItem(self.layout_panel, "Layout and Icon Positions")
         self.settings_tool_box.addItem(self.font_panel, "Icon Text Font Settings")
         self.settings_tool_box.addItem(self.advanced_panel, "Advanced Settings")
-        settings_layout = QtGui.QHBoxLayout()
-        settings_layout.addWidget(self.settings_tool_box)
+        
+        self.save_settings_button = QtGui.QPushButton("Save Current\nSettings")
+        self.load_settings_from_file_button = QtGui.QPushButton("Load Settings\nFrom File")
+        self.reset_settings_button = QtGui.QPushButton("Reset Settings")
+        settings_buttons_layout = QtGui.QHBoxLayout()
+        settings_buttons_layout.addWidget(self.save_settings_button)
+        settings_buttons_layout.addWidget(self.load_settings_from_file_button)
+        settings_buttons_layout.addWidget(self.reset_settings_button)
+        settings_layout = QtGui.QVBoxLayout()
+        settings_layout.addWidget(self.settings_tool_box,10)
+        settings_layout.addLayout(settings_buttons_layout,0)
+
         self.settings_group_box.setLayout(settings_layout)
         return self.settings_group_box
 
@@ -216,7 +247,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.palette_selection_label = QtGui.QLabel("Icon Palette:")
         self.palette_selection_combobox = QtGui.QComboBox()
         self.palette_selection_combobox.setToolTip("Choose one colour and the program picks a palette that will suit that color.\nHowever, manual QC is required for the generated images, as the program\ndoesn't yet look at the parent or background image color,\nso if the same color is picked, the image will look messy.")
-        palettes_list = ["Black","Based on Input Color","From Input File"]
+        palettes_list = ["Black","Background Appropriate Color","Based on Input Color"]
         self.palette_selection_combobox.addItems(palettes_list)
         self.palette_selection_button = QColorButton()
         self.palette_selection_combobox.setMinimumHeight(self.palette_selection_button.size().height())
@@ -229,12 +260,12 @@ class LayoutDesigner(QtGui.QWidget):
         self.primary_attr_icon_size_spin_box = QtGui.QSpinBox()
         self.primary_attr_icon_size_spin_box.setSuffix("%")
         self.primary_attr_icon_size_spin_box.setToolTip("This sets the size of the primary attribute icons, at a percentage relative to the background image.")
-        self.primary_attr_icon_size_spin_box.setRange(5,8)
+        self.primary_attr_icon_size_spin_box.setRange(5,10)
         self.secondary_attr_icon_size_label = QtGui.QLabel("Set Secondary Attribute Icon\nRelative Size:")
         self.secondary_attr_icon_size_spin_box = QtGui.QSpinBox()
         self.secondary_attr_icon_size_spin_box  .setSuffix("%")
         self.secondary_attr_icon_size_spin_box.setToolTip("This sets the size of the secondary attribute icons, at a percentage relative to the background image.")
-        self.secondary_attr_icon_size_spin_box.setRange(5,8)
+        self.secondary_attr_icon_size_spin_box.setRange(5,10)
         #Widget for controlling icon bounding box.
         self.icon_bounding_box_label = QtGui.QLabel("Icon Bounding Box Shape:")
         self.icon_bounding_box_combobox = QtGui.QComboBox()
@@ -273,10 +304,10 @@ class LayoutDesigner(QtGui.QWidget):
         self.final_image_aspect_ratio_input_box_1.setToolTip("Select the width aspect ratio factor.")
         self.final_image_aspect_ratio_input_box_2.setToolTip("Select the height aspect ratio factor.")
         self.aspect_ratio_widget_layout = QtGui.QHBoxLayout()
-        self.aspect_ratio_widget_layout.addWidget(self.final_image_aspect_ratio_input_box_1,0,
+        self.aspect_ratio_widget_layout.addWidget(self.final_image_aspect_ratio_input_box_1, 0,
                                             QtCore.Qt.AlignRight)
         self.aspect_ratio_widget_layout.addWidget(self.final_image_aspect_ratio_colon,0)
-        self.aspect_ratio_widget_layout.addWidget(self.final_image_aspect_ratio_input_box_2,0,
+        self.aspect_ratio_widget_layout.addWidget(self.final_image_aspect_ratio_input_box_2, 0,
                                             QtCore.Qt.AlignLeft)
         self.aspect_ratio_widget_layout.addStretch(10)
         #Checkbox to allow icons without text.
