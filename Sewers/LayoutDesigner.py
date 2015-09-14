@@ -1,5 +1,6 @@
 from __future__ import division
-import os, glob, random, json
+import os, glob, random
+import json
 from PyQt4 import QtGui, QtCore
 from FSNTextEdit import FSNTextEdit
 from IconButton import IconButton
@@ -10,40 +11,150 @@ from QColorButton import QColorButton
 class LayoutDesigner(QtGui.QWidget):
     def __init__(self):
         super(LayoutDesigner,self).__init__()
+        defaults = {
+                "Parent Image Resize Factor": 42, 
+                "Secondary Attribute Relative Size": 8,
+                "Image Aspect Ratio": [9, 14], 
+                "Background Color Threshold Value": 15, 
+                "Primary Attribute Relative Size": 8, 
+                "Parent Image Position": [1, 1], 
+                "Margin": 5.0, 
+                "Icon Arrangement": "Circular", 
+                "Use Simple Color Replacement": True, 
+                "Parent Image Resize Reference": "Width", 
+                "Icon Palette": [0, 0, 0], 
+                "Allow Icons Overlap": False,
+                "Allow Icons Without Text": False,
+                "Icon Font Bold": False,
+                "Icon Font Underline": False,
+                "Icon Font Italics": True,
+                "Icon Font Size": 30,
+                "Icon Font Color": [0, 0, 0],
+                "Use Icon Color For Font Color": True,
+                "Load Icon Colors From Background": False
+            }
+        #with open(os.path.join("cache","defaults.json"),"w") as json_file_handler:
+        #    json.dump(defaults,json_file_handler)
         self.createUI()
         self.mapEvents()
-        self.setStartingDefaults()
+        #Load values from the default file.
+        self.resetValues()
 
-    def setStartingDefaults(self):
+    def resetValues(self):
+        default_file = os.path.join("cache","defaults.json")
+        if os.path.isfile(default_file):
+            self.setValues()
+
+    def setValues(self, file_path):
         """Sets the defaults for the settings.
         At a later stage, I need to read from and export to a JSON file. 
         That way, things will be much smoother and I can have saved settings.
         """
+        with open(file_path) as json_file_handler:
+            settings_from_json = json.load(json_file_handler)
 
-        #Default primary and secondary icon sizes.
-        self.primary_attr_icon_size_spin_box.setValue(8)
-        self.secondary_attr_icon_size_spin_box.setValue(8)
-        #Default primary image resize reference.
-        self.parent_image_resize_reference.setCurrentIndex(2)
-        #Default primary or product image resize percentage value.
-        self.product_image_scale_spinbox.setValue(42)
-        #Default color replacement algorithm
-        self.use_simple_color_replacement.setChecked(True)
-        #Default Color stripping threshold
-        self.background_color_threshold_spinbox.setValue(8)
-        #Default Palette selection method.
+        #Set the primary and secondary icon sizes.
+        primary_attr_icon_size_value = settings_from_json["Primary Attribute Relative Size"]
+        self.primary_attr_icon_size_spin_box.setValue(primary_attr_icon_size_value)
+        
+        secondary_attr_icon_size_value = settings_from_json["Secondary Attribute Relative Size"]
+        self.secondary_attr_icon_size_spin_box.setValue(secondary_attr_icon_size_value)
+        #Set the Parent Image position y and x.
+        parent_image_position_value = settings_from_json["Parent Image Position"]
+        if type(parent_image_position_value) != str:
+            y, x = parent_image_position_value
+            self.parent_image_position_position_radiobuttons[y][x].setChecked(True)
+        else:
+            self.parent_image_position_position_radiobuttons[1][1].setChecked(True)
+            self.use_random_parent_image_position.setChecked(True)
+
+        #Set the primary image resize reference.
+        parent_image_resize_reference_value = settings_from_json["Parent Image Resize Reference"]
+        resize_reference_combo_index = self.parent_image_resize_reference.findText(parent_image_resize_reference_value)
+        self.parent_image_resize_reference.setCurrentIndex(resize_reference_combo_index)
+        
+        #Set the primary or product image resize percentage value.
+        parent_image_resize_factor_value = settings_from_json["Parent Image Resize Factor"]
+        self.product_image_scale_spinbox.setValue(parent_image_resize_factor_value)
+        
+        #Set the color replacement algorithm
+        use_simple_color_replacement_value = settings_from_json["Use Simple Color Replacement"]
+        self.use_simple_color_replacement.setChecked(use_simple_color_replacement_value)
+        
+        #Set the Color stripping threshold
+        background_color_threshold_value = settings_from_json["Background Color Threshold Value"]
+        self.background_color_threshold_spinbox.setValue(background_color_threshold_value)
+        
+        #Set the Palette selection method.
+        icon_color_value = settings_from_json["Icon Palette"]
         self.palette_selection_combobox.setCurrentIndex(1)
-        #Default Image margin percentage.
-        self.image_margin_spinbox.setValue(5.0)
-        #Default Aspect ratio
-        self.final_image_aspect_ratio_input_box_1.setValue(9)
-        self.final_image_aspect_ratio_input_box_2.setValue(14)
-        #Default Parent Image position y and x.
-        y = 2
-        x = 2
-        self.parent_image_position_position_radiobuttons[y][x].setChecked(True)
-        #Default Icon arrangement method.
-        self.icon_arrangement_circular.setChecked(True)
+        
+        #Set the Image margin percentage.
+        margin_value = settings_from_json["Margin"]
+        self.image_margin_spinbox.setValue(margin_value)
+        
+        #Set the Aspect ratio
+        image_aspect_ratio_value = settings_from_json["Image Aspect Ratio"]
+        aspect_x, aspect_y = image_aspect_ratio_value
+        self.final_image_aspect_ratio_input_box_1.setValue(aspect_x)
+        self.final_image_aspect_ratio_input_box_2.setValue(aspect_y)
+        
+        #Set the Icon arrangement method.
+        icon_arrangement_value = str(settings_from_json["Icon Arrangement"])
+        if icon_arrangement_value == "Circular":
+            self.icon_arrangement_circular.setChecked(True)
+        else:
+            self.icon_arrangement_rectangular.setChecked(True)
+        
+        #Set the overlap boolean
+        allow_overlap_value = settings_from_json["Allow Icons Overlap"]
+        if type(allow_overlap_value) != bool:
+            allow_overlap_value = False
+        self.allow_overlap_checkbox.setChecked(allow_overlap_value)
+
+        #Set the boolean to allow icons without text.
+        allow_textless_icons = settings_from_json["Allow Icons Without Text"]
+        if type(allow_textless_icons) != bool:
+            allow_textless_icons = False
+        self.allow_textless_icons_checkbox.setChecked(allow_textless_icons)
+
+        #Set Icon Font Bold
+        icon_font_bold = settings_from_json["Icon Font Bold"]
+        if type(icon_font_bold) != bool:
+            icon_font_bold = False
+        self.bold_button.setChecked(icon_font_bold)
+        
+        #Set Icon Font Underlined
+        icon_font_underline = settings_from_json["Icon Font Underline"]
+        if type(icon_font_underline) != bool:
+            icon_font_underline = False
+        self.underline_button.setChecked(icon_font_underline)
+        
+        #Set Icon Font Italics
+        icon_font_italics = settings_from_json["Icon Font Italics"]
+        if type(icon_font_italics) != bool:
+            icon_font_italics = False
+        self.italics_button.setChecked(icon_font_italics)
+
+        #Set Icon font size
+        icon_font_size = settings_from_json["Icon Font Size"]
+
+        #Set the icon font color
+        #Set the bool to use the icon color for font color.
+        use_icon_color_for_font_color = settings_from_json["Use Icon Color For Font Color"]
+        if type(use_icon_color_for_font_color) != bool:
+            use_icon_color_for_font_color = False
+        if use_icon_color_for_font_color:
+            icon_font_color = icon_color_value
+        else:
+            icon_font_color = settings_from_json["Icon Font Color"]
+        icon_font_r, icon_font_g, icon_font_b = icon_font_color
+
+        #Set the background-appropriate icon color loading behaviour.
+        load_icon_color_from_background = settings_from_json["Load Icon Colors From Background"]
+        if type(load_icon_color_from_background) != bool:
+            load_icon_color_from_background = False
+
 
     def createUI(self):        
         self.preview_group_box = self.createPreviewWidget()
@@ -99,12 +210,15 @@ class LayoutDesigner(QtGui.QWidget):
         self.settings_tool_box.addItem(self.advanced_panel, "Advanced Settings")
         
         self.save_settings_button = QtGui.QPushButton("Save Current\nSettings")
+        self.save_settings_button.setToolTip("Click to save all the current settings to a JSON file.")
         self.load_settings_from_file_button = QtGui.QPushButton("Load Settings\nFrom File")
-        self.reset_settings_button = QtGui.QPushButton("Reset Settings")
+        self.load_settings_from_file_button.setToolTip("Click to load settings from a JSON file.")
+        self.reset_settings_button = QtGui.QPushButton("Reset\nSettings")
+        self.reset_settings_button.setToolTip("Click to reset all settings to their default values.")
         settings_buttons_layout = QtGui.QHBoxLayout()
-        settings_buttons_layout.addWidget(self.save_settings_button)
-        settings_buttons_layout.addWidget(self.load_settings_from_file_button)
-        settings_buttons_layout.addWidget(self.reset_settings_button)
+        settings_buttons_layout.addWidget(self.save_settings_button,0,QtCore.Qt.AlignRight)
+        settings_buttons_layout.addWidget(self.load_settings_from_file_button,0,QtCore.Qt.AlignHCenter)
+        settings_buttons_layout.addWidget(self.reset_settings_button,0,QtCore.Qt.AlignLeft)
         settings_layout = QtGui.QVBoxLayout()
         settings_layout.addWidget(self.settings_tool_box,10)
         settings_layout.addLayout(settings_buttons_layout,0)
@@ -391,12 +505,12 @@ class LayoutDesigner(QtGui.QWidget):
         advanced_panel_layout.addWidget(self.allow_textless_icons_checkbox, row, column, 1, 2, 
                                     left_top_alignment)
 
-        advanced_panel_layout.setColumnStretch(0,0)
-        advanced_panel_layout.setColumnStretch(1,0)
-        advanced_panel_layout.setColumnStretch(2,10)
+        advanced_panel_layout.setColumnStretch(0, 0)
+        advanced_panel_layout.setColumnStretch(1, 0)
+        advanced_panel_layout.setColumnStretch(2, 10)
         for row_number in range(row):
             advanced_panel_layout.setRowStretch(row_number,0)
-        advanced_panel_layout.setRowStretch(row,10)
+        advanced_panel_layout.setRowStretch(row, 10)
         advanced_panel = QtGui.QWidget()
         advanced_panel.setLayout(advanced_panel_layout)
         return advanced_panel
@@ -405,6 +519,24 @@ class LayoutDesigner(QtGui.QWidget):
         self.background_selection_combobox.currentIndexChanged.connect(self.changeBackground)
         self.use_random_parent_image_position.stateChanged.connect(self.toggleRandomParentPosition)
         self.primary_attr_icon_size_spin_box.valueChanged.connect(self.limitSecondaryIconSize)
+        self.reset_settings_button.clicked.connect(self.resetValues)
+        self.save_settings_button.clicked.connect(self.saveSettingsToJSON)
+        self.load_settings_from_file_button.clicked.connect(self.loadSettingsFromJSON)
+
+    def loadSettingsFromJSON(self):
+        open_file_name = QtGui.QFileDialog.getOpenFileName(self, "Load Settings from a JSON",
+                                                        os.getcwd(), ("JSON files (*.json)")
+                                                        )
+        if open_file_name:
+            if os.path.isfile(open_file_name):
+                self.setValues(open_file_name)
+
+    def saveSettingsToJSON(self):
+        save_file_name = QtGui.QFileDialog.getSaveFileName(self, "Save Settings To a JSON",
+                                                        os.getcwd(), ("JSON files (*.json)")
+                                                        )
+        if save_file_name:
+            print save_file_name
 
     def limitSecondaryIconSize(self,maximum_primary_value):
         self.secondary_attr_icon_size_spin_box.setMaximum(maximum_primary_value)

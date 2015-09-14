@@ -7,7 +7,7 @@ import os, sys, math, datetime
 
 from PyQt4 import QtGui, QtCore
 #Sewers is the folder containing all the modules.
-from Sewers.Turtle import Turtle
+from Sewers.Turtle import Turtle #Base QMainWindow class.
 from Sewers.Splinter import Splinter #Thread for Leo to use. 
 from Sewers.IconListBox import IconListBox
 from Sewers.DataSelector import DataSelector
@@ -30,10 +30,10 @@ class Leonardo(Turtle):
                     "Name": "Data Set",
                     "Icon": os.path.join("essentials","data.png")
                     },
-                    {
-                    "Name": "Fine Tune",
-                    "Icon": os.path.join("essentials","marching.png")
-                    },
+                    #{
+                    #"Name": "Fine Tune",
+                    #"Icon": os.path.join("essentials","marching.png")
+                    #},
                     {
                     "Name": "Layout Design",
                     "Icon": os.path.join("essentials","layout.png")
@@ -47,7 +47,7 @@ class Leonardo(Turtle):
         self.page_changer.setFixedSize(120, 600)
         self.page_changer.item(1).setFlags(QtCore.Qt.NoItemFlags)
         self.page_changer.item(2).setFlags(QtCore.Qt.NoItemFlags)
-        self.page_changer.item(3).setFlags(QtCore.Qt.NoItemFlags)
+        #self.page_changer.item(3).setFlags(QtCore.Qt.NoItemFlags)
 
         #Initialize the individual widget pages
         self.data_selector_widget = DataSelector()
