@@ -90,7 +90,7 @@ def getMergedFlipkartBrandImage(brand=None):
 def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, icon_arrangement,ordering,parent_image_positioning):
     #This is the way I'm getting icon positions now.
     import random, os, math
-    print "Parent Image is at: ", parent_image_positioning
+    #print "Parent Image is at: ", parent_image_positioning
     #First, store the parameters in an easily-readable manner.
     #Parent image dimensions
     width_parent, height_parent = parent_image.size
@@ -262,20 +262,20 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                 #icons are to be laid out in arrays.
                 pass
             else:
-                print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
+                print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s."%icon_arrangement
         elif parent_image_positioning == (0.5, 0.5):
             #parent image is placed at the center-middle.
             if icon_arrangement == "Circular":
                 #icons are to be arranged in arcs.
                 #print "Center Position!"
-                primary_radius_multiplier = 0.8
-                secondary_radius_multiplier = 0.8
-                sweep_angle = 70
+                primary_radius_multiplier = 0.75
+                secondary_radius_multiplier = 0.75
+                sweep_angle = 85
                 primary_theta_range = (getRadians(270-sweep_angle), getRadians(270+sweep_angle))
                 secondary_theta_range = (getRadians(90-sweep_angle), getRadians(90+sweep_angle))
-
-                primary_arc_center = (int(x_center_parent-0.4*width_parent), y_top_left_parent+height_parent*0.3)
-                secondary_arc_center = (int(x_center_parent-0.4*width_parent), y_top_left_parent+height_parent-height_parent*0.5)
+                clearance_factor = 0.45
+                primary_arc_center = (int(x_center_parent-clearance_factor*width_parent), y_top_left_parent+height_parent*0.1)
+                secondary_arc_center = (int(x_center_parent-clearance_factor*width_parent), y_top_left_parent+height_parent-height_parent*0.5)
                 
                 primary_plot_points_required = len(primary_icons)
                 diagonal_length = width_base/2
@@ -605,9 +605,11 @@ def checkIcon(attribute,description):
     return True
 
 def getIconImage(icon_path, description_text, icon_relative_size, base_image_size):
-    """This method generates an image object which contains the icon image as well as the description text."""
+    """This method generates an image object which contains the icon image 
+    as well as the description text."""
     import textwrap
     import numpy as np
+    import PIL
     clearance_factor_for_text = 2.0
     font_resize_factor = 0.3
     text_lengths = [len(word) for word in description_text.split(" ")]
@@ -619,6 +621,16 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     #Don't strip for now.
     #icon_image = getStrippedImage(getResizedImage(Image.open(icon_path).convert("RGBA"),icon_relative_size,"height",base_image_size), threshold=30)
     icon_image = getResizedImage(Image.open(icon_path).convert("RGBA"),icon_relative_size,"height",base_image_size)
+    shape = "Circle"
+    shape_width = int(max(icon_image.size)*1.45)
+    shape_path = os.path.join("Images","Shapes","%s.png"%shape)
+
+    shape = Image.open(shape_path).convert("RGBA").resize((shape_width,shape_width), resample=PIL.Image.ANTIALIAS)
+    shape_and_icon= shape
+    icon_x = int(shape.size[0]/2-icon_image.size[0]/2)
+    icon_y = int(shape.size[1]/2-icon_image.size[1]/2)
+    icon_position_in_shape = (icon_x, icon_y)
+    shape_and_icon.paste(icon_image, icon_position_in_shape, icon_image)
     #icon_image = replaceColorInImage(resized_icon_image,(255,255,255,255),(0,0,0,255))
     #Create a blank canvas for the text.
     max_w, max_h = 500, 500
@@ -633,7 +645,9 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     icon_text_color = (58, 141, 190) #iron box
     icon_text_color = (255, 62, 13) #red
     icon_text_color = (0,0,0) #air fryer 2, ICT powerbank, Smart Watch
+    icon_text_color = (19, 7, 58) #Some blue for refrigerator.
     text_canvas = Image.new("RGBA",(max_w, max_h),(0,0,0,0))
+    icon_image = shape_and_icon #remove to disable circle.
     if icon_text_color != (0,0,0):
         icon_image_array = np.array(icon_image)
         icon_image_array[(icon_image_array == (0,0,0,255)).all(axis = -1)] = (icon_text_color[0],icon_text_color[1],icon_text_color[2],255)

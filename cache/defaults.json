@@ -1,5 +1,5 @@
 {
-	"Parent Image Resize Factor": 42, 
+	"Parent Image Resize Factor": 0.37, 
 	"Icon Font Italics": true, 
 	"Image Aspect Ratio": [9, 14], 
 	"Icon Arrangement": "Circular", 
@@ -7,7 +7,7 @@
 	"Icon Font Underline": false, 
 	"Allow Icons Overlap": false, 
 	"Allow Icons Without Text": false, 
-	"Parent Image Resize Reference": "Width", 
+	"Parent Image Resize Reference": "Smart Fit", 
 	"Icon Palette": [0, 0, 0], 
 	"Background Color Threshold Value": 15, 
 	"Secondary Attribute Relative Size": 8, 
@@ -15,8 +15,8 @@
 	"Primary Attribute Relative Size": 8, 
 	"Icon Font Color": [0, 0, 0], 
 	"Use Icon Color For Font Color": true, 
-	"Parent Image Position": [1, 1], 
+	"Parent Image Position": [0.5, 0.5], 
 	"Icon Font Size": 30, 
-	"Margin": 5.0, 
+	"Margin": 0.05, 
 	"Icon Font Bold": false
 }

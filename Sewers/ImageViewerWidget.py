@@ -25,9 +25,12 @@ class ImageViewerWidget(QtGui.QWidget):
         self.image_holder = QtGui.QLabel()
         self.image_holder.setFixedSize(90*3,140*3)
         layout = QtGui.QHBoxLayout()
-        layout.addWidget(self.left,0,QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-        layout.addWidget(self.image_holder,2,QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-        layout.addWidget(self.right,0,QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        layout.addWidget(self.left,
+                        0, QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        layout.addWidget(self.image_holder,
+                        2, QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        layout.addWidget(self.right,
+                        0, QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         self.setLayout(layout)
     
     def setImages(self, images_list):

@@ -12,38 +12,39 @@ class LayoutDesigner(QtGui.QWidget):
     def __init__(self):
         super(LayoutDesigner,self).__init__()
         defaults = {
-                "Parent Image Resize Factor": 42, 
-                "Secondary Attribute Relative Size": 8,
-                "Image Aspect Ratio": [9, 14], 
-                "Background Color Threshold Value": 15, 
-                "Primary Attribute Relative Size": 8, 
-                "Parent Image Position": [1, 1], 
-                "Margin": 5.0, 
-                "Icon Arrangement": "Circular", 
-                "Use Simple Color Replacement": True, 
-                "Parent Image Resize Reference": "Width", 
-                "Icon Palette": [0, 0, 0], 
-                "Allow Icons Overlap": False,
-                "Allow Icons Without Text": False,
-                "Icon Font Bold": False,
-                "Icon Font Underline": False,
-                "Icon Font Italics": True,
-                "Icon Font Size": 30,
-                "Icon Font Color": [0, 0, 0],
-                "Use Icon Color For Font Color": True,
-                "Load Icon Colors From Background": False
-            }
+                    "Parent Image Resize Factor": 42, 
+                    "Icon Font Italics": True, 
+                    "Image Aspect Ratio": [9, 14], 
+                    "Icon Arrangement": "Circular", 
+                    "Use Simple Color Replacement": True, 
+                    "Icon Font Underline": False, 
+                    "Allow Icons Overlap": False, 
+                    "Allow Icons Without Text": False, 
+                    "Parent Image Resize Reference": "Width", 
+                    "Icon Palette": [0, 0, 0], 
+                    "Background Color Threshold Value": 15, 
+                    "Secondary Attribute Relative Size": 8, 
+                    "Load Icon Colors From Background": False, 
+                    "Primary Attribute Relative Size": 8, 
+                    "Icon Font Color": [0, 0, 0], 
+                    "Use Icon Color For Font Color": True, 
+                    "Parent Image Position": [1, 1], 
+                    "Icon Font Size": 30, 
+                    "Margin": 5.0, 
+                    "Icon Font Bold": False
+                }
         #with open(os.path.join("cache","defaults.json"),"w") as json_file_handler:
-        #    json.dump(defaults,json_file_handler)
+        #    json.dump(defaults,json_file_handler, indent=4, sort_keys=True)
         self.createUI()
         self.mapEvents()
         #Load values from the default file.
         self.resetValues()
+        
 
     def resetValues(self):
         default_file = os.path.join("cache","defaults.json")
         if os.path.isfile(default_file):
-            self.setValues()
+            self.setValues(default_file)
 
     def setValues(self, file_path):
         """Sets the defaults for the settings.
@@ -63,7 +64,7 @@ class LayoutDesigner(QtGui.QWidget):
         parent_image_position_value = settings_from_json["Parent Image Position"]
         if type(parent_image_position_value) != str:
             y, x = parent_image_position_value
-            self.parent_image_position_position_radiobuttons[y][x].setChecked(True)
+            self.parent_image_position_position_radiobuttons[int(2*y)][int(2*x)].setChecked(True)
         else:
             self.parent_image_position_position_radiobuttons[1][1].setChecked(True)
             self.use_random_parent_image_position.setChecked(True)
@@ -74,7 +75,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.parent_image_resize_reference.setCurrentIndex(resize_reference_combo_index)
         
         #Set the primary or product image resize percentage value.
-        parent_image_resize_factor_value = settings_from_json["Parent Image Resize Factor"]
+        parent_image_resize_factor_value = 100*settings_from_json["Parent Image Resize Factor"]
         self.product_image_scale_spinbox.setValue(parent_image_resize_factor_value)
         
         #Set the color replacement algorithm
@@ -90,7 +91,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.palette_selection_combobox.setCurrentIndex(1)
         
         #Set the Image margin percentage.
-        margin_value = settings_from_json["Margin"]
+        margin_value = 100*settings_from_json["Margin"]
         self.image_margin_spinbox.setValue(margin_value)
         
         #Set the Aspect ratio
@@ -536,7 +537,10 @@ class LayoutDesigner(QtGui.QWidget):
                                                         os.getcwd(), ("JSON files (*.json)")
                                                         )
         if save_file_name:
-            print save_file_name
+            settings = self.getCurrentSettings()
+            with open(save_file_name,"w") as json_file_handler:
+                json.dump(settings,json_file_handler,indent=4,sort_keys=True)
+
 
     def limitSecondaryIconSize(self,maximum_primary_value):
         self.secondary_attr_icon_size_spin_box.setMaximum(maximum_primary_value)
@@ -578,7 +582,7 @@ class LayoutDesigner(QtGui.QWidget):
         return position
 
     def getIconPalette(self):
-        return "Black" #Fix this later.
+        return (0,0,0) #Fix this later.
 
     def getOverlap(self):
         return self.allow_overlap_checkbox.isChecked()
@@ -612,10 +616,74 @@ class LayoutDesigner(QtGui.QWidget):
     def getAspectRatio(self):
         width = int(self.final_image_aspect_ratio_input_box_1.value())
         height = int(self.final_image_aspect_ratio_input_box_2.value())
-        return height, width
+        return width, height #is this order fine?
 
     def allowTextlessIcons(self):
         return self.allow_textless_icons_checkbox.isChecked()
 
     def getMargin(self):
          return (self.image_margin_spinbox.value()/100)
+
+    def loadIconColorsFromBackground(self):
+        return "False" #Add handles for this later.
+
+    def getIconFontColor(self):
+        return (0,0,0)
+
+    def useIconColorForFontColor(self):
+        return True
+
+    def getIconFontSize(self):
+        return self.font_size_spinbox.value()
+
+    def allowOverlap(self):
+        return False #Add functionality for this later.
+
+    def getCurrentSettings(self):
+        """Returns a dictionary that summarizes all the current settings."""
+        parent_image_resize_factor = self.getParentImageResizeFactor()
+        icon_font_italics = self.italics_button.isChecked()
+        icon_arrangement_value = self.getIconPosition()
+        image_aspect_ratio = self.getAspectRatio()
+        use_simple_color_replacement = self.useSimpleColorStripAlgorithm()
+        icon_font_underline = self.underline_button.isChecked()
+        allow_overlap = self.allowOverlap()
+        allow_textless_icons = self.allowTextlessIcons()
+        parent_image_resize_reference = self.getParentImageResizeReference()
+        icon_palette = self.getIconPalette()
+        background_color_threshold = self.getColorStripThreshold()
+        load_icon_color_from_background = self.loadIconColorsFromBackground()
+        primary_attr_icon_size_value = self.primary_attr_icon_size_spin_box.value()
+        secondary_attr_icon_size_value = self.secondary_attr_icon_size_spin_box.value()
+        icon_font_color = self.getIconFontColor()
+        use_icon_color_for_font_color = self.useIconColorForFontColor()
+        parent_image_position = self.getParentImageCoords()
+        icon_font_size = self.getIconFontSize()
+        margin = self.getMargin()
+        icon_font_bold = self.bold_button.isChecked()
+        icon_bounding_box = self.getIconBoundingBox()
+
+
+        settings = {
+                    "Parent Image Resize Factor": parent_image_resize_factor, 
+                    "Icon Font Italics": icon_font_italics, 
+                    "Image Aspect Ratio": image_aspect_ratio, 
+                    "Icon Arrangement": icon_arrangement_value, 
+                    "Use Simple Color Replacement": use_simple_color_replacement, 
+                    "Icon Font Underline": icon_font_underline, 
+                    "Allow Icons Overlap": allow_overlap, 
+                    "Allow Icons Without Text": allow_textless_icons, 
+                    "Parent Image Resize Reference": parent_image_resize_reference, 
+                    "Icon Palette": icon_palette, 
+                    "Background Color Threshold Value": background_color_threshold, 
+                    "Load Icon Colors From Background": load_icon_color_from_background, 
+                    "Primary Attribute Relative Size": primary_attr_icon_size_value, 
+                    "Secondary Attribute Relative Size": secondary_attr_icon_size_value, 
+                    "Icon Font Color": icon_font_color, 
+                    "Use Icon Color For Font Color": use_icon_color_for_font_color, 
+                    "Parent Image Position": parent_image_position, 
+                    "Icon Font Size": icon_font_size, 
+                    "Margin": margin, 
+                    "Icon Font Bold": icon_font_bold
+                }
+        return settings
