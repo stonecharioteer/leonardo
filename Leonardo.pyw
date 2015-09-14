@@ -82,8 +82,8 @@ class Leonardo(Turtle):
         self.hamato_yoshi.progress.connect(self.preview_and_run_widget.displayProgress)
         self.hamato_yoshi.sendMessage.connect(self.displayActivity)
 
-    def displayActivity(self,message):
-        full_message = message + " @" + datetime.datetime.now().strftime("[%a (%d-%m)] %H:%M:%S") 
+    def displayActivity(self, message, last_known_eta):
+        full_message = message + " @" + datetime.datetime.now().strftime("[%a (%d-%m)] %H:%M:%S") + " ETA:" + last_known_eta.strftime("[%a (%d-%m)] %H:%M:%S")
         self.preview_and_run_widget.status_message.setText(full_message)
 
     def showPreviewScreen(self):
@@ -113,6 +113,7 @@ class Leonardo(Turtle):
         self.hamato_yoshi.parent_image_resize_factor = self.layout_designer_widget.getParentImageResizeFactor()
         self.hamato_yoshi.allow_textless_icons = self.layout_designer_widget.allowTextlessIcons()
         self.hamato_yoshi.margin = self.layout_designer_widget.getMargin()
+        self.hamato_yoshi.use_category_specific_backgrounds = self.layout_designer_widget.useCategorySpecificBackgrounds()
         self.hamato_yoshi.output_location = os.getcwd()
         self.hamato_yoshi.allow_run = True
     

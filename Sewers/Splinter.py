@@ -13,7 +13,7 @@ import Katana
 
 class Splinter(QtCore.QThread):
     progress = QtCore.pyqtSignal(str, int, datetime.datetime, bool, list)
-    sendMessage = QtCore.pyqtSignal(str)
+    sendMessage = QtCore.pyqtSignal(str, datetime.datetime)
 
     def __init__(self):
         super(Splinter,self).__init__()
@@ -35,6 +35,7 @@ class Splinter(QtCore.QThread):
         self.allow_textless_icons = False
         self.margin = 0.05
         self.output_location = None
+        self.use_category_specific_backgrounds = True
 
         if not self.isRunning():
             self.start(QtCore.QThread.LowPriority)
@@ -43,13 +44,14 @@ class Splinter(QtCore.QThread):
         while True:
             if self.allow_run:
                 total = len(self.data)
-                self.sendMessage.emit("Started processing %d FSNs."%total)
+                self.last_eta = datetime.datetime.now()
+                self.sendMessage.emit("Started processing %d FSNs."%total, self.last_eta)
                 counter = 0
                 start_time = datetime.datetime.now()
                 images_list = []
                 for row in self.data:
                     counter+=1
-                    self.sendMessage.emit("Starting to process %d of %d FSNs."%(counter,total))
+                    self.sendMessage.emit("Starting to process %d of %d FSNs."%(counter,total), self.last_eta)
                     fsn = row["FSN"]
                     if "Brand" in row.keys():
                         brand = row["Brand"]
@@ -65,7 +67,7 @@ class Splinter(QtCore.QThread):
                             primary_attributes.append(key)
                         elif "Secondary USP" in key:
                             secondary_attributes.append(key)
-                    self.sendMessage.emit("Seggregated primary and secondary attributes for %d of %d FSNs."%(counter,total))
+                    self.sendMessage.emit("Seggregated primary and secondary attributes for %d of %d FSNs."%(counter,total), self.last_eta)
 
                     primary_attributes_count = len(primary_attributes)/2
                     primary_attribute_data = [] 
@@ -95,7 +97,7 @@ class Splinter(QtCore.QThread):
                                 else:
                                     description_text = " "
                             secondary_attribute_data.append({"Attribute":attribute_name,"Description Text":description_text})
-                    self.sendMessage.emit("Preparing app image for %d of %d FSNs."%(counter,total))
+                    self.sendMessage.emit("Preparing app image for %d of %d FSNs."%(counter,total), self.last_eta)
 
                     image_name = self.prepareAppImage(
                                                 fsn, brand, category, 
@@ -109,7 +111,7 @@ class Splinter(QtCore.QThread):
                                                 self.bg_color_strip_threshold, self.output_location
                                             )
 
-                    eta = Katana.getETA(start_time, counter, total)
+                    self.eta = Katana.getETA(start_time, counter, total)
                     images_list.append(image_name)
                     if counter < total:
                         message = "Processing %d of %d FSNs." %(counter,total)
@@ -119,8 +121,9 @@ class Splinter(QtCore.QThread):
                         message = "Completed."
                         progress = 100
                         completion_status = True
-                    self.progress.emit(message, progress, eta, completion_status, images_list)
-                    self.sendMessage.emit("Completed %d in %ss." %(counter, datetime.datetime.now() - start_time))
+                    self.progress.emit(message, progress, self.eta, completion_status, images_list)
+                    self.last_eta = self.eta
+                    self.sendMessage.emit("Completed %d in %ss." %(counter, datetime.datetime.now() - start_time), self.last_eta)
                 self.allow_run = False
 
     def prepareAppImage(self, fsn, brand, category, primary_attribute_data, secondary_attribute_data, parent_image_positioning, icon_positioning, icon_palette, allow_overlap, background_image_path, primary_attribute_relative_size, secondary_attribute_relative_size, bounding_box, use_simple_bg_color_strip, bg_color_strip_threshold, output_location):
@@ -165,23 +168,24 @@ class Splinter(QtCore.QThread):
         """
         #Get the primary image path
         message = "Getting parent image for %s."%fsn
-        self.sendMessage.emit(message)
+        self.sendMessage.emit(message, self.last_eta)
         parent_image_path = Katana.getParentImage(fsn)
         #Get the background image.
         message = "Getting background image for %s."%fsn
-        self.sendMessage.emit(message)
-        background_image = Katana.getBackgroundImage(background_image_path)
+        self.sendMessage.emit(message, self.last_eta)
+        background_image = Katana.getBackgroundImage(background_image_path,
+                                            self.use_category_specific_backgrounds, category)
         base_image = Katana.getBaseImage()
         #Get the primary and secondary attribute icons.
         message = "Getting primary attribute data image for %s."%fsn
-        self.sendMessage.emit(message)
+        self.sendMessage.emit(message, self.last_eta)
         primary_attributes_and_icons_data = Katana.getIcons(primary_attribute_data, category, primary_attribute_relative_size, base_image.size)
         message = "Getting secondary attribute data image for %s."%fsn
-        self.sendMessage.emit(message)
+        self.sendMessage.emit(message, self.last_eta)
         secondary_attributes_and_icons_data = Katana.getIcons(secondary_attribute_data,category,secondary_attribute_relative_size, base_image.size)
         #First resize the parent image.
         message = "Resizing parent image for %s."%fsn
-        self.sendMessage.emit(message)
+        self.sendMessage.emit(message, self.last_eta)
         original_parent_image = Image.open(parent_image_path).convert("RGBA")
         #resized_parent_image = Katana.getResizedImage(original_parent_image, self.parent_image_resize_factor, self.parent_image_resize_reference, base_image.size)
         #Check the resize reference for the smartfit option. Create use a local parent_image_resize_reference value to control this.
@@ -203,7 +207,7 @@ class Splinter(QtCore.QThread):
             #Simple background strip just searches for white and removes it.
             #Later, this should be extended to remove any background color.
             message = "Stripping parent image background using simple strip algorithm for %s."%fsn
-            self.sendMessage.emit(message)
+            self.sendMessage.emit(message, self.last_eta)
             parent_image = Katana.replaceColorInImage(resized_parent_image, (255,255,255,255), (0,0,0,0), bg_color_strip_threshold)
         else:
             #The complex movement algorithm takes thing by strokes.
@@ -213,11 +217,11 @@ class Splinter(QtCore.QThread):
             #channel to zero, quitting whenever it encounters an RGB value
             #that is below or above the threshold.
             message = "Stripping parent image background using movement algorithm for %s."%fsn
-            self.sendMessage.emit(message)
+            self.sendMessage.emit(message, self.last_eta)
             parent_image = Katana.getStrippedImage(resized_parent_image, bg_color_strip_threshold)
         #Based on the input control parameters, get the coordinates for the parent image.
         message = "Getting parent image coordinates corresponding to %s for %s."%(parent_image_positioning, fsn)
-        self.sendMessage.emit(message)
+        self.sendMessage.emit(message, self.last_eta)
         if parent_image_positioning == "Random":
             parent_image_positioning = Katana.getRandomParentImagePlacementPoints()
         parent_image_coords = Katana.getParentImageCoords(base_image.size,parent_image.size, parent_image_positioning)
@@ -225,23 +229,23 @@ class Splinter(QtCore.QThread):
         #print "Parent image Coords: ", parent_image_coords
         #print "*"*10
         message = "Pasting the parent image for %s."%(fsn)
-        self.sendMessage.emit(message)
+        self.sendMessage.emit(message, self.last_eta)
         base_image.paste(parent_image, parent_image_coords, parent_image)
         counter = 0
         message = "Getting icons and coordinates for %s."%(fsn)
-        self.sendMessage.emit(message)
+        self.sendMessage.emit(message, self.last_eta)
         icons_and_coordinates = Katana.getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, "Circular","Separate",parent_image_positioning)
         for icon in icons_and_coordinates:
             try:
                 base_image.paste(icon["Icon"],icon["Position"],icon["Icon"])
                 message = "Pasted icon on base image at %s for %s." %(icon["Position"],fsn)
-                self.sendMessage.emit(message)
+                self.sendMessage.emit(message, self.last_eta)
             except:
                 if icon["Position"] is None:
                     message = "Icon position cannot be None for %s." %(fsn)                    
                 else:
                     message = "Encountered a problem while pasting the icon on base image at %s for %s." %(icon["Position"],fsn)
-                self.sendMessage.emit(message)
+                self.sendMessage.emit(message, self.last_eta)
                 raise
         #Paste the FK and Brand Icon
         fk_brand_icon = Katana.getMergedFlipkartBrandImage(brand)

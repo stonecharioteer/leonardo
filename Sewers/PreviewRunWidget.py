@@ -47,9 +47,10 @@ class PreviewRunWidget(QtGui.QGroupBox):
         """This gets the data from the Splinter Thread."""
         self.image_viewer_widget.setImages(images_list)
         self.image_viewer_widget.moveRight()
+        eta_string = eta.strftime("%H:%M:%S")
         if not completion_status:
             self.progress_bar.setValue(progress_value)
-            self.status_message.setText("%s ETA: %s."%(status,eta.strftime("%H:%M:%S")))
+            self.status_message.setText("%s ETA: %s."%(status,eta_string))
         else:
             self.progress_bar.setValue(100)
             self.status_message.setText("Remember, remember, the 5th of November.")

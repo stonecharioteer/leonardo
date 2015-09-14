@@ -22,13 +22,18 @@ def getBaseImage():
     from PIL import Image
     return Image.new("RGBA", (1800, 2800), (0,0,0,0))
 
-def getBackgroundImage(background_path):
+def getBackgroundImage(background_path, use_category_specific_backgrounds, category):
     import random, os
     from PIL import Image
     import PIL
-    if background_path == "Random":
-        backgrounds = glob.glob(os.path.join(os.getcwd(), "Images", "Backgrounds", "Background*.*"))
-        background_path = random.choice(backgrounds)
+    if use_category_specific_backgrounds:
+        backgrounds = glob.glob(os.path.join(os.getcwd(), "Images", "Backgrounds", "%s*.*"%category.replace(" ","_")))
+        print category
+        background_path =  backgrounds[0]
+    else:
+        if background_path == "Random":
+            backgrounds = glob.glob(os.path.join(os.getcwd(), "Images", "Backgrounds", "Background*.*"))
+            background_path = random.choice(backgrounds)
     return Image.open(background_path).convert("RGBA").resize((1800,2800), resample=PIL.Image.ANTIALIAS)
 
 def getFlipkartIconImage():
@@ -184,7 +189,6 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
             else:
                 print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
         elif parent_image_positioning in [(0.5,0.0),(0.0,0.5),(1.0,0.5),(0.5,1.0)]:
-            print "Parent image is placed at ", parent_image_positioning
             if icon_arrangement == "Circular":
                 #icons are to be arranged in arcs.
                 if parent_image_positioning == (0.5,0.0):
@@ -277,18 +281,34 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
             if icon_arrangement == "Circular":
                 #icons are to be arranged in arcs.
                 #print "Center Position!"
-                primary_radius_multiplier = 0.75
-                secondary_radius_multiplier = 0.75
+                primary_radius_multiplier = 1.0
+                secondary_radius_multiplier = 1.0
                 sweep_angle = 85
                 primary_theta_range = (getRadians(270-sweep_angle), getRadians(270+sweep_angle))
                 secondary_theta_range = (getRadians(90-sweep_angle), getRadians(90+sweep_angle))
-                clearance_factor = 0
-                clearance = max_icon_width/2
-                primary_arc_center = (int(x_center_parent-clearance), y_top_left_parent+height_parent*0.1)
-                secondary_arc_center = (int(x_center_parent-clearance), y_top_left_parent+height_parent-height_parent*0.5)
+                x_clearance = max_icon_width/2
+
+                y_top = int(y_center_parent-0.25*height_parent)
+                y_bottom = int(y_center_parent+0.15*height_parent)
+                
+                if ((y_bottom-y_top) >= max_icon_height):
+                    print "There is no clash between icons."
+                    y_clearance = 0
+                else:
+                    print "There is a clash between icons"
+                    print "Maximum icon height, ",max_icon_height
+                    y_clearance = int(max_icon_height*0.155)
+
+                primary_arc_center = (int(x_center_parent-x_clearance), y_top-y_clearance)
+                secondary_arc_center = (int(x_center_parent-x_clearance), y_bottom)
                 
                 primary_plot_points_required = len(primary_icons)
-                diagonal_length = width_base/2
+                
+                if width_parent >= height_parent:
+                    diagonal_length = width_parent/2
+                else:
+                    diagonal_length = width_parent + (height_parent-width_parent)/2
+
                 primary_radius = primary_radius_multiplier*diagonal_length
                 primary_icon_positions = getPointsOnArc(primary_arc_center, primary_radius, primary_plot_points_required, primary_theta_range)
                 
@@ -631,6 +651,7 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     #Don't strip for now.
     #icon_image = getStrippedImage(getResizedImage(Image.open(icon_path).convert("RGBA"),icon_relative_size,"height",base_image_size), threshold=30)
     icon_image = getResizedImage(Image.open(icon_path).convert("RGBA"),icon_relative_size,"height",base_image_size)
+    shape = "Octagon_Straight"
     shape = "Circle"
     shape_width = int(max(icon_image.size)*1.45)
     shape_path = os.path.join("Images","Shapes","%s.png"%shape)

@@ -39,7 +39,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.mapEvents()
         #Load values from the default file.
         self.resetValues()
-        
+
 
     def resetValues(self):
         default_file = os.path.join("cache","defaults.json")
@@ -315,7 +315,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.underline_button.setStyleSheet("QPushButton {text-decoration: underline;}")
         self.font_size_label = QtGui.QLabel("Font Size:")
         self.font_size_spinbox = QtGui.QSpinBox()
-        self.font_size_spinbox.setRange(30,72)
+        self.font_size_spinbox.setRange(18,45)
         self.font_color_label = QtGui.QLabel("Font Color:")
         self.font_color_combobox = QtGui.QComboBox()
         self.font_color_combobox.addItems(["Black","White","FK Blue","FK Yellow","Auto Select","Choose Manually"])
@@ -638,6 +638,9 @@ class LayoutDesigner(QtGui.QWidget):
 
     def allowOverlap(self):
         return False #Add functionality for this later.
+
+    def useCategorySpecificBackgrounds(self):
+        return True #Add a handle for this later.
 
     def getCurrentSettings(self):
         """Returns a dictionary that summarizes all the current settings."""
