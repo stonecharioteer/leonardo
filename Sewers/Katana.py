@@ -103,6 +103,15 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
     #Seggregate the primary and secondary icons.
     primary_icons = [icon["Icon"] for icon in primary_attributes_and_icons_data]
     secondary_icons = [icon["Icon"] for icon in secondary_attributes_and_icons_data]
+    icons = primary_icons + secondary_icons
+    #Get the icon sizes.
+    icon_sizes = [icon.size for icon in icons]
+    icon_widths = [icon_size[0] for icon_size in icon_sizes]
+    icon_heights = [icon_size[1] for icon_size in icon_sizes]
+    #Get the maximum Icon width and height.
+    max_icon_width = max(icon_widths)
+    max_icon_height = max(icon_heights)
+
     #Split the operation based on whether the ordering is separate or alternate.
     if ordering == "Separate":
         #Primary and secondary icon lines and arrangement is to be kept separate.
@@ -273,9 +282,10 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                 sweep_angle = 85
                 primary_theta_range = (getRadians(270-sweep_angle), getRadians(270+sweep_angle))
                 secondary_theta_range = (getRadians(90-sweep_angle), getRadians(90+sweep_angle))
-                clearance_factor = 0.45
-                primary_arc_center = (int(x_center_parent-clearance_factor*width_parent), y_top_left_parent+height_parent*0.1)
-                secondary_arc_center = (int(x_center_parent-clearance_factor*width_parent), y_top_left_parent+height_parent-height_parent*0.5)
+                clearance_factor = 0
+                clearance = max_icon_width/2
+                primary_arc_center = (int(x_center_parent-clearance), y_top_left_parent+height_parent*0.1)
+                secondary_arc_center = (int(x_center_parent-clearance), y_top_left_parent+height_parent-height_parent*0.5)
                 
                 primary_plot_points_required = len(primary_icons)
                 diagonal_length = width_base/2
