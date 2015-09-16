@@ -21,7 +21,9 @@ class QColorButton(QWidget):
         self.current_black = (0,0,0)
         self.current_grey_1 = (55,55,55)
         self.current_grey_2 = (123,123,123)
+        self.current_grey_3 = (200,200,200)
         self.current_white = (255,255,255)
+
         self.black_button.pressed.connect(self.onColorPicker)
         icon_path = os.path.join("essentials","eyedropper.png")
         icon_pixmap = QPixmap(icon_path)
@@ -33,10 +35,13 @@ class QColorButton(QWidget):
         self.black_button.setIconSize(icon_size)
         self.grey_1_button = QPushButton()
         self.grey_2_button = QPushButton()
+        self.grey_3_button = QPushButton()
         self.white_button = QPushButton()
+        self.white_button.setIcon(icon)
+
         layout = QHBoxLayout()
-        self.buttons_list = [self.black_button,self.grey_1_button, self.grey_2_button, self.white_button]
-        self.color_list = [self.current_black, self.current_grey_1, self.current_grey_2, self.current_white]
+        self.buttons_list = [self.black_button,self.grey_1_button, self.grey_2_button, self.grey_3_button, self.white_button]
+        self.color_list = [self.current_black, self.current_grey_1, self.current_grey_2, self.current_grey_3, self.current_white]
         counter = 0
         for button in self.buttons_list:
             button.setFixedSize(button_size)
@@ -45,24 +50,29 @@ class QColorButton(QWidget):
             counter += 1
 
         #self.setFixedSize(button_size)
-        self.black_button.setToolTip("Left click to select the base black color.")
+        self.black_button.setToolTip("Left click to select the icon border color.")
+        self.white_button.setToolTip("Left click to select the icon background color.")
         self.setMaximumHeight(button_size.height()*1.5)
         self.setLayout(layout)
 
-    def setColor(self, color):
+    def setBorderColor(self, color):
         import PIL
         if color != self._color:
             self._color = color
             self.colorChanged.emit()
         self.current_black = PIL.ImageColor.getrgb(str(color))
-        self.current_grey_1 = [int(0.6*(255-color)) for color in self.current_black]
-        self.current_grey_2 = [int(0.8*(255-color)) for color in self.current_black]
+        self.current_grey_1 = [int(0.8*(color)) for color in self.current_black]
+        self.current_grey_2 = [int(0.5*(255-color)) for color in self.current_black]
+        self.current_grey_3 = [int(0.8*(255-color)) for color in self.current_black]
         self.current_white = [int(1*(255-color)) for color in self.current_black]
         self.color_list = [self.current_black, self.current_grey_1, self.current_grey_2, self.current_white]
         counter = 0
         for button in self.buttons_list:
             button.setStyleSheet("QPushButton{background-color: rgb(%d,%d,%d);}" % (self.color_list[counter][0],self.color_list[counter][1],self.color_list[counter][2]))
             counter+=1
+
+    def setBackgroundColor(self, color):
+        import PIL
         
 
         if self._color:
@@ -103,6 +113,7 @@ class QColorButton(QWidget):
         self.current_black = colors_list[0]
         self.current_grey_1 = colors_list[1]
         self.current_grey_2 = colors_list[2]
+        self.current_white = colors_list[3]
 
         self.color_list = [self.current_black, self.current_grey_1, self.current_grey_2, self.current_white]
         counter = 0

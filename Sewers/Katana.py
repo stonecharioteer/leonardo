@@ -101,7 +101,7 @@ def getMergedFlipkartBrandImage(brand=None):
 
     return final_image
 
-def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, icon_arrangement,ordering,parent_image_positioning):
+def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, icon_arrangement, ordering, parent_image_positioning):
     #This is the way I'm getting icon positions now.
     import random, os, math
     #print "Parent Image is at: ", parent_image_positioning
@@ -607,7 +607,7 @@ def getParentImage(fsn):
         parent_image_path = os.path.join("essentials","na_parent_image.png")
     return parent_image_path
 
-def getIcons(attribute_data, category, icon_relative_size, base_image_size):
+def getIcons(attribute_data, category, icon_relative_size, base_image_size, colors_list):
     #print attribute_data, category
     look_in_path = os.path.join(os.getcwd(),"Images","Repository",category)
     image_search_path = os.path.join(look_in_path, "*.*")
@@ -622,7 +622,7 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size):
             #If it hasn't yet found an icon, or in first run.
             if not found_icon:
                 if attribute["Attribute"].lower().strip() in icon.lower().strip():
-                    icon_with_text = getIconImage(icon, attribute["Description Text"], icon_relative_size, base_image_size)
+                    icon_with_text = getIconImage(icon, attribute["Description Text"], icon_relative_size, base_image_size, colors_list)
                     attribute.update({"Icon": icon_with_text})
                     found_icon = True
                     #attribute.update({"Icon": None})
@@ -643,7 +643,7 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size):
 def checkIcon(attribute,description):
     return True
 
-def getIconImage(icon_path, description_text, icon_relative_size, base_image_size):
+def getIconImage(icon_path, description_text, icon_relative_size, base_image_size, colors_list):
     """This method generates an image object which contains the icon image 
     as well as the description text."""
     import textwrap
@@ -687,11 +687,54 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     icon_text_color = (255, 62, 13) #red
     icon_text_color = (0,0,0) #air fryer 2, ICT powerbank, Smart Watch
     icon_text_color = (19, 7, 58) #Some blue for refrigerator.
+    #print colors_list
+    black = [color for color in colors_list[0]]
+    if len(black) == 3:
+        black.append(255)
+    black = tuple(black)
+    
+    grey_1 = [color for color in colors_list[1]]
+    if len(grey_1) == 3:
+        grey_1.append(255)
+    grey_1 = tuple(grey_1)
+
+    grey_2 = [color for color in colors_list[2]]
+    if len(grey_2) == 3:
+        grey_2.append(255)
+    grey_2 = tuple(grey_2)
+    
+    white = [color for color in colors_list[3]]
+    if len(white) == 3:
+        white.append(255)
+    white = tuple(white)
+
+    icon_text_color = black
+
     text_canvas = Image.new("RGBA",(max_w, max_h),(0,0,0,0))
     icon_image = shape_and_icon #remove to disable circle.
     if icon_text_color != (0,0,0):
         icon_image_array = np.array(icon_image)
-        icon_image_array[(icon_image_array == (0,0,0,255)).all(axis = -1)] = (icon_text_color[0],icon_text_color[1],icon_text_color[2],255)
+        row_index = 0
+        for row in icon_image_array:
+            column_index = 0
+            for column in row:
+                red, blue, green, alpha = column
+                if alpha!=0:
+                    if (red == 0) and (blue == 0) and (green == 0):
+                        icon_image_array[row_index][column_index] = black
+                    elif (0<red<100) and (0<blue<100) and (0<green<100):
+                        icon_image_array[row_index][column_index] = grey_1
+                    elif (100<=red<255) and (100<=blue<255) and (100<=green<255):
+                        icon_image_array[row_index][column_index] = grey_2
+                    else:
+                        icon_image_array[row_index][column_index] = white
+                column_index += 1
+            row_index += 1
+
+        #icon_image_array[(icon_image_array == (0,0,0,255)).all(axis = -1)] = (black[0],black[1],black[2],255)
+        #icon_image_array[(icon_image_array == (255,255,255,255)).all(axis = -1)] = (white[0],white[1],white[2],255)
+
+
         icon_image = Image.fromarray(icon_image_array,"RGBA")
 
     draw_text_handle = ImageDraw.Draw(text_canvas)
@@ -719,7 +762,7 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     text_canvas_position = (text_x, text_y)
     final_canvas.paste(icon_image, icon_position, icon_image)
     final_canvas.paste(text_canvas, text_canvas_position, text_canvas)
-
+    final_canvas.save(os.path.join("cache",os.path.basename(icon_path)))
     return final_canvas
 
 def getValidPlacementPoints(base_image_size, parent_image_size, parent_coordinates, past_icons_data, new_icon_data, allow_overlap):

@@ -35,6 +35,7 @@ class Splinter(QtCore.QThread):
         self.allow_textless_icons = False
         self.margin = 0.05
         self.output_location = None
+        self.colors_list = [(0,0,0),(55,55,55),(127,127,127),(255,255,255)]
         self.use_category_specific_backgrounds = True
 
         if not self.isRunning():
@@ -108,7 +109,8 @@ class Splinter(QtCore.QThread):
                                                 self.primary_attribute_relative_size, 
                                                 self.secondary_attribute_relative_size, 
                                                 self.bounding_box, self.use_simple_bg_color_strip, 
-                                                self.bg_color_strip_threshold, self.output_location
+                                                self.bg_color_strip_threshold, self.colors_list,
+                                                self.output_location
                                             )
 
                     self.eta = Katana.getETA(start_time, counter, total)
@@ -126,7 +128,7 @@ class Splinter(QtCore.QThread):
                     self.sendMessage.emit("Completed %d in %ss." %(counter, datetime.datetime.now() - start_time), self.last_eta)
                 self.allow_run = False
 
-    def prepareAppImage(self, fsn, brand, category, primary_attribute_data, secondary_attribute_data, parent_image_positioning, icon_positioning, icon_palette, allow_overlap, background_image_path, primary_attribute_relative_size, secondary_attribute_relative_size, bounding_box, use_simple_bg_color_strip, bg_color_strip_threshold, output_location):
+    def prepareAppImage(self, fsn, brand, category, primary_attribute_data, secondary_attribute_data, parent_image_positioning, icon_positioning, icon_palette, allow_overlap, background_image_path, primary_attribute_relative_size, secondary_attribute_relative_size, bounding_box, use_simple_bg_color_strip, bg_color_strip_threshold, colors_list, output_location):
         """This method takes one fsn set, and prepares the app-image.
         ALGORITHM:
         1. If the background image is specified, 
@@ -179,10 +181,10 @@ class Splinter(QtCore.QThread):
         #Get the primary and secondary attribute icons.
         message = "Getting primary attribute data image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta)
-        primary_attributes_and_icons_data = Katana.getIcons(primary_attribute_data, category, primary_attribute_relative_size, base_image.size)
+        primary_attributes_and_icons_data = Katana.getIcons(primary_attribute_data, category, primary_attribute_relative_size, base_image.size, colors_list)
         message = "Getting secondary attribute data image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta)
-        secondary_attributes_and_icons_data = Katana.getIcons(secondary_attribute_data,category,secondary_attribute_relative_size, base_image.size)
+        secondary_attributes_and_icons_data = Katana.getIcons(secondary_attribute_data,category,secondary_attribute_relative_size, base_image.size, colors_list)
         #First resize the parent image.
         message = "Resizing parent image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta)
@@ -234,7 +236,12 @@ class Splinter(QtCore.QThread):
         counter = 0
         message = "Getting icons and coordinates for %s."%(fsn)
         self.sendMessage.emit(message, self.last_eta)
-        icons_and_coordinates = Katana.getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, "Circular","Separate",parent_image_positioning)
+        icons_and_coordinates = Katana.getIconsAndCoordinates(base_image, 
+                                            parent_image, parent_image_coords, 
+                                            primary_attributes_and_icons_data, 
+                                            secondary_attributes_and_icons_data, "Circular",
+                                            "Separate", parent_image_positioning
+                                            )
         for icon in icons_and_coordinates:
             try:
                 base_image.paste(icon["Icon"],icon["Position"],icon["Icon"])

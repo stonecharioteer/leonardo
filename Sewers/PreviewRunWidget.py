@@ -1,4 +1,4 @@
-import os
+import os, datetime
 from PyQt4 import QtGui, QtCore
 from ImageViewerWidget import ImageViewerWidget
 from ProgressBar import ProgressBar
