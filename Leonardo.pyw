@@ -44,7 +44,8 @@ class Leonardo(Turtle):
                     }
                 ]
         self.page_changer.addElements(page_control_list)
-        self.page_changer.setFixedSize(120, 600)
+        self.page_changer.setFixedSize(120, 120*len(page_control_list))
+        
         self.page_changer.item(1).setFlags(QtCore.Qt.NoItemFlags)
         self.page_changer.item(2).setFlags(QtCore.Qt.NoItemFlags)
         #self.page_changer.item(3).setFlags(QtCore.Qt.NoItemFlags)
