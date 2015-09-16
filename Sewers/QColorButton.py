@@ -34,7 +34,6 @@ class QColorButton(QWidget):
         self.grey_1_button = QPushButton()
         self.grey_2_button = QPushButton()
         self.white_button = QPushButton()
-        self.white_button.setIcon(icon)
         layout = QHBoxLayout()
         self.buttons_list = [self.black_button,self.grey_1_button, self.grey_2_button, self.white_button]
         self.color_list = [self.current_black, self.current_grey_1, self.current_grey_2, self.current_white]
@@ -47,7 +46,6 @@ class QColorButton(QWidget):
 
         #self.setFixedSize(button_size)
         self.black_button.setToolTip("Left click to select the base black color.")
-        self.white_button.setToolTip("Left click to select the base white color.")
         self.setMaximumHeight(button_size.height()*1.5)
         self.setLayout(layout)
 
