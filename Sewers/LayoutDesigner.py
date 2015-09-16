@@ -156,6 +156,10 @@ class LayoutDesigner(QtGui.QWidget):
         if type(load_icon_color_from_background) != bool:
             load_icon_color_from_background = False
 
+        #Set the bounding box.
+        icon_bounding_box = settings_from_json["Icon Bounding Box"]
+        self.icon_bounding_box_combobox.setCurrentIndex(self.icon_bounding_box_combobox.findText(icon_bounding_box))
+
 
     def createUI(self):        
         self.preview_group_box = self.createPreviewWidget()
@@ -286,15 +290,25 @@ class LayoutDesigner(QtGui.QWidget):
         self.icon_arrangement_group.addButton(self.icon_arrangement_circular)
         self.icon_arrangement_group.addButton(self.icon_arrangement_rectangular)
         self.icon_arrangement_group.setExclusive(True)
-
+        #Widget for controlling icon bounding box.
+        self.icon_bounding_box_label = QtGui.QLabel("Icon Bounding Box Shape:")
+        self.icon_bounding_box_combobox = QtGui.QComboBox()
+        self.icon_bounding_box_combobox.addItem("None")
+        icon_shape_paths = glob.glob(os.path.join(os.getcwd(),"Images","Shapes","*.png"))
+        icon_names = [os.path.splitext(os.path.basename(icon_path))[0].replace("_"," ") for icon_path in icon_shape_paths]
+        for counter in range(len(icon_shape_paths)):
+            self.icon_bounding_box_combobox.addItem(QtGui.QIcon(icon_shape_paths[counter]),icon_names[counter])
+        self.icon_bounding_box_combobox.setIconSize(QtCore.QSize(35,35))
         #Create layout and return the overall widget.
         layout_panel_layout = QtGui.QGridLayout()
         layout_panel_layout.addWidget(self.background_selection_label,0, 0)
-        layout_panel_layout.addWidget(self.background_selection_combobox,1,0,1,2)
-        layout_panel_layout.addWidget(self.parent_image_position_selector,0,3,10,2, QtCore.Qt.AlignTop)
+        layout_panel_layout.addWidget(self.background_selection_combobox,1, 0, 1, 2)
+        layout_panel_layout.addWidget(self.parent_image_position_selector,0, 3, 10, 2, QtCore.Qt.AlignTop)
         layout_panel_layout.addWidget(self.icon_arrangement_label, 2, 0, 1, 1)
         layout_panel_layout.addWidget(self.icon_arrangement_circular, 3, 0, 1, 1, QtCore.Qt.AlignRight)
         layout_panel_layout.addWidget(self.icon_arrangement_rectangular, 3, 1, 1, 1, QtCore.Qt.AlignLeft)
+        layout_panel_layout.addWidget(self.icon_bounding_box_label, 4, 0, 1, 1, QtCore.Qt.AlignRight)
+        layout_panel_layout.addWidget(self.icon_bounding_box_combobox, 4, 1, 1, 1, QtCore.Qt.AlignLeft)
         layout_panel = QtGui.QWidget()
         layout_panel.setLayout(layout_panel_layout)
         self.changeBackground()
@@ -381,10 +395,6 @@ class LayoutDesigner(QtGui.QWidget):
         self.secondary_attr_icon_size_spin_box  .setSuffix("%")
         self.secondary_attr_icon_size_spin_box.setToolTip("This sets the size of the secondary attribute icons, at a percentage relative to the background image.")
         self.secondary_attr_icon_size_spin_box.setRange(5,10)
-        #Widget for controlling icon bounding box.
-        self.icon_bounding_box_label = QtGui.QLabel("Icon Bounding Box Shape:")
-        self.icon_bounding_box_combobox = QtGui.QComboBox()
-        self.icon_bounding_box_combobox.addItems(["None","Circle","Rectangle","Square"])
         #For changing color replacement algorithm.
         self.use_simple_color_replacement = QtGui.QCheckBox("Use a Simple Colour Extraction Method to remove Parent Image Background.")
         self.use_simple_color_replacement.setToolTip("If selected, the code just finds the likely background color and removes it from the entire message.\nThis method saves a large amount of runtime.\nThis is a risky method if the product image has similar colors, or if the image quality is dodgy.\nExercise with caution.")
@@ -485,13 +495,6 @@ class LayoutDesigner(QtGui.QWidget):
                                     left_center_alignment)
         column += 1
         advanced_panel_layout.addLayout(palette_layout, row, column, 
-                                    left_center_alignment)
-        row += 1
-        column = 0
-        advanced_panel_layout.addWidget(self.icon_bounding_box_label, row, column, 
-                                    left_center_alignment)
-        column += 1
-        advanced_panel_layout.addWidget(self.icon_bounding_box_combobox, row, column, 
                                     left_center_alignment)
         row += 1
         column = 0
@@ -642,6 +645,7 @@ class LayoutDesigner(QtGui.QWidget):
     def useCategorySpecificBackgrounds(self):
         return True #Add a handle for this later.
 
+
     def getCurrentSettings(self):
         """Returns a dictionary that summarizes all the current settings."""
         parent_image_resize_factor = self.getParentImageResizeFactor()
@@ -687,6 +691,7 @@ class LayoutDesigner(QtGui.QWidget):
                     "Parent Image Position": parent_image_position, 
                     "Icon Font Size": icon_font_size, 
                     "Margin": margin, 
-                    "Icon Font Bold": icon_font_bold
+                    "Icon Font Bold": icon_font_bold,
+                    "Icon Bounding Box": icon_bounding_box
                 }
         return settings

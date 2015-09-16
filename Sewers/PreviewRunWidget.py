@@ -32,15 +32,11 @@ class PreviewRunWidget(QtGui.QGroupBox):
     	self.live_progress.setLayout(live_progress_layout)
     	self.tabs = QtGui.QTabWidget()
     	self.tabs.addTab(self.live_progress,"Live Progress")
-    	
     	self.log = QtGui.QTextEdit()
-    	
     	self.tabs.addTab(self.log,"Log")
-    	
     	layout = QtGui.QHBoxLayout()
     	layout.addWidget(self.tabs)
     	self.setLayout(layout)
-
     	self.show()
 
     def displayProgress(self,status, progress_value, eta, completion_status, images_list):
@@ -53,11 +49,5 @@ class PreviewRunWidget(QtGui.QGroupBox):
             self.status_message.setText("%s ETA: %s."%(status,eta_string))
         else:
             self.progress_bar.setValue(100)
-            self.status_message.setText("Remember, remember, the 5th of November.")
+            self.status_message.setText("Completed at %s."%datetime.datetime.now().strftime("%H:%M:%S"))
 
-
-
-
-
-        
-        

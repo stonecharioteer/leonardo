@@ -8,6 +8,15 @@ from PIL import ImageFont
 from PIL import ImageDraw
 import PIL
 
+def getTitleCase(sentence):
+    import re
+    exceptions = ["a", "an", "the", "of", "is", "and"]
+    word_list = re.split(" ", sentence)
+    final = [word_list[0].capitalize()]
+    for word in word_list[1:]:
+        final.append(word in exceptions and word or word.capitalize())
+    return " ".join(final)
+
 def getRadians(degrees):
     import math
     if (degrees == 0):
@@ -88,7 +97,7 @@ def getMergedFlipkartBrandImage(brand=None):
         line_path = [line_top, line_bottom]
         line_thickness = int(padding_factor/15*(flipkart_image.size[0]+brand_image.size[0]))
         final_image_drawing_handle.line(line_path, (0,0,0,200), line_thickness)        
-        #final_image.save("FK_"+brand+".png",dpi=(300,300))
+        final_image.save("FK_"+brand+".png",dpi=(300,300))
 
     return final_image
 
@@ -642,6 +651,7 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     import PIL
     clearance_factor_for_text = 2.0
     font_resize_factor = 0.3
+    description_text = getTitleCase(description_text)
     text_lengths = [len(word) for word in description_text.split(" ")]
     max_text_length = max(text_lengths)
     wrap_width = max_text_length if max_text_length > 10 else 10
