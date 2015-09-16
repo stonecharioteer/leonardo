@@ -59,10 +59,6 @@ class QColorButton(QWidget):
         self.current_grey_2 = [int(0.8*(255-color)) for color in self.current_black]
         self.current_white = [int(1*(255-color)) for color in self.current_black]
         self.color_list = [self.current_black, self.current_grey_1, self.current_grey_2, self.current_white]
-
-        print "Changed colors:"
-        for color in self.color_list:
-            print color
         counter = 0
         for button in self.buttons_list:
             button.setStyleSheet("QPushButton{background-color: rgb(%d,%d,%d);}" % (self.color_list[counter][0],self.color_list[counter][1],self.color_list[counter][2]))
@@ -97,3 +93,19 @@ class QColorButton(QWidget):
             self.setColor(None)
 
         return super(QColorButton, self).mousePressEvent(e)
+    
+    def getColors(self):
+        self.color_list = [self.current_black, self.current_grey_1, self.current_grey_2, self.current_white]
+        return self.color_list
+
+    def setColors(self, colors_list):
+        counter = 0
+        self.current_black = colors_list[0]
+        self.current_grey_1 = colors_list[1]
+        self.current_grey_2 = colors_list[2]
+
+        self.color_list = [self.current_black, self.current_grey_1, self.current_grey_2, self.current_white]
+        counter = 0
+        for button in self.buttons_list:
+            button.setStyleSheet("QPushButton{background-color: rgb(%d,%d,%d);}" % (self.color_list[counter][0],self.color_list[counter][1],self.color_list[counter][2]))
+            counter+=1

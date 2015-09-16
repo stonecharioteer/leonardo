@@ -87,8 +87,8 @@ class LayoutDesigner(QtGui.QWidget):
         self.background_color_threshold_spinbox.setValue(background_color_threshold_value)
         
         #Set the Palette selection method.
-        icon_color_value = settings_from_json["Icon Palette"]
-        self.palette_selection_combobox.setCurrentIndex(1)
+        icon_colors_value = settings_from_json["Icon Palette"]
+        self.palette_selection_button.setColors(icon_colors_value)
         
         #Set the Image margin percentage.
         margin_value = 100*settings_from_json["Margin"]
@@ -146,7 +146,7 @@ class LayoutDesigner(QtGui.QWidget):
         if type(use_icon_color_for_font_color) != bool:
             use_icon_color_for_font_color = False
         if use_icon_color_for_font_color:
-            icon_font_color = icon_color_value
+            icon_font_color = icon_colors_value[0]
         else:
             icon_font_color = settings_from_json["Icon Font Color"]
         icon_font_r, icon_font_g, icon_font_b = icon_font_color
@@ -374,14 +374,9 @@ class LayoutDesigner(QtGui.QWidget):
         self.product_image_scale_spinbox.setSuffix("%")
         #Widget for controlling icon color.
         self.palette_selection_label = QtGui.QLabel("Icon Palette:")
-        self.palette_selection_combobox = QtGui.QComboBox()
-        self.palette_selection_combobox.setToolTip("Choose one colour and the program picks a palette that will suit that color.\nHowever, manual QC is required for the generated images, as the program\ndoesn't yet look at the parent or background image color,\nso if the same color is picked, the image will look messy.")
-        palettes_list = ["Black","Background Appropriate Color","Based on Input Color"]
-        self.palette_selection_combobox.addItems(palettes_list)
         self.palette_selection_button = QColorButton()
-        self.palette_selection_combobox.setMinimumHeight(self.palette_selection_button.size().height())
         palette_layout = QtGui.QHBoxLayout()
-        palette_layout.addWidget(self.palette_selection_combobox,0,QtCore.Qt.AlignRight)
+        #palette_layout.addWidget(self.palette_selection_combobox,0,QtCore.Qt.AlignRight)
         palette_layout.addWidget(self.palette_selection_button,0,QtCore.Qt.AlignLeft)
         palette_layout.addStretch(10)
         #Widget for controlling primary and secondary attribute icon sizes.
@@ -585,7 +580,7 @@ class LayoutDesigner(QtGui.QWidget):
         return position
 
     def getIconPalette(self):
-        return (0,0,0) #Fix this later.
+        return self.palette_selection_button.getColors()
 
     def getOverlap(self):
         return self.allow_overlap_checkbox.isChecked()
@@ -644,7 +639,6 @@ class LayoutDesigner(QtGui.QWidget):
 
     def useCategorySpecificBackgrounds(self):
         return True #Add a handle for this later.
-
 
     def getCurrentSettings(self):
         """Returns a dictionary that summarizes all the current settings."""
