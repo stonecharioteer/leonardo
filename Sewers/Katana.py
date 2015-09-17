@@ -97,7 +97,7 @@ def getMergedFlipkartBrandImage(brand=None):
         line_path = [line_top, line_bottom]
         line_thickness = int(padding_factor/15*(flipkart_image.size[0]+brand_image.size[0]))
         final_image_drawing_handle.line(line_path, (0,0,0,200), line_thickness)        
-        final_image.save("FK_"+brand+".png",dpi=(300,300))
+        final_image.save(os.path.join("cache","FK_"+brand+".png"),dpi=(300,300))
 
     return final_image
 
