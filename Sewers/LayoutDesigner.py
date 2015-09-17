@@ -160,6 +160,12 @@ class LayoutDesigner(QtGui.QWidget):
         icon_bounding_box = settings_from_json["Icon Bounding Box"]
         self.icon_bounding_box_combobox.setCurrentIndex(self.icon_bounding_box_combobox.findText(icon_bounding_box))
 
+        #Set the fix icon case checkbox.
+        fix_icon_text_case = settings_from_json["Fix Icon Text Case"]
+        self.fix_icon_text_case.setChecked(fix_icon_text_case)
+        #Set the preserve icon colors checkbox.
+        preserve_icon_colors = settings_from_json["Preserve Icon Colors"]
+        self.preserve_icon_colors.setChecked(preserve_icon_colors)
 
     def createUI(self):        
         self.preview_group_box = self.createPreviewWidget()
@@ -432,6 +438,11 @@ class LayoutDesigner(QtGui.QWidget):
         self.aspect_ratio_widget_layout.addStretch(10)
         #Checkbox to allow icons without text.
         self.allow_textless_icons_checkbox = QtGui.QCheckBox("Allow Icons Without Text")
+        #Preserve icon colors
+        self.preserve_icon_colors = QtGui.QCheckBox("Preserve Icon Colors")
+        #Fix the icon text case.
+        self.fix_icon_text_case = QtGui.QCheckBox("Convert USP Description Text to Title Case")
+        self.fix_icon_text_case.setToolTip("Force the first character of the USP description text to capitals. This could result in possible problems.")
         #Layout
         left_center_alignment = QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter
         left_top_alignment = QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop
@@ -497,7 +508,15 @@ class LayoutDesigner(QtGui.QWidget):
                                     left_center_alignment)
         row += 1
         column = 0
+        advanced_panel_layout.addWidget(self.preserve_icon_colors, row, column, 1, 2, 
+                                    left_top_alignment)
+        row += 1
+        column = 0
         advanced_panel_layout.addWidget(self.allow_overlap_checkbox, row, column, 1, 2, 
+                                    left_center_alignment)
+        row += 1
+        column = 0
+        advanced_panel_layout.addWidget(self.fix_icon_text_case, row, column, 1, 2, 
                                     left_center_alignment)
         row += 1
         column = 0
@@ -641,7 +660,10 @@ class LayoutDesigner(QtGui.QWidget):
         return True #Add a handle for this later.
 
     def preserveIconColors(self):
-        return True
+        return self.preserve_icon_colors.isChecked()
+
+    def fixIconTextCase(self):
+        return self.fix_icon_text_case.isChecked()
 
     def getCurrentSettings(self):
         """Returns a dictionary that summarizes all the current settings."""
@@ -665,6 +687,8 @@ class LayoutDesigner(QtGui.QWidget):
         icon_font_size = self.getIconFontSize()
         margin = self.getMargin()
         icon_font_bold = self.bold_button.isChecked()
+        preserve_icon_colors = self.preserveIconColors()
+        fix_icon_text_case = self.fixIconTextCase()
         icon_bounding_box = self.getIconBoundingBox()
 
 
@@ -689,6 +713,8 @@ class LayoutDesigner(QtGui.QWidget):
                     "Icon Font Size": icon_font_size, 
                     "Margin": margin, 
                     "Icon Font Bold": icon_font_bold,
-                    "Icon Bounding Box": icon_bounding_box
+                    "Icon Bounding Box": icon_bounding_box,
+                    "Fix Icon Text Case": fix_icon_text_case,
+                    "Preserve Icon Colors": preserve_icon_colors
                 }
         return settings

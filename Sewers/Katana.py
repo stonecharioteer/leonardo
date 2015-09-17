@@ -620,7 +620,7 @@ def getParentImage(fsn):
         parent_image_path = os.path.join("essentials","na_parent_image.png")
     return parent_image_path
 
-def getIcons(attribute_data, category, icon_relative_size, base_image_size, colors_list, bounding_box, preserve_icon_original_colors=None):
+def getIcons(attribute_data, category, icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_original_colors=None):
     #print attribute_data, category
     look_in_path = os.path.join(os.getcwd(),"Images","Repository",category)
     image_search_path = os.path.join(look_in_path, "*.*")
@@ -635,7 +635,7 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size, colo
             #If it hasn't yet found an icon, or in first run.
             if not found_icon:
                 if attribute["Attribute"].lower().strip() in icon.lower().strip():
-                    icon_with_text = getIconImage(icon, attribute["Description Text"], icon_relative_size, base_image_size, colors_list,bounding_box, preserve_icon_original_colors)
+                    icon_with_text = getIconImage(icon, attribute["Description Text"], icon_relative_size, base_image_size, colors_list,bounding_box, fix_icon_text_case, preserve_icon_original_colors)
                     attribute.update({"Icon": icon_with_text})
                     found_icon = True
                     #attribute.update({"Icon": None})
@@ -644,7 +644,7 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size, colo
                 break
         if not found_icon:
             na_icon_path = os.path.join("essentials","icon_na.png")
-            icon_with_text = getIconImage(na_icon_path, attribute["Description Text"], icon_relative_size, base_image_size, colors_list, bounding_box, preserve_icon_original_colors)
+            icon_with_text = getIconImage(na_icon_path, attribute["Description Text"], icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_original_colors)
             attribute.update({"Icon": icon_with_text})
             attributes_without_icons.append(attribute["Attribute"])
     #if (len(attributes_without_icons) > 0):
@@ -656,7 +656,7 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size, colo
 def checkIcon(attribute,description):
     return True
 
-def getIconImage(icon_path, description_text, icon_relative_size, base_image_size, colors_list, bounding_box, preserve_icon_original_colors=None):
+def getIconImage(icon_path, description_text, icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_original_colors=None):
     """This method generates an image object which contains the icon image 
     as well as the description text."""
     import textwrap
@@ -664,7 +664,8 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     import PIL
     clearance_factor_for_text = 2.0
     font_resize_factor = 0.3
-    #description_text = getTitleCase(description_text)
+    if fix_icon_text_case:
+        description_text = getTitleCase(description_text)
 
     text_lengths = [len(word) for word in description_text.split(" ")]
     max_text_length = max(text_lengths)
