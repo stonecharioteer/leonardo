@@ -3,6 +3,7 @@ Leonardo is a tool that'll help Flipkart Content Artists in batch processing.
 When complete, it'll be able to help them make the secondary iconic image for the App.
 It's part of the artists' and SMEs' toolset.
 """
+from __future__ import division
 import os, sys, math, datetime
 
 from PyQt4 import QtGui, QtCore
@@ -19,7 +20,7 @@ from Sewers.ShellShocked import showSplashScreen, setWindowTheme
 class Leonardo(Turtle):
     def __init__(self):
         super(Leonardo, self).__init__()
-        self.threads = 3
+        self.threads = 10
         self.createUI()
         self.radical_rats = [Splinter(i) for i in range(self.threads)]
         self.mapEvents()
@@ -83,11 +84,7 @@ class Leonardo(Turtle):
         self.preview_and_run_widget.start_progress_button.clicked.connect(self.runSplinter)
         for i in range(self.threads):
             self.radical_rats[i].progress.connect(self.preview_and_run_widget.displayProgress)
-            self.radical_rats[i].sendMessage.connect(self.displayActivity)
-
-    def displayActivity(self, message, last_known_eta):
-        full_message = message + " @" + datetime.datetime.now().strftime("[%a (%d-%m)] %H:%M:%S") + " ETA:" + last_known_eta.strftime("[%a (%d-%m)] %H:%M:%S")
-        self.preview_and_run_widget.status_message.setText(full_message)
+            self.radical_rats[i].sendMessage.connect(self.preview_and_run_widget.displayActivity)
 
     def showPreviewScreen(self):
         #self.page_changer.item(0).setFlags(QtCore.Qt.NoItemFlags)
@@ -101,16 +98,22 @@ class Leonardo(Turtle):
         self.page_changer.setCurrentRow(1)
     
     def runSplinter(self):
-        entry_count = len(self.threads)
-        step_size = int(entry_count/self.threads)
+        entry_count = len(self.data_selector_widget.data)
+        step_size = int(math.ceil((entry_count/self.threads)))
+        print entry_count, step_size, 
         previous_step = 0
         for i in range(self.threads):
             current_step = previous_step + step_size
-            if current_step < entry_count:
-                data = self.data_selector_widget.data[previous_step:current_step]
+            if i != self.threads-1:
+                if current_step < entry_count:
+                    data = self.data_selector_widget.data[previous_step:current_step]
+                else:
+                    data = self.data_selector_widget.data[previous_step:]
             else:
                 data = self.data_selector_widget.data[previous_step:]
+
             previous_step = current_step
+
             self.radical_rats[i].data = data
             self.radical_rats[i].parent_image_position = self.layout_designer_widget.getParentImageCoords()
             self.radical_rats[i].icon_positioning = self.layout_designer_widget.getIconPosition()
