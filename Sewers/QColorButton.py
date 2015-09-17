@@ -96,9 +96,7 @@ class QColorButton(QWidget):
             self.black_color = color
             self.colorChanged.emit()
         self.current_black = PIL.ImageColor.getrgb(str(color))
-        self.current_grey_1 = [int(0.2*(self.getColorDiff(white_color,black_color))) for (white_color,black_color) in zip(self.current_white,self.current_black)]
-        self.current_grey_2 = [int(0.5*(self.getColorDiff(white_color,black_color))) for (white_color,black_color) in zip(self.current_white,self.current_black)]
-        self.current_grey_3 = [int(0.9*(self.getColorDiff(white_color,black_color))) for (white_color,black_color) in zip(self.current_white,self.current_black)]
+        self.setGreys()
         self.color_list = [
                         self.current_black, 
                         self.current_grey_1,
@@ -119,6 +117,11 @@ class QColorButton(QWidget):
             button.setStyleSheet(button_style_sheet)
             counter += 1
 
+    def setGreys(self):
+        self.current_grey_1 = [int(black_color*0.8+(1-0.8)*white_color) for (white_color,black_color) in zip(self.current_white,self.current_black)]
+        self.current_grey_2 = [int(black_color*0.5+(1-0.5)*white_color) for (white_color,black_color) in zip(self.current_white,self.current_black)]
+        self.current_grey_3 = [int(black_color*0.2+(1-0.2)*white_color) for (white_color,black_color) in zip(self.current_white,self.current_black)]
+
     def setWhiteColor(self, color):
         """Sets the white."""
         import PIL
@@ -126,9 +129,7 @@ class QColorButton(QWidget):
             self.white_color = color
             self.colorChanged.emit()
         self.current_white = PIL.ImageColor.getrgb(str(color))
-        self.current_grey_1 = [int(0.2*(self.getColorDiff(white_color,black_color))) for (white_color,black_color) in zip(self.current_white,self.current_black)]
-        self.current_grey_2 = [int(0.5*(self.getColorDiff(white_color,black_color))) for (white_color,black_color) in zip(self.current_white,self.current_black)]
-        self.current_grey_3 = [int(0.8*(self.getColorDiff(white_color,black_color))) for (white_color,black_color) in zip(self.current_white,self.current_black)]
+        self.setGreys()
 
         self.color_list = [
                         self.current_black, 

@@ -130,7 +130,8 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
     if ordering == "Separate":
         #Primary and secondary icon lines and arrangement is to be kept separate.
         #Determine the kind of parent_image_alignment, based on the original parameter.
-        if (parent_image_positioning in [(0.0, 0.0), (0.0, 1.0), (1.0, 0.0), (1.0, 1.0)]): #Club this with other corner-based positions.
+        if (parent_image_positioning in [(0.0, 0.0), (0.0, 1.0), (1.0, 0.0), (1.0, 1.0)]): 
+        #Club this with other corner-based positions.
             #parent image is placed at the top-left corner
             if icon_arrangement == "Circular":
                 #icons are to be arranged in arcs.
@@ -702,8 +703,13 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     if len(grey_2) == 3:
         grey_2.append(255)
     grey_2 = tuple(grey_2)
-    
-    white = [color for color in colors_list[3]]
+
+    grey_3 = [color for color in colors_list[3]]
+    if len(grey_3) == 3:
+        grey_3.append(255)
+    grey_3 = tuple(grey_3)
+
+    white = [color for color in colors_list[4]]
     if len(white) == 3:
         white.append(255)
     white = tuple(white)
@@ -724,8 +730,10 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
                         icon_image_array[row_index][column_index] = black
                     elif (0<red<100) and (0<blue<100) and (0<green<100):
                         icon_image_array[row_index][column_index] = grey_1
-                    elif (100<=red<255) and (100<=blue<255) and (100<=green<255):
+                    elif (100<=red<200) and (100<=blue<200) and (100<=green<200):
                         icon_image_array[row_index][column_index] = grey_2
+                    elif (200<=red<255) and (200<=blue<255) and (200<=green<255):
+                        icon_image_array[row_index][column_index] = grey_3
                     else:
                         icon_image_array[row_index][column_index] = white
                 column_index += 1
