@@ -289,24 +289,37 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
         elif parent_image_positioning == (0.5, 0.5):
             #parent image is placed at the center-middle.
             if icon_arrangement == "Circular":
-                #icons are to be arranged in arcs.
                 #print "Center Position!"
-                primary_radius_multiplier = 1.0
-                secondary_radius_multiplier = 1.0
+                #Steps
+                #First, figure out the space between the product image and the canvas edges.
+                #If the space is at least 1.2x the maximum width of the icon images,
+                #then and then alone should this try to place one icon on either side.
+                #If the space isn't at least 1.2x on either side, shift the position 
+                #of the arc so that it doesn't place the icon over the image.
+                
+
+                #Angle calculation
                 sweep_angle = 85
                 primary_theta_range = (getRadians(270-sweep_angle), getRadians(270+sweep_angle))
                 secondary_theta_range = (getRadians(90-sweep_angle), getRadians(90+sweep_angle))
+                
+                #Positions Calculation
+                if width_parent >= height_parent:
+                    diagonal_length = width_parent*0.7
+                else:
+                    diagonal_length = (height_parent)*0.7
+
+                primary_radius_multiplier = 1.0
+                secondary_radius_multiplier = 1.0
+
                 x_clearance = max_icon_width/2
 
-                y_top = int(y_center_parent-0.25*height_parent)
-                y_bottom = int(y_center_parent+0.15*height_parent)
+                y_top = int(y_center_parent - 0.25*height_parent)
+                y_bottom = int(y_center_parent + 0.15*height_parent)
                 
                 if ((y_bottom-y_top) >= max_icon_height):
-                    print "There is no clash between icons."
                     y_clearance = 0
                 else:
-                    print "There is a clash between icons"
-                    print "Maximum icon height, ",max_icon_height
                     y_clearance = int(max_icon_height*0.155)
 
                 primary_arc_center = (int(x_center_parent-x_clearance), y_top-y_clearance)
@@ -314,13 +327,13 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                 
                 primary_plot_points_required = len(primary_icons)
                 
-                if width_parent >= height_parent:
-                    diagonal_length = width_parent/2
-                else:
-                    diagonal_length = width_parent + (height_parent-width_parent)/2
 
                 primary_radius = primary_radius_multiplier*diagonal_length
-                primary_icon_positions = getPointsOnArc(primary_arc_center, primary_radius, primary_plot_points_required, primary_theta_range)
+                primary_icon_positions = getPointsOnArc(primary_arc_center, 
+                                                primary_radius, 
+                                                primary_plot_points_required, 
+                                                primary_theta_range
+                                            )
                 
                 secondary_plot_points_required = len(secondary_icons)
                 secondary_radius = secondary_radius_multiplier*diagonal_length
@@ -344,7 +357,6 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                     counter+=1
 
             elif icon_arrangement == "Rectangular":
-                #icons are to be laid out in arrays.
                 pass
             else:
                 print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
