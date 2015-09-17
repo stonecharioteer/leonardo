@@ -309,8 +309,8 @@ def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primar
                 else:
                     diagonal_length = (height_parent)*0.7
 
-                primary_radius_multiplier = 1.0
-                secondary_radius_multiplier = 1.0
+                primary_radius_multiplier = 0.8
+                secondary_radius_multiplier = 0.8
 
                 x_clearance = max_icon_width/2
 
@@ -620,7 +620,7 @@ def getParentImage(fsn):
         parent_image_path = os.path.join("essentials","na_parent_image.png")
     return parent_image_path
 
-def getIcons(attribute_data, category, icon_relative_size, base_image_size, colors_list, bounding_box):
+def getIcons(attribute_data, category, icon_relative_size, base_image_size, colors_list, bounding_box, preserve_icon_original_colors=None):
     #print attribute_data, category
     look_in_path = os.path.join(os.getcwd(),"Images","Repository",category)
     image_search_path = os.path.join(look_in_path, "*.*")
@@ -635,7 +635,7 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size, colo
             #If it hasn't yet found an icon, or in first run.
             if not found_icon:
                 if attribute["Attribute"].lower().strip() in icon.lower().strip():
-                    icon_with_text = getIconImage(icon, attribute["Description Text"], icon_relative_size, base_image_size, colors_list,bounding_box)
+                    icon_with_text = getIconImage(icon, attribute["Description Text"], icon_relative_size, base_image_size, colors_list,bounding_box, preserve_icon_original_colors)
                     attribute.update({"Icon": icon_with_text})
                     found_icon = True
                     #attribute.update({"Icon": None})
@@ -644,7 +644,7 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size, colo
                 break
         if not found_icon:
             na_icon_path = os.path.join("essentials","icon_na.png")
-            icon_with_text = getIconImage(na_icon_path, attribute["Description Text"], icon_relative_size, base_image_size, colors_list, bounding_box)
+            icon_with_text = getIconImage(na_icon_path, attribute["Description Text"], icon_relative_size, base_image_size, colors_list, bounding_box, preserve_icon_original_colors)
             attribute.update({"Icon": icon_with_text})
             attributes_without_icons.append(attribute["Attribute"])
     #if (len(attributes_without_icons) > 0):
@@ -656,7 +656,7 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size, colo
 def checkIcon(attribute,description):
     return True
 
-def getIconImage(icon_path, description_text, icon_relative_size, base_image_size, colors_list, bounding_box):
+def getIconImage(icon_path, description_text, icon_relative_size, base_image_size, colors_list, bounding_box, preserve_icon_original_colors=None):
     """This method generates an image object which contains the icon image 
     as well as the description text."""
     import textwrap
@@ -664,7 +664,8 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     import PIL
     clearance_factor_for_text = 2.0
     font_resize_factor = 0.3
-    description_text = getTitleCase(description_text)
+    #description_text = getTitleCase(description_text)
+
     text_lengths = [len(word) for word in description_text.split(" ")]
     max_text_length = max(text_lengths)
     wrap_width = max_text_length if max_text_length > 10 else 10
@@ -731,7 +732,10 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
 
     text_canvas = Image.new("RGBA",(max_w, max_h),(0,0,0,0))
     icon_image = shape_and_icon #remove to disable circle.
-    if icon_text_color != (0,0,0):
+    if preserve_icon_original_colors is None:
+        preserve_icon_original_colors = False
+    if not preserve_icon_original_colors:
+    #if icon_text_color != (0,0,0):
         icon_image_array = np.array(icon_image)
         row_index = 0
         for row in icon_image_array:
@@ -751,13 +755,9 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
                         icon_image_array[row_index][column_index] = white
                 column_index += 1
             row_index += 1
-
+        icon_image = Image.fromarray(icon_image_array,"RGBA")
         #icon_image_array[(icon_image_array == (0,0,0,255)).all(axis = -1)] = (black[0],black[1],black[2],255)
         #icon_image_array[(icon_image_array == (255,255,255,255)).all(axis = -1)] = (white[0],white[1],white[2],255)
-
-
-        icon_image = Image.fromarray(icon_image_array,"RGBA")
-
     draw_text_handle = ImageDraw.Draw(text_canvas)
     #font_size = int(icon_image.size[1]*font_resize_factor)
     font_size = 72 #Set default font size for now.

@@ -640,6 +640,9 @@ class LayoutDesigner(QtGui.QWidget):
     def useCategorySpecificBackgrounds(self):
         return True #Add a handle for this later.
 
+    def preserveIconColors(self):
+        return True
+
     def getCurrentSettings(self):
         """Returns a dictionary that summarizes all the current settings."""
         parent_image_resize_factor = self.getParentImageResizeFactor()

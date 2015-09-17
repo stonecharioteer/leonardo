@@ -3,7 +3,7 @@
     "Allow Icons Without Text": false, 
     "Background Color Threshold Value": 15, 
     "Icon Arrangement": "Circular", 
-    "Icon Bounding Box": "Circle", 
+    "Icon Bounding Box": "None", 
     "Icon Font Bold": false, 
     "Icon Font Color": [
         0, 
@@ -50,10 +50,10 @@
         0.5, 
         0.5
     ], 
-    "Parent Image Resize Factor": 0.37, 
+    "Parent Image Resize Factor": 0.42, 
     "Parent Image Resize Reference": "Smart Fit", 
     "Primary Attribute Relative Size": 8, 
     "Secondary Attribute Relative Size": 8, 
     "Use Icon Color For Font Color": true, 
-    "Use Simple Color Replacement": true
+    "Use Simple Color Replacement": false
 }

@@ -20,7 +20,7 @@ from Sewers.ShellShocked import showSplashScreen, setWindowTheme
 class Leonardo(Turtle):
     def __init__(self):
         super(Leonardo, self).__init__()
-        self.threads = 10
+        self.threads = 1
         self.createUI()
         self.radical_rats = [Splinter(i) for i in range(self.threads)]
         self.mapEvents()
@@ -100,7 +100,6 @@ class Leonardo(Turtle):
     def runSplinter(self):
         entry_count = len(self.data_selector_widget.data)
         step_size = int(math.ceil((entry_count/self.threads)))
-        print entry_count, step_size, 
         previous_step = 0
         for i in range(self.threads):
             current_step = previous_step + step_size
@@ -132,6 +131,7 @@ class Leonardo(Turtle):
             self.radical_rats[i].use_category_specific_backgrounds = self.layout_designer_widget.useCategorySpecificBackgrounds()
             self.radical_rats[i].output_location = os.getcwd()
             self.radical_rats[i].colors_list = self.layout_designer_widget.getIconPalette()
+            self.radical_rats[i].preserve_icon_colors = self.layout_designer_widget.preserveIconColors()
             self.radical_rats[i].allow_run = True
 
     

@@ -36,6 +36,7 @@ class Splinter(QtCore.QThread):
         self.allow_textless_icons = False
         self.margin = 0.05
         self.output_location = None
+        self.preserve_icon_colors = False
         self.colors_list = [(0,0,0),(55,55,55),(127,127,127),(255,255,255)]
         self.use_category_specific_backgrounds = True
 
@@ -111,7 +112,7 @@ class Splinter(QtCore.QThread):
                                                 self.secondary_attribute_relative_size, 
                                                 self.bounding_box, self.use_simple_bg_color_strip, 
                                                 self.bg_color_strip_threshold, self.colors_list,
-                                                self.output_location
+                                                self.preserve_icon_colors, self.output_location
                                             )
 
                     self.eta = Katana.getETA(start_time, counter, total)
@@ -129,7 +130,7 @@ class Splinter(QtCore.QThread):
                     self.sendMessage.emit("Completed %d in %ss." %(counter, datetime.datetime.now() - start_time), self.last_eta, self.thread_index)
                 self.allow_run = False
 
-    def prepareAppImage(self, fsn, brand, category, primary_attribute_data, secondary_attribute_data, parent_image_positioning, icon_positioning, icon_palette, allow_overlap, background_image_path, primary_attribute_relative_size, secondary_attribute_relative_size, bounding_box, use_simple_bg_color_strip, bg_color_strip_threshold, colors_list, output_location):
+    def prepareAppImage(self, fsn, brand, category, primary_attribute_data, secondary_attribute_data, parent_image_positioning, icon_positioning, icon_palette, allow_overlap, background_image_path, primary_attribute_relative_size, secondary_attribute_relative_size, bounding_box, use_simple_bg_color_strip, bg_color_strip_threshold, colors_list, preserve_icon_colors, output_location):
         """This method takes one fsn set, and prepares the app-image.
         ALGORITHM:
         1. If the background image is specified, 
@@ -182,10 +183,10 @@ class Splinter(QtCore.QThread):
         #Get the primary and secondary attribute icons.
         message = "Getting primary attribute data image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
-        primary_attributes_and_icons_data = Katana.getIcons(primary_attribute_data, category, primary_attribute_relative_size, base_image.size, colors_list, bounding_box)
+        primary_attributes_and_icons_data = Katana.getIcons(primary_attribute_data, category, primary_attribute_relative_size, base_image.size, colors_list, bounding_box, preserve_icon_colors)
         message = "Getting secondary attribute data image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
-        secondary_attributes_and_icons_data = Katana.getIcons(secondary_attribute_data,category,secondary_attribute_relative_size, base_image.size, colors_list, bounding_box)
+        secondary_attributes_and_icons_data = Katana.getIcons(secondary_attribute_data,category,secondary_attribute_relative_size, base_image.size, colors_list, bounding_box, preserve_icon_colors)
         #First resize the parent image.
         message = "Resizing parent image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
