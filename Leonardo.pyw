@@ -19,8 +19,9 @@ from Sewers.ShellShocked import showSplashScreen, setWindowTheme
 class Leonardo(Turtle):
     def __init__(self):
         super(Leonardo, self).__init__()
+        self.threads = 3
         self.createUI()
-        self.hamato_yoshi = Splinter()
+        self.radical_rats = [Splinter(i) for i in range(self.threads)]
         self.mapEvents()
 
     def createUI(self):
@@ -53,7 +54,7 @@ class Leonardo(Turtle):
         #Initialize the individual widget pages
         self.data_selector_widget = DataSelector()
         self.layout_designer_widget = LayoutDesigner()
-        self.preview_and_run_widget = PreviewRunWidget("Preview and Run")
+        self.preview_and_run_widget = PreviewRunWidget("Preview and Run",self.threads)
 
         self.pages = QtGui.QStackedWidget()
         self.pages.addWidget(self.data_selector_widget)
@@ -80,8 +81,9 @@ class Leonardo(Turtle):
         self.data_selector_widget.validate_button.clicked.connect(self.allowDesign)
         self.layout_designer_widget.validate_button.clicked.connect(self.showPreviewScreen)
         self.preview_and_run_widget.start_progress_button.clicked.connect(self.runSplinter)
-        self.hamato_yoshi.progress.connect(self.preview_and_run_widget.displayProgress)
-        self.hamato_yoshi.sendMessage.connect(self.displayActivity)
+        for i in range(self.threads):
+            self.radical_rats[i].progress.connect(self.preview_and_run_widget.displayProgress)
+            self.radical_rats[i].sendMessage.connect(self.displayActivity)
 
     def displayActivity(self, message, last_known_eta):
         full_message = message + " @" + datetime.datetime.now().strftime("[%a (%d-%m)] %H:%M:%S") + " ETA:" + last_known_eta.strftime("[%a (%d-%m)] %H:%M:%S")
@@ -99,25 +101,36 @@ class Leonardo(Turtle):
         self.page_changer.setCurrentRow(1)
     
     def runSplinter(self):
-        self.hamato_yoshi.data = self.data_selector_widget.data
-        self.hamato_yoshi.parent_image_position = self.layout_designer_widget.getParentImageCoords()
-        self.hamato_yoshi.icon_positioning = self.layout_designer_widget.getIconPosition()
-        self.hamato_yoshi.icon_palette = self.layout_designer_widget.getIconPalette() #Enable this later.
-        self.hamato_yoshi.allow_overlap = self.layout_designer_widget.getOverlap()
-        self.hamato_yoshi.background_image_path = self.layout_designer_widget.getBackgroundImage()
-        self.hamato_yoshi.primary_attribute_relative_size = self.layout_designer_widget.getPrimaryAttrRelativeSize()
-        self.hamato_yoshi.secondary_attribute_relative_size = self.layout_designer_widget.getSecondaryAttrRelativeSize()
-        self.hamato_yoshi.bounding_box = self.layout_designer_widget.getIconBoundingBox()
-        self.hamato_yoshi.use_simple_bg_color_strip = self.layout_designer_widget.useSimpleColorStripAlgorithm()
-        self.hamato_yoshi.bg_color_strip_threshold = self.layout_designer_widget.getColorStripThreshold()
-        self.hamato_yoshi.parent_image_resize_reference = self.layout_designer_widget.getParentImageResizeReference()
-        self.hamato_yoshi.parent_image_resize_factor = self.layout_designer_widget.getParentImageResizeFactor()
-        self.hamato_yoshi.allow_textless_icons = self.layout_designer_widget.allowTextlessIcons()
-        self.hamato_yoshi.margin = self.layout_designer_widget.getMargin()
-        self.hamato_yoshi.use_category_specific_backgrounds = self.layout_designer_widget.useCategorySpecificBackgrounds()
-        self.hamato_yoshi.output_location = os.getcwd()
-        self.hamato_yoshi.colors_list = self.layout_designer_widget.getIconPalette()
-        self.hamato_yoshi.allow_run = True
+        entry_count = len(self.threads)
+        step_size = int(entry_count/self.threads)
+        previous_step = 0
+        for i in range(self.threads):
+            current_step = previous_step + step_size
+            if current_step < entry_count:
+                data = self.data_selector_widget.data[previous_step:current_step]
+            else:
+                data = self.data_selector_widget.data[previous_step:]
+            previous_step = current_step
+            self.radical_rats[i].data = data
+            self.radical_rats[i].parent_image_position = self.layout_designer_widget.getParentImageCoords()
+            self.radical_rats[i].icon_positioning = self.layout_designer_widget.getIconPosition()
+            self.radical_rats[i].icon_palette = self.layout_designer_widget.getIconPalette() #Enable this later.
+            self.radical_rats[i].allow_overlap = self.layout_designer_widget.getOverlap()
+            self.radical_rats[i].background_image_path = self.layout_designer_widget.getBackgroundImage()
+            self.radical_rats[i].primary_attribute_relative_size = self.layout_designer_widget.getPrimaryAttrRelativeSize()
+            self.radical_rats[i].secondary_attribute_relative_size = self.layout_designer_widget.getSecondaryAttrRelativeSize()
+            self.radical_rats[i].bounding_box = self.layout_designer_widget.getIconBoundingBox()
+            self.radical_rats[i].use_simple_bg_color_strip = self.layout_designer_widget.useSimpleColorStripAlgorithm()
+            self.radical_rats[i].bg_color_strip_threshold = self.layout_designer_widget.getColorStripThreshold()
+            self.radical_rats[i].parent_image_resize_reference = self.layout_designer_widget.getParentImageResizeReference()
+            self.radical_rats[i].parent_image_resize_factor = self.layout_designer_widget.getParentImageResizeFactor()
+            self.radical_rats[i].allow_textless_icons = self.layout_designer_widget.allowTextlessIcons()
+            self.radical_rats[i].margin = self.layout_designer_widget.getMargin()
+            self.radical_rats[i].use_category_specific_backgrounds = self.layout_designer_widget.useCategorySpecificBackgrounds()
+            self.radical_rats[i].output_location = os.getcwd()
+            self.radical_rats[i].colors_list = self.layout_designer_widget.getIconPalette()
+            self.radical_rats[i].allow_run = True
+
     
     def sayCowabunga(self, message):
         print "Cowabunga! ", message
