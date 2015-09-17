@@ -181,10 +181,10 @@ class Splinter(QtCore.QThread):
         #Get the primary and secondary attribute icons.
         message = "Getting primary attribute data image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta)
-        primary_attributes_and_icons_data = Katana.getIcons(primary_attribute_data, category, primary_attribute_relative_size, base_image.size, colors_list)
+        primary_attributes_and_icons_data = Katana.getIcons(primary_attribute_data, category, primary_attribute_relative_size, base_image.size, colors_list, bounding_box)
         message = "Getting secondary attribute data image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta)
-        secondary_attributes_and_icons_data = Katana.getIcons(secondary_attribute_data,category,secondary_attribute_relative_size, base_image.size, colors_list)
+        secondary_attributes_and_icons_data = Katana.getIcons(secondary_attribute_data,category,secondary_attribute_relative_size, base_image.size, colors_list, bounding_box)
         #First resize the parent image.
         message = "Resizing parent image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta)

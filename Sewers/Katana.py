@@ -620,7 +620,7 @@ def getParentImage(fsn):
         parent_image_path = os.path.join("essentials","na_parent_image.png")
     return parent_image_path
 
-def getIcons(attribute_data, category, icon_relative_size, base_image_size, colors_list):
+def getIcons(attribute_data, category, icon_relative_size, base_image_size, colors_list, bounding_box):
     #print attribute_data, category
     look_in_path = os.path.join(os.getcwd(),"Images","Repository",category)
     image_search_path = os.path.join(look_in_path, "*.*")
@@ -635,7 +635,7 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size, colo
             #If it hasn't yet found an icon, or in first run.
             if not found_icon:
                 if attribute["Attribute"].lower().strip() in icon.lower().strip():
-                    icon_with_text = getIconImage(icon, attribute["Description Text"], icon_relative_size, base_image_size, colors_list)
+                    icon_with_text = getIconImage(icon, attribute["Description Text"], icon_relative_size, base_image_size, colors_list,bounding_box)
                     attribute.update({"Icon": icon_with_text})
                     found_icon = True
                     #attribute.update({"Icon": None})
@@ -644,7 +644,7 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size, colo
                 break
         if not found_icon:
             na_icon_path = os.path.join("essentials","icon_na.png")
-            icon_with_text = getIconImage(na_icon_path, attribute["Description Text"], icon_relative_size, base_image_size)
+            icon_with_text = getIconImage(na_icon_path, attribute["Description Text"], icon_relative_size, base_image_size, colors_list, bounding_box)
             attribute.update({"Icon": icon_with_text})
             attributes_without_icons.append(attribute["Attribute"])
     #if (len(attributes_without_icons) > 0):
@@ -656,7 +656,7 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size, colo
 def checkIcon(attribute,description):
     return True
 
-def getIconImage(icon_path, description_text, icon_relative_size, base_image_size, colors_list):
+def getIconImage(icon_path, description_text, icon_relative_size, base_image_size, colors_list, bounding_box):
     """This method generates an image object which contains the icon image 
     as well as the description text."""
     import textwrap
@@ -673,18 +673,19 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     #get an image object using the icon path, and resize it to the required dimensions with respect to the height of the base image.
     #Don't strip for now.
     #icon_image = getStrippedImage(getResizedImage(Image.open(icon_path).convert("RGBA"),icon_relative_size,"height",base_image_size), threshold=30)
-    icon_image = getResizedImage(Image.open(icon_path).convert("RGBA"),icon_relative_size,"height",base_image_size)
-    shape = "Octagon_Straight"
-    shape = "Circle"
-    shape_width = int(max(icon_image.size)*1.45)
-    shape_path = os.path.join("Images","Shapes","%s.png"%shape)
-
-    shape = Image.open(shape_path).convert("RGBA").resize((shape_width,shape_width), resample=PIL.Image.ANTIALIAS)
-    shape_and_icon= shape
-    icon_x = int(shape.size[0]/2-icon_image.size[0]/2)
-    icon_y = int(shape.size[1]/2-icon_image.size[1]/2)
-    icon_position_in_shape = (icon_x, icon_y)
-    shape_and_icon.paste(icon_image, icon_position_in_shape, icon_image)
+    icon_image = getResizedImage(Image.open(icon_path).convert("RGBA"), icon_relative_size,"height",base_image_size)
+    if bounding_box == "None":
+        shape = bounding_box.replace(" ","_")
+        shape_width = int(max(icon_image.size)*1.45)
+        shape_path = os.path.join("Images","Shapes","%s.png"%shape)
+        shape = Image.open(shape_path).convert("RGBA").resize((shape_width,shape_width), resample=PIL.Image.ANTIALIAS)
+        shape_and_icon= shape
+        icon_x = int(shape.size[0]/2-icon_image.size[0]/2)
+        icon_y = int(shape.size[1]/2-icon_image.size[1]/2)
+        icon_position_in_shape = (icon_x, icon_y)
+        shape_and_icon.paste(icon_image, icon_position_in_shape, icon_image)
+    else:
+        shape_and_icon = icon_image
     #icon_image = replaceColorInImage(resized_icon_image,(255,255,255,255),(0,0,0,255))
     #Create a blank canvas for the text.
     max_w, max_h = 500, 500
