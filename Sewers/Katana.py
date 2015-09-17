@@ -674,7 +674,7 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     #Don't strip for now.
     #icon_image = getStrippedImage(getResizedImage(Image.open(icon_path).convert("RGBA"),icon_relative_size,"height",base_image_size), threshold=30)
     icon_image = getResizedImage(Image.open(icon_path).convert("RGBA"), icon_relative_size,"height",base_image_size)
-    if bounding_box == "None":
+    if bounding_box != "None":
         shape = bounding_box.replace(" ","_")
         shape_width = int(max(icon_image.size)*1.45)
         shape_path = os.path.join("Images","Shapes","%s.png"%shape)
