@@ -1,4 +1,5 @@
 from __future__ import division
+from multiprocessing import Pool, Queue, Lock, Process
 import csv
 import os, glob, datetime, random, math
 import numpy as np
@@ -879,5 +880,75 @@ def getCategoryFolderNames():
 
     return [os.path.basename(path_and_folder_name) for path_and_folder_name in path_and_folders_list]
 
+def getListAsChunks(list_object, chunk_size):
+    n = max(1, chunk_size)
+    return [list_object[i:i+chunk_size] for i in range(0, len(list_object), chunk_size)]
+
+def stripBGInBatches(image_batch, process_lock, process_id, output_path, threshold=None):
+    from multiprocessing import Process, Pool, Queue, Lock
+    from PIL import Image
+    import os
+    import datetime
+    if threshold is None:
+        threshold=30
+    start_time = datetime.datetime.now()
+    total = len(image_batch)
+    counter = 0
+    process_lock.acquire()
+    print "Process %d starting now."%process_id
+    process_lock.release()
+    for image_path in image_batch:
+        output_file_name = os.path.join(output_path, os.path.splitext(os.path.basename(image_path))[0]+".png")
+        #process_lock.acquire()
+        #print "[P%d]: %s. %s"%(process_id, image_path, output_file_name)
+        #process_lock.release()
+        getStrippedImage(Image.open(image_path).convert("RGBA"), threshold).save(output_file_name)
+        counter+=1
+        eta_string = getETA(start_time, counter, total).strftime("%H:%M:%S")
+        process_lock.acquire()
+        print "[P%d]: Completed %d of %d. ETA: %s."%(process_id, counter, total, eta_string)
+        process_lock.release()
+    process_lock.acquire()
+    print "Process %d ended now. Total Time: %ds"%(process_id, (datetime.datetime.now()-start_time).seconds)
+    process_lock.release()
+
+def tryMultipleStrips(allowed_processes=None):
+    """Test function to try out python's multi-processing module."""
+    #from __future__ import division
+    from multiprocessing import Process, Pool, Queue, Lock
+    import datetime
+    import glob
+    import os
+    import PIL
+    import pandas
+    path_to_test = os.path.join("Images","Parent Images","Test")
+    output_path = os.path.join(path_to_test,"Output")
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+    image_path_list = glob.glob(os.path.join(path_to_test,"*.jpeg"))
+    start_time = datetime.datetime.now()
+    update_time = datetime.datetime.now()
+    if allowed_processes is None:
+        allowed_processes = 3
+    no_of_images = len(image_path_list)
+    print "Loaded %d images at %s."%(no_of_images, start_time.strftime("%H:%M:%S"))
+    batch_size = int(math.ceil(no_of_images/allowed_processes))
+
+    image_path_batches = getListAsChunks(image_path_list, batch_size)
+    process_ids = range(allowed_processes)
+    lock = Lock()
+    process_list = [Process(target=stripBGInBatches, args=(image_path_batch, lock, process_id, output_path, 30)) for process_id,image_path_batch in zip(process_ids,image_path_batches)]
+    lock.acquire()
+    print "Processes are going on......"
+    lock.release()
+    for process_object in process_list:
+        process_object.start()
+    for process_object in process_list:
+        process_object.join()
+    print "Processes are done. Time Taken: %ds for %d processes...."%((datetime.datetime.now()-start_time).seconds, allowed_processes)
+    print "Average time per image : %fs"%((datetime.datetime.now()-start_time).seconds/no_of_images)
+
+
+    
 if __name__ == "__main__":
     print "Don't use the Main Function."
