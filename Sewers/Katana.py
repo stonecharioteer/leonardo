@@ -102,13 +102,13 @@ def getMergedFlipkartBrandImage(brand=None):
 
     return final_image
 
-def getIconsAndCoordinates(base_image, parent_image, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, icon_arrangement, ordering, parent_image_positioning):
+def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, icon_arrangement, ordering, parent_image_positioning):
     #This is the way I'm getting icon positions now.
     import random, os, math
     #print "Parent Image is at: ", parent_image_positioning
     #First, store the parameters in an easily-readable manner.
     #Parent image dimensions
-    width_parent, height_parent = parent_image.size
+    width_parent, height_parent = parent_image_size
     #Parent image top left corner coordinates.
     x_top_left_parent, y_top_left_parent = parent_image_coords
     #Parent image center coordinates.
@@ -426,8 +426,16 @@ def getPointOnCircleCartesian(origin_x,origin_y,radius,ref_x=None,ref_y=None):
 def getDistanceBetweenPoints(point_1,point_2):
     return ((point_1[0]-point_2[0])**2 + (point_1[1]-point_2[1])**2)**0.5
 
-def replaceColorInImage(image, original_colour, replacement_color, threshold):
+def replaceColorInImage(image, original_colour, replacement_color, threshold, multiprocess=None, manager_return_handle=None, manager_return_dict=None):
     import numpy as np
+    if multiprocess is None:
+        multiprocess = False
+    if multiprocess:
+        if (manager_return_dict is None):
+            raise Exception("Provide a multiprocessing.Manager().dict() in order to get a return value.")
+        if manager_return_handle is None:
+            print "No key was provided for the dictionary. Defaulting to 0."
+            manager_return_handle = 0
     image_data = np.array(image)
     #print image.size
     #print image_data.shape
@@ -442,11 +450,23 @@ def replaceColorInImage(image, original_colour, replacement_color, threshold):
                 image_data[row][column] = replacement_color
 #    image_data[(image_data == original_colour).all(axis=-1)] = replacement_color
     #image_data[(min_color <=image_data <= max_colour).all(axis=-1)] = replacement_color
-    return Image.fromarray(image_data,mode="RGBA")
+    requested_image = Image.fromarray(image_data,mode="RGBA")
+    if multiprocess:
+        manager_return_dict.update({manager_return_handle: requested_image})
+    else:
+        return requested_image
 
-def getStrippedImage(image, threshold):
-    """This method removes the background color of the image."""
+def getStrippedImage(image, threshold, multiprocess=None, manager_return_handle=None, manager_return_dict=None):
+    """This method removes the background color of the image be recursively going through rows and columns, horizontally and vertically, forward and in reverse."""
     import numpy as np
+    if multiprocess is None:
+        multiprocess = False
+    if multiprocess:
+        if (manager_return_dict is None):
+            raise Exception("Provide a multiprocessing.Manager().dict() in order to get a return value.")
+        if manager_return_handle is None:
+            print "No key was provided for the dictionary. Defaulting to 0."
+            manager_return_handle = 0
     image_data_columns, image_data_rows = image.size
     image_data = np.array(image)
 
@@ -582,7 +602,10 @@ def getStrippedImage(image, threshold):
                     break
 
     stripped_image = Image.fromarray(image_data,mode="RGBA")
-    return stripped_image
+    if multiprocess:
+        manager_return_dict.update({manager_return_handle: stripped_image})
+    else:
+        return stripped_image
 
 
 def getResizedImage(image_to_resize,resize_factor,resize_by,base_image_size):
@@ -621,8 +644,16 @@ def getParentImage(fsn):
         parent_image_path = os.path.join("essentials","na_parent_image.png")
     return parent_image_path
 
-def getIcons(attribute_data, category, icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_original_colors=None):
+def getIcons(attribute_data, category, icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_original_colors=None, multiprocess=None, manager_return_handle=None, manager_return_dict=None):
     #print attribute_data, category
+    if multiprocess is None:
+        multiprocess = False
+    if multiprocess:
+        if manager_return_dict is None:
+            raise Exception("Provide a multiprocessing.Manager().dict() in order to get a return value.")
+        if manager_return_handle is None:
+            print "No key was provided for the dictionary. Defaulting to 0."
+            manager_return_handle = 0  
     look_in_path = os.path.join(os.getcwd(),"Images","Repository",category)
     image_search_path = os.path.join(look_in_path, "*.*")
     images_in_look_in_path = glob.glob(image_search_path)
@@ -652,7 +683,10 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size, colo
     #    print "The following %s attributes don't have icons. Recommend making them before progressing." %category
     #    print attributes_without_icons
     #    print "Looking in the %s folder."%image_search_path
-    return attribute_data
+    if multiprocess:
+        manager_return_dict.update({manager_return_handle: attribute_data})
+    else:
+        return attribute_data
 
 def checkIcon(attribute,description):
     return True

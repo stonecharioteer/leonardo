@@ -1,6 +1,6 @@
 {
     "Allow Icons Overlap": false, 
-    "Allow Icons Without Text": true, 
+    "Allow Icons Without Text": false, 
     "Background Color Threshold Value": 15, 
     "Fix Icon Text Case": true, 
     "Icon Arrangement": "Circular", 
@@ -53,9 +53,9 @@
     ], 
     "Parent Image Resize Factor": 0.42, 
     "Parent Image Resize Reference": "Smart Fit", 
-    "Preserve Icon Colors": true, 
+    "Preserve Icon Colors": false, 
     "Primary Attribute Relative Size": 8, 
     "Secondary Attribute Relative Size": 8, 
     "Use Icon Color For Font Color": true, 
-    "Use Simple Color Replacement": true
+    "Use Simple Color Replacement": false
 }
