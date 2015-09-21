@@ -270,7 +270,7 @@ class Splinter(QtCore.QThread):
         icons_and_coordinates = Katana.getIconsAndCoordinates(base_image, 
                                             parent_image_size, parent_image_coords, 
                                             primary_attributes_and_icons_data, 
-                                            secondary_attributes_and_icons_data, "Circular",
+                                            secondary_attributes_and_icons_data, icon_positioning,
                                             "Separate", parent_image_positioning
                                             )
         #Paste the FK and Brand Icon
