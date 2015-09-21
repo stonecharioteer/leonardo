@@ -192,13 +192,19 @@ class Splinter(QtCore.QThread):
         #Check the resize reference for the smartfit option. Create use a local parent_image_resize_reference value to control this.
         if self.parent_image_resize_reference == "Smart Fit":
             parent_image_resize_reference = "Height" if original_parent_image.size[1]>original_parent_image.size[0] else "Width"
-            if parent_image_resize_reference == "Width":
+            message = "Resizing parent image by %s since Smart Fit was selected. (%s)"%(parent_image_resize_reference, fsn)
+            self.sendMessage.emit(message, self.last_eta, self.thread_index)
+            if (parent_image_resize_reference == "Width"):
                 parent_image_resize_factor = 1.5*self.parent_image_resize_factor
+                if parent_image_resize_factor > 0.55:
+                    parent_image_resize_factor = 0.55
             else:
                 parent_image_resize_factor = self.parent_image_resize_factor
         else:
             parent_image_resize_reference = self.parent_image_resize_reference
             parent_image_resize_factor = self.parent_image_resize_factor
+        message = "Resizing parent image to %f%% along the %s. (%s)"%(parent_image_resize_factor*100,parent_image_resize_reference, fsn)
+        self.sendMessage.emit(message, self.last_eta, self.thread_index)
         resized_parent_image = Katana.getResizedImage(original_parent_image, parent_image_resize_factor, parent_image_resize_reference, base_image.size)
         parent_image_size = resized_parent_image.size
         #Use the selected background colour strip algorithm 
@@ -290,8 +296,8 @@ class Splinter(QtCore.QThread):
         for icon in icons_and_coordinates:
             try:
                 base_image.paste(icon["Icon"],icon["Position"],icon["Icon"])
-                message = "Pasted icon on base image at %s for %s." %(icon["Position"],fsn)
-                self.sendMessage.emit(message, self.last_eta, self.thread_index)
+                #message = "Pasted icon on base image at %s for %s." %(icon["Position"],fsn)
+                #self.sendMessage.emit(message, self.last_eta, self.thread_index)
             except:
                 if icon["Position"] is None:
                     message = "Icon position cannot be None for %s." %(fsn)                    

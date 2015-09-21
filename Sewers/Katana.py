@@ -297,21 +297,27 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                 #then and then alone should this try to place one icon on either side.
                 #If the space isn't at least 1.2x on either side, shift the position 
                 #of the arc so that it doesn't place the icon over the image.
-                
-
                 #Angle calculation
                 sweep_angle = 85
                 primary_theta_range = (getRadians(270-sweep_angle), getRadians(270+sweep_angle))
                 secondary_theta_range = (getRadians(90-sweep_angle), getRadians(90+sweep_angle))
                 
                 #Positions Calculation
-                if width_parent >= height_parent:
-                    diagonal_length = width_parent*0.7
-                else:
-                    diagonal_length = (height_parent)*0.7
+                #if width_parent >= height_parent:
+                    #diagonal_length = width_parent*0.7
+                #    diagonal_length = (width_base-width_parent)/2
+                #else:
+                    #diagonal_length = (height_parent)*0.7
+                #    diagonal_length = (height_base-height_parent)/2
 
-                primary_radius_multiplier = 0.8
-                secondary_radius_multiplier = 0.8
+                if width_base>width_parent:
+                    diagonal_length = (height_base-height_parent-max_icon_width/2)/2
+                else:
+                    diagonal_length = (width_base-width_parent-max_icon_width/2)/2
+
+
+                primary_radius_multiplier = 1.0
+                secondary_radius_multiplier = 1.0
 
                 x_clearance = max_icon_width/2
 
