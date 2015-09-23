@@ -47,9 +47,7 @@ class LayoutDesigner(QtGui.QWidget):
             self.setValues(default_file)
 
     def setValues(self, file_path):
-        """Sets the defaults for the settings.
-        At a later stage, I need to read from and export to a JSON file. 
-        That way, things will be much smoother and I can have saved settings.
+        """Sets the defaults for the settings, loading from a JSON file.
         """
         with open(file_path) as json_file_handler:
             settings_from_json = json.load(json_file_handler)
@@ -169,6 +167,9 @@ class LayoutDesigner(QtGui.QWidget):
 
         use_category_specific_backgrounds = settings_from_json["Use Category Specific Backgrounds"]
         self.use_category_specific_backgrounds.setChecked(use_category_specific_backgrounds)
+
+        background_image = settings_from_json["Background Image"]
+        self.background_selection_combobox.setCurrentIndex(self.background_selection_combobox.findText(background_image))
 
     def createUI(self):        
         self.preview_group_box = self.createPreviewWidget()
@@ -677,6 +678,21 @@ class LayoutDesigner(QtGui.QWidget):
     def fixIconTextCase(self):
         return self.fix_icon_text_case.isChecked()
 
+    def getFont(self):
+        import os
+        is_bold = self.bold_button.isChecked()
+        is_italics = self.italics_button.isChecked()
+        if is_bold and is_italics:
+            font = os.path.join("essentials", "RionaSans-MediumItalics.ttf")
+        elif is_bold and (not is_italics):
+            font = os.path.join("essentials", "RionaSans-Medium.ttf")
+        elif (not is_bold) and is_italics:
+            font = os.path.join("essentials", "RionaSans-RegularItalics.ttf")
+        else:
+            font = os.path.join("essentials", "RionaSans-Regular.ttf")
+        return font
+
+
     def getCurrentSettings(self):
         """Returns a dictionary that summarizes all the current settings."""
         parent_image_resize_factor = self.getParentImageResizeFactor()
@@ -703,6 +719,7 @@ class LayoutDesigner(QtGui.QWidget):
         fix_icon_text_case = self.fixIconTextCase()
         icon_bounding_box = self.getIconBoundingBox()
         use_category_specific_backgrounds = self.useCategorySpecificBackgrounds()
+        background_image = self.getBackgroundImage()
 
 
         settings = {
@@ -729,6 +746,7 @@ class LayoutDesigner(QtGui.QWidget):
                     "Icon Bounding Box": icon_bounding_box,
                     "Fix Icon Text Case": fix_icon_text_case,
                     "Preserve Icon Colors": preserve_icon_colors,
-                    "Use Category Specific Backgrounds": use_category_specific_backgrounds
+                    "Use Category Specific Backgrounds": use_category_specific_backgrounds,
+                    "Background Image": background_image
                 }
         return settings

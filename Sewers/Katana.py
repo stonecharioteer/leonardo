@@ -11,11 +11,11 @@ import PIL
 
 def getTitleCase(sentence):
     import re
-    exceptions = ["a", "an", "the", "of", "is", "and"]
+    exceptions = ["a", "an", "the", "of", "is", "and", "at", "if","but", "to", "upto"]
     word_list = re.split(" ", sentence)
-    final = [word_list[0].capitalize()]
+    final = [word_list[0][0].capitalize()+word_list[0][1:]]
     for word in word_list[1:]:
-        final.append(word in exceptions and word or word.capitalize())
+        final.append(word in exceptions and word or (word[0].capitalize()+word[1:]))
     return " ".join(final)
 
 def getRadians(degrees):
@@ -297,10 +297,21 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                 #If the space isn't at least 1.2x on either side, shift the position 
                 #of the arc so that it doesn't place the icon over the image.
                 #Angle calculation
+                primary_plot_points_required = len(primary_icons)
+                secondary_plot_points_required = len(secondary_icons)
+                icons_required = (primary_plot_points_required + secondary_plot_points_required)
+                half_icons_required = math.ceil(icons_required/2)
+                other_half_icons_required = icons_required - half_icons_required
+
                 sweep_angle = 85
                 primary_theta_range = (getRadians(270-sweep_angle), getRadians(270+sweep_angle))
                 secondary_theta_range = (getRadians(90-sweep_angle), getRadians(90+sweep_angle))
-                
+                clearance_on_top = y_top_left_parent
+                clearance_on_bottom = height_base - (y_top_left_parent + height_parent)
+                clearance_on_left = x_top_left_parent
+                clearance_on_right = width_base - (x_top_left_parent + width_parent)
+
+
                 #Positions Calculation
                 #if width_parent >= height_parent:
                     #diagonal_length = width_parent*0.7
@@ -309,11 +320,12 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                     #diagonal_length = (height_parent)*0.7
                 #    diagonal_length = (height_base-height_parent)/2
 
-                if width_base>width_parent:
-                    diagonal_length = (height_base-height_parent-max_icon_width/2)/2
+                if width_base<width_parent:
+                    diagonal_length = (height_base-max_icon_width/2)/2
                 else:
-                    diagonal_length = (width_base-width_parent-max_icon_width/2)/2
+                    diagonal_length = (width_base-max_icon_width/2)/2
 
+                diagonal_length = (width_base-max_icon_width/2)/2
 
                 primary_radius_multiplier = 1.0
                 secondary_radius_multiplier = 1.0
@@ -331,37 +343,35 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                 primary_arc_center = (int(x_center_parent-x_clearance), y_top-y_clearance)
                 secondary_arc_center = (int(x_center_parent-x_clearance), y_bottom)
                 
-                primary_plot_points_required = len(primary_icons)
-                
 
                 primary_radius = primary_radius_multiplier*diagonal_length
+
                 primary_icon_positions = getPointsOnArc(primary_arc_center, 
                                                 primary_radius, 
-                                                primary_plot_points_required, 
+                                                half_icons_required, 
                                                 primary_theta_range
                                             )
                 
-                secondary_plot_points_required = len(secondary_icons)
-                secondary_radius = secondary_radius_multiplier*diagonal_length
-                secondary_icon_positions = getPointsOnArc(secondary_arc_center, secondary_radius, secondary_plot_points_required, secondary_theta_range)
+                if secondary_plot_points_required > 0:
+                    secondary_radius = secondary_radius_multiplier*diagonal_length
+                    secondary_icon_positions = getPointsOnArc(secondary_arc_center, 
+                                                    secondary_radius, 
+                                                    other_half_icons_required, 
+                                                    secondary_theta_range
+                                                )
+                else:
+                    secondary_icon_positions = []
                 coordinates_and_icons = []
+                icon_positions = primary_icon_positions + secondary_icon_positions
+                icons = primary_icons + secondary_icons
                 counter = 0
-                for icon in primary_icons:
+                for icon in icons:
                     coord = {
                         "Icon": icon,
-                        "Position":primary_icon_positions[counter]
+                        "Position":icon_positions[counter]
                     }
                     coordinates_and_icons.append(coord)
                     counter+=1
-                counter = 0
-                for icon in secondary_icons:
-                    coord = {
-                        "Icon": icon,
-                        "Position":secondary_icon_positions[counter]
-                    }
-                    coordinates_and_icons.append(coord)
-                    counter+=1
-
             elif icon_arrangement == "Rectangular":
                 pass
             else:
@@ -651,7 +661,7 @@ def getParentImage(fsn):
         parent_image_path = os.path.join("essentials","na_parent_image.png")
     return parent_image_path
 
-def getIcons(attribute_data, category, icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_original_colors=None, multiprocess=None, manager_return_handle=None, manager_return_dict=None):
+def getIcons(attribute_data, category, icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_original_colors=None, font=None, multiprocess=None, manager_return_handle=None, manager_return_dict=None):
     #print attribute_data, category
     if multiprocess is None:
         multiprocess = False
@@ -660,7 +670,7 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size, colo
             raise Exception("Provide a multiprocessing.Manager().dict() in order to get a return value.")
         if manager_return_handle is None:
             print "No key was provided for the dictionary. Defaulting to 0."
-            manager_return_handle = 0  
+            manager_return_handle = 0
     look_in_path = os.path.join(os.getcwd(),"Images","Repository",category)
     image_search_path = os.path.join(look_in_path, "*.*")
     images_in_look_in_path = glob.glob(image_search_path)
@@ -674,7 +684,7 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size, colo
             #If it hasn't yet found an icon, or in first run.
             if not found_icon:
                 if attribute["Attribute"].lower().strip() in icon.lower().strip():
-                    icon_with_text = getIconImage(icon, attribute["Description Text"], icon_relative_size, base_image_size, colors_list,bounding_box, fix_icon_text_case, preserve_icon_original_colors)
+                    icon_with_text = getIconImage(icon, attribute["Description Text"], icon_relative_size, base_image_size, colors_list,bounding_box, fix_icon_text_case, preserve_icon_original_colors, font)
                     attribute.update({"Icon": icon_with_text})
                     found_icon = True
                     #attribute.update({"Icon": None})
@@ -683,7 +693,7 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size, colo
                 break
         if not found_icon:
             na_icon_path = os.path.join("essentials","icon_na.png")
-            icon_with_text = getIconImage(na_icon_path, attribute["Description Text"], icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_original_colors)
+            icon_with_text = getIconImage(na_icon_path, attribute["Description Text"], icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_original_colors, font)
             attribute.update({"Icon": icon_with_text})
             attributes_without_icons.append(attribute["Attribute"])
     #if (len(attributes_without_icons) > 0):
@@ -698,7 +708,7 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size, colo
 def checkIcon(attribute,description):
     return True
 
-def getIconImage(icon_path, description_text, icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_original_colors=None):
+def getIconImage(icon_path, description_text, icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_original_colors=None, font_path=None):
     """This method generates an image object which contains the icon image 
     as well as the description text."""
     import textwrap
@@ -804,8 +814,11 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     draw_text_handle = ImageDraw.Draw(text_canvas)
     #font_size = int(icon_image.size[1]*font_resize_factor)
     font_size = 72 #Set default font size for now.
-    font = ImageFont.truetype(os.path.join("essentials","RionaSans-Regular.ttf"), font_size)
-    
+    if font_path is None:
+        font = ImageFont.truetype(os.path.join("essentials","RionaSans-Regular.ttf"), font_size)
+    else:
+        font = ImageFont.truetype(font_path, font_size)
+
     current_h, pad = 0, 10 #this is the padding.
     #Ref: http://stackoverflow.com/questions/1970807/center-middle-align-text-with-pil
     for line in text_as_paragraphs:

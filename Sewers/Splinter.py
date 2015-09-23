@@ -44,6 +44,7 @@ class Splinter(QtCore.QThread):
         self.colors_list = [(0,0,0),(55,55,55),(127,127,127),(255,255,255)]
         self.fix_icon_text_case = False
         self.use_category_specific_backgrounds = True
+        self.font = os.path.join("essentials", "RionaSans-Regular.ttf")
 
         if not self.isRunning():
             self.start(QtCore.QThread.LowPriority)
@@ -119,7 +120,7 @@ class Splinter(QtCore.QThread):
                                                 self.bounding_box, self.use_simple_bg_color_strip, 
                                                 self.bg_color_strip_threshold, self.colors_list,
                                                 self.fix_icon_text_case,
-                                                self.preserve_icon_colors, self.output_location
+                                                self.preserve_icon_colors, self.font, self.output_location
                                             )
 
                     self.eta = Katana.getETA(start_time, counter, total)
@@ -137,7 +138,7 @@ class Splinter(QtCore.QThread):
                     self.sendMessage.emit("Completed %d in %ss." %(counter, datetime.datetime.now() - start_time), self.last_eta, self.thread_index)
                 self.allow_run = False
 
-    def prepareAppImage(self, fsn, brand, category, primary_attribute_data, secondary_attribute_data, parent_image_positioning, icon_positioning, icon_palette, allow_overlap, background_image_path, primary_attribute_relative_size, secondary_attribute_relative_size, bounding_box, use_simple_bg_color_strip, bg_color_strip_threshold, colors_list, fix_icon_text_case, preserve_icon_colors, output_location):
+    def prepareAppImage(self, fsn, brand, category, primary_attribute_data, secondary_attribute_data, parent_image_positioning, icon_positioning, icon_palette, allow_overlap, background_image_path, primary_attribute_relative_size, secondary_attribute_relative_size, bounding_box, use_simple_bg_color_strip, bg_color_strip_threshold, colors_list, fix_icon_text_case, preserve_icon_colors, font, output_location):
         """This method takes one fsn set, and prepares the app-image.
         ALGORITHM:
         1. If the background image is specified, 
@@ -195,7 +196,7 @@ class Splinter(QtCore.QThread):
             message = "Resizing parent image by %s since Smart Fit was selected. (%s)"%(parent_image_resize_reference, fsn)
             self.sendMessage.emit(message, self.last_eta, self.thread_index)
             if (parent_image_resize_reference == "Width"):
-                parent_image_resize_factor = 1.5*self.parent_image_resize_factor
+                parent_image_resize_factor = (1.5*self.parent_image_resize_factor)
                 if parent_image_resize_factor > 0.55:
                     parent_image_resize_factor = 0.55
             else:
@@ -203,7 +204,7 @@ class Splinter(QtCore.QThread):
         else:
             parent_image_resize_reference = self.parent_image_resize_reference
             parent_image_resize_factor = self.parent_image_resize_factor
-        message = "Resizing parent image to %f%% along the %s. (%s)"%(parent_image_resize_factor*100,parent_image_resize_reference, fsn)
+        message = "Resizing parent image to %f%% along the %s. (%s)"%(parent_image_resize_factor*100, parent_image_resize_reference, fsn)
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
         resized_parent_image = Katana.getResizedImage(original_parent_image, parent_image_resize_factor, parent_image_resize_reference, base_image.size)
         parent_image_size = resized_parent_image.size
@@ -236,14 +237,14 @@ class Splinter(QtCore.QThread):
         background_image = Katana.getBackgroundImage(background_image_path,
                                             self.use_category_specific_backgrounds, category)
         #Get the primary and secondary attribute icons.
-
-        primary_attributes_process = Process(target=Katana.getIcons, args=(primary_attribute_data, category, primary_attribute_relative_size, base_image.size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_colors, True, "Primary", return_dict))
+        
+        primary_attributes_process = Process(target=Katana.getIcons, args=(primary_attribute_data, category, primary_attribute_relative_size, base_image.size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_colors, font, True, "Primary", return_dict))
         primary_attributes_process.start()
         message = "Getting primary attribute data image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
         #primary_attributes_and_icons_data = Katana.getIcons(primary_attribute_data, category, primary_attribute_relative_size, base_image.size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_colors)
 
-        secondary_attributes_process = Process(target=Katana.getIcons, args=(secondary_attribute_data,category,secondary_attribute_relative_size, base_image.size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_colors, True, "Secondary", return_dict))
+        secondary_attributes_process = Process(target=Katana.getIcons, args=(secondary_attribute_data,category,secondary_attribute_relative_size, base_image.size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_colors, font, True, "Secondary", return_dict))
         secondary_attributes_process.start()
         message = "Getting secondary attribute data image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
