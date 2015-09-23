@@ -2,39 +2,39 @@
     "Allow Icons Overlap": false, 
     "Allow Icons Without Text": false, 
     "Background Color Threshold Value": 15, 
-    "Background Image": "c:\\Users\\vinay.keerthi\\Code\\Leonardo\\leonardo\\Images\\Backgrounds\\Background 3.png", 
+    "Background Image": "C:\\Users\\vinay.keerthi\\Code\\Leonardo\\leonardo\\Images\\Backgrounds\\Background 3.png", 
     "Fix Icon Text Case": true, 
     "Icon Arrangement": "Circular", 
     "Icon Bounding Box": "Circle", 
-    "Icon Font Bold": false, 
+    "Icon Font Bold": true, 
     "Icon Font Color": [
         0, 
         0, 
         0
     ], 
-    "Icon Font Italics": true, 
+    "Icon Font Italics": false, 
     "Icon Font Size": 18, 
     "Icon Font Underline": false, 
     "Icon Palette": [
         [
-            209, 
-            5, 
-            12
+            231, 
+            90, 
+            80
         ], 
         [
-            218, 
-            54, 
-            60
+            235, 
+            122, 
+            114
         ], 
         [
-            232, 
-            130, 
-            133
+            243, 
+            172, 
+            167
         ], 
         [
-            245, 
-            205, 
-            206
+            250, 
+            222, 
+            220
         ], 
         [
             255, 

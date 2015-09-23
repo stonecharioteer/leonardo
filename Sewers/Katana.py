@@ -821,6 +821,7 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
 
     current_h, pad = 0, 10 #this is the padding.
     #Ref: http://stackoverflow.com/questions/1970807/center-middle-align-text-with-pil
+    icon_text_color = (25,25,25)
     for line in text_as_paragraphs:
         w, h = draw_text_handle.textsize(line, font=font)
         draw_text_handle.text(((int((max_w-w)/2)), current_h), line, icon_text_color, font=font)

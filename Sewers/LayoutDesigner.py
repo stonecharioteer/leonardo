@@ -683,13 +683,13 @@ class LayoutDesigner(QtGui.QWidget):
         is_bold = self.bold_button.isChecked()
         is_italics = self.italics_button.isChecked()
         if is_bold and is_italics:
-            font = os.path.join("essentials", "RionaSans-MediumItalics.ttf")
+            font = os.path.join("essentials", "RionaSans-BoldItalic.ttf")
         elif is_bold and (not is_italics):
-            font = os.path.join("essentials", "RionaSans-Medium.ttf")
+            font = os.path.join("essentials", "RionaSans-Bold.ttf")
         elif (not is_bold) and is_italics:
-            font = os.path.join("essentials", "RionaSans-RegularItalics.ttf")
+            font = os.path.join("essentials", "RionaSans-MediumItalic.ttf")
         else:
-            font = os.path.join("essentials", "RionaSans-Regular.ttf")
+            font = os.path.join("essentials", "RionaSans-Medium.ttf")
         return font
 
 
