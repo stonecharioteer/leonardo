@@ -66,40 +66,38 @@ def getBrandImage_new(brand):
 def getMergedFlipkartBrandImage(brand=None):
     flipkart_image = getFlipkartIconImage()
     padding_factor = 0.05
-    if brand is None:
-        #print "No brand given!"
-        final_image = flipkart_image
-    else:
-        #Open the brand image.
-        original_brand_image = getBrandImage_new(brand)
-        #Scale the brand image respective to the flipkart image's height.
-        brand_image = getResizedImage(original_brand_image,1,"Height",flipkart_image.size)
-        
-        #Start a canvas whose length is 1.2x that of fk + brand.
-        canvas_width = (flipkart_image.size[0] + brand_image.size[0])*(1+2*padding_factor)
-        canvas_height = flipkart_image.size[1]
+    final_image = flipkart_image
+    if (brand is not None):
+        if len(glob.glob(os.path.join("Images","Brands",brand.replace(" ","_")+"*.*"))) >0:
+            #Open the brand image.
+            original_brand_image = getBrandImage_new(brand)
+            #Scale the brand image respective to the flipkart image's height.
+            brand_image = getResizedImage(original_brand_image,1,"Height",flipkart_image.size)
+            
+            #Start a canvas whose length is 1.2x that of fk + brand.
+            canvas_width = (flipkart_image.size[0] + brand_image.size[0])*(1+2*padding_factor)
+            canvas_height = flipkart_image.size[1]
 
-        canvas_size = (int(canvas_width), int(canvas_height))
-        final_image = Image.new("RGBA",canvas_size,(255,255,255,0))
-        #Paste the fk logo onto the left.
-        flipkart_image_position = (0,0)
-        final_image.paste(flipkart_image, flipkart_image_position, flipkart_image)
-        #Paste the Brand logo onto the right.
-        brand_image_position = (int(flipkart_image.size[0] + 2*padding_factor*(flipkart_image.size[0]+brand_image.size[0])),0)
-        final_image.paste(brand_image, brand_image_position, brand_image)
-        #At fk_width + 0.1x fk+brandwidth, draw a vertical line.
-        final_image_drawing_handle = ImageDraw.Draw(final_image, mode="RGBA")
-        line_top_x = flipkart_image.size[0] + padding_factor*(flipkart_image.size[0]+brand_image.size[0])
-        line_top_y = 0.5*padding_factor*flipkart_image.size[1]
-        line_top = (int(line_top_x), int(line_top_y))
-        line_bottom_x = line_top_x
-        line_bottom_y = (1-padding_factor*0.5)*flipkart_image.size[1]
-        line_bottom = (int(line_bottom_x), int(line_bottom_y))
-        line_path = [line_top, line_bottom]
-        line_thickness = int(padding_factor/15*(flipkart_image.size[0]+brand_image.size[0]))
-        final_image_drawing_handle.line(line_path, (0,0,0,200), line_thickness)        
-        final_image.save(os.path.join("cache","FK_"+brand+".png"),dpi=(300,300))
-
+            canvas_size = (int(canvas_width), int(canvas_height))
+            final_image = Image.new("RGBA",canvas_size,(255,255,255,0))
+            #Paste the fk logo onto the left.
+            flipkart_image_position = (0,0)
+            final_image.paste(flipkart_image, flipkart_image_position, flipkart_image)
+            #Paste the Brand logo onto the right.
+            brand_image_position = (int(flipkart_image.size[0] + 2*padding_factor*(flipkart_image.size[0]+brand_image.size[0])),0)
+            final_image.paste(brand_image, brand_image_position, brand_image)
+            #At fk_width + 0.1x fk+brandwidth, draw a vertical line.
+            final_image_drawing_handle = ImageDraw.Draw(final_image, mode="RGBA")
+            line_top_x = flipkart_image.size[0] + padding_factor*(flipkart_image.size[0]+brand_image.size[0])
+            line_top_y = 0.5*padding_factor*flipkart_image.size[1]
+            line_top = (int(line_top_x), int(line_top_y))
+            line_bottom_x = line_top_x
+            line_bottom_y = (1-padding_factor*0.5)*flipkart_image.size[1]
+            line_bottom = (int(line_bottom_x), int(line_bottom_y))
+            line_path = [line_top, line_bottom]
+            line_thickness = int(padding_factor/15*(flipkart_image.size[0]+brand_image.size[0]))
+            final_image_drawing_handle.line(line_path, (0,0,0,200), line_thickness)        
+            final_image.save(os.path.join("cache","FK_"+brand+".png"),dpi=(300,300))
     return final_image
 
 def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, icon_arrangement, ordering, parent_image_positioning):
@@ -195,6 +193,7 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                     coordinates_and_icons.append(coord)
                     counter+=1
             elif icon_arrangement == "Rectangular":
+
                 #icons are to be laid out in arrays.
                 pass
             else:
@@ -387,7 +386,9 @@ def getPointsOnArc(origin, radius, divisions, theta_range):
     theta_diff = theta_max-theta_min
     #print "%d Divisions"%divisions
     #print "Max angle: %f, Min: %f"% (getDegreeFromRadians(theta_max), getDegreeFromRadians(theta_min) )
-    if divisions == 1:
+    if divisions == 0:
+        thetas = [(theta_max-theta_min)*0.5]
+    elif divisions == 1:
         thetas = [0.5*theta_diff+theta_min]
     elif divisions == 2:
         thetas = [0.25*theta_diff+theta_min, 0.75*theta_diff+theta_min]
@@ -825,7 +826,7 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     text_canvas_position = (text_x, text_y)
     final_canvas.paste(icon_image, icon_position, icon_image)
     final_canvas.paste(text_canvas, text_canvas_position, text_canvas)
-    final_canvas.save(os.path.join("cache",os.path.basename(icon_path)))
+    #final_canvas.save(os.path.join("cache",os.path.basename(icon_path)))
     return final_canvas
 
 def getValidPlacementPoints(base_image_size, parent_image_size, parent_coordinates, past_icons_data, new_icon_data, allow_overlap):

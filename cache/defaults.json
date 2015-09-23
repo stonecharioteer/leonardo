@@ -4,7 +4,7 @@
     "Background Color Threshold Value": 15, 
     "Fix Icon Text Case": true, 
     "Icon Arrangement": "Circular", 
-    "Icon Bounding Box": "None", 
+    "Icon Bounding Box": "Octagon Straight", 
     "Icon Font Bold": false, 
     "Icon Font Color": [
         0, 
@@ -17,23 +17,23 @@
     "Icon Palette": [
         [
             0, 
-            0, 
-            0
-        ], 
-        [
-            51, 
-            51, 
-            51
-        ], 
-        [
-            127, 
-            127, 
+            85, 
             127
         ], 
         [
+            50, 
+            118, 
+            152
+        ], 
+        [
+            127, 
+            170, 
+            191
+        ], 
+        [
             204, 
-            204, 
-            204
+            221, 
+            229
         ], 
         [
             255, 
@@ -56,6 +56,7 @@
     "Preserve Icon Colors": false, 
     "Primary Attribute Relative Size": 8, 
     "Secondary Attribute Relative Size": 8, 
+    "Use Category Specific Backgrounds": false, 
     "Use Icon Color For Font Color": true, 
     "Use Simple Color Replacement": false
 }

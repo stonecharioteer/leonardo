@@ -167,6 +167,9 @@ class LayoutDesigner(QtGui.QWidget):
         preserve_icon_colors = settings_from_json["Preserve Icon Colors"]
         self.preserve_icon_colors.setChecked(preserve_icon_colors)
 
+        use_category_specific_backgrounds = settings_from_json["Use Category Specific Backgrounds"]
+        self.use_category_specific_backgrounds.setChecked(use_category_specific_backgrounds)
+
     def createUI(self):        
         self.preview_group_box = self.createPreviewWidget()
         self.settings_group_box = self.createSettingsWidget()
@@ -443,6 +446,9 @@ class LayoutDesigner(QtGui.QWidget):
         #Fix the icon text case.
         self.fix_icon_text_case = QtGui.QCheckBox("Convert USP Description Text to Title Case")
         self.fix_icon_text_case.setToolTip("Force the first character of the USP description text to capitals. This could result in possible problems.")
+        #
+        self.use_category_specific_backgrounds = QtGui.QCheckBox("Use Category Specific Background Images.")
+
         #Layout
         left_center_alignment = QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter
         left_top_alignment = QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop
@@ -518,6 +524,12 @@ class LayoutDesigner(QtGui.QWidget):
         column = 0
         advanced_panel_layout.addWidget(self.fix_icon_text_case, row, column, 1, 2, 
                                     left_center_alignment)
+        
+        row += 1
+        column = 0
+        advanced_panel_layout.addWidget(self.use_category_specific_backgrounds, row, column, 1, 2, 
+                                    left_center_alignment)
+        
         row += 1
         column = 0
         advanced_panel_layout.addWidget(self.allow_textless_icons_checkbox, row, column, 1, 2, 
@@ -657,7 +669,7 @@ class LayoutDesigner(QtGui.QWidget):
         return False #Add functionality for this later.
 
     def useCategorySpecificBackgrounds(self):
-        return True #Add a handle for this later.
+        return self.use_category_specific_backgrounds.isChecked() #Add a handle for this later.
 
     def preserveIconColors(self):
         return self.preserve_icon_colors.isChecked()
@@ -690,6 +702,7 @@ class LayoutDesigner(QtGui.QWidget):
         preserve_icon_colors = self.preserveIconColors()
         fix_icon_text_case = self.fixIconTextCase()
         icon_bounding_box = self.getIconBoundingBox()
+        use_category_specific_backgrounds = self.useCategorySpecificBackgrounds()
 
 
         settings = {
@@ -715,6 +728,7 @@ class LayoutDesigner(QtGui.QWidget):
                     "Icon Font Bold": icon_font_bold,
                     "Icon Bounding Box": icon_bounding_box,
                     "Fix Icon Text Case": fix_icon_text_case,
-                    "Preserve Icon Colors": preserve_icon_colors
+                    "Preserve Icon Colors": preserve_icon_colors,
+                    "Use Category Specific Backgrounds": use_category_specific_backgrounds
                 }
         return settings
