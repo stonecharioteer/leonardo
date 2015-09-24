@@ -7,6 +7,7 @@ from IconButton import IconButton
 #from FileLocationWidget import FileLocationWidget
 from PrimaryButton import PrimaryButton
 from QColorButton import QColorButton
+from QColorPanel import QColorPanel
 
 class LayoutDesigner(QtGui.QWidget):
     def __init__(self):
@@ -161,6 +162,7 @@ class LayoutDesigner(QtGui.QWidget):
         #Set the fix icon case checkbox.
         fix_icon_text_case = settings_from_json["Fix Icon Text Case"]
         self.fix_icon_text_case.setChecked(fix_icon_text_case)
+        
         #Set the preserve icon colors checkbox.
         preserve_icon_colors = settings_from_json["Preserve Icon Colors"]
         self.preserve_icon_colors.setChecked(preserve_icon_colors)
@@ -346,7 +348,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.font_color_picker = QColorButton()
 
         font_panel_layout = QtGui.QGridLayout()
-        font_panel_layout.addWidget(self.bold_button, 0, 0, 1, 1, 
+        font_panel_layout.addWidget(self.bold_button, 0, 0, 1, 1,
                                     QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         font_panel_layout.addWidget(self.italics_button, 0, 1, 1, 1, 
                                     QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
@@ -384,7 +386,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.product_image_scale_spinbox.setSuffix("%")
         #Widget for controlling icon color.
         self.palette_selection_label = QtGui.QLabel("Icon Palette:")
-        self.palette_selection_button = QColorButton()
+        self.palette_selection_button = QColorPanel()
         palette_layout = QtGui.QHBoxLayout()
         #palette_layout.addWidget(self.palette_selection_combobox,0,QtCore.Qt.AlignRight)
         palette_layout.addWidget(self.palette_selection_button,0,QtCore.Qt.AlignLeft)
@@ -448,8 +450,9 @@ class LayoutDesigner(QtGui.QWidget):
         self.fix_icon_text_case = QtGui.QCheckBox("Convert USP Description Text to Title Case")
         self.fix_icon_text_case.setToolTip("Force the first character of the USP description text to capitals. This could result in possible problems.")
         #
-        self.use_category_specific_backgrounds = QtGui.QCheckBox("Use Category Specific Background Images.")
-
+        self.use_category_specific_backgrounds = QtGui.QCheckBox("Use Category-Specific Background Images.")
+        #
+        self.use_icon_color_for_font_color = QtGui.QCheckBox("Use the first color from Icon palette as font color.")
         #Layout
         left_center_alignment = QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter
         left_top_alignment = QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop
@@ -529,6 +532,11 @@ class LayoutDesigner(QtGui.QWidget):
         row += 1
         column = 0
         advanced_panel_layout.addWidget(self.use_category_specific_backgrounds, row, column, 1, 2, 
+                                    left_center_alignment)
+
+        row += 1
+        column = 0
+        advanced_panel_layout.addWidget(self.use_icon_color_for_font_color, row, column, 1, 2, 
                                     left_center_alignment)
         
         row += 1
@@ -658,10 +666,10 @@ class LayoutDesigner(QtGui.QWidget):
         return "False" #Add handles for this later.
 
     def getIconFontColor(self):
-        return (0,0,0)
+        return self.font_color_picker.getColor()
 
     def useIconColorForFontColor(self):
-        return True
+        return self.use_icon_color_for_font_color.isChecked()
 
     def getIconFontSize(self):
         return self.font_size_spinbox.value()
@@ -724,15 +732,16 @@ class LayoutDesigner(QtGui.QWidget):
 
         settings = {
                     "Parent Image Resize Factor": parent_image_resize_factor, 
+                    "Icon Palette": icon_palette, 
                     "Icon Font Italics": icon_font_italics, 
+                    "Icon Font Bold": icon_font_bold,
+                    "Icon Font Underline": icon_font_underline, 
                     "Image Aspect Ratio": image_aspect_ratio, 
                     "Icon Arrangement": icon_arrangement_value, 
                     "Use Simple Color Replacement": use_simple_color_replacement, 
-                    "Icon Font Underline": icon_font_underline, 
                     "Allow Icons Overlap": allow_overlap, 
                     "Allow Icons Without Text": allow_textless_icons, 
                     "Parent Image Resize Reference": parent_image_resize_reference, 
-                    "Icon Palette": icon_palette, 
                     "Background Color Threshold Value": background_color_threshold, 
                     "Load Icon Colors From Background": load_icon_color_from_background, 
                     "Primary Attribute Relative Size": primary_attr_icon_size_value, 
@@ -742,7 +751,6 @@ class LayoutDesigner(QtGui.QWidget):
                     "Parent Image Position": parent_image_position, 
                     "Icon Font Size": icon_font_size, 
                     "Margin": margin, 
-                    "Icon Font Bold": icon_font_bold,
                     "Icon Bounding Box": icon_bounding_box,
                     "Fix Icon Text Case": fix_icon_text_case,
                     "Preserve Icon Colors": preserve_icon_colors,

@@ -6,11 +6,11 @@
     "Fix Icon Text Case": true, 
     "Icon Arrangement": "Circular", 
     "Icon Bounding Box": "Circle", 
-    "Icon Font Bold": true, 
+    "Icon Font Bold": false, 
     "Icon Font Color": [
-        0, 
-        0, 
-        0
+        25, 
+        25, 
+        25
     ], 
     "Icon Font Italics": false, 
     "Icon Font Size": 18, 
