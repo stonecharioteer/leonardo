@@ -184,6 +184,7 @@ class Splinter(QtCore.QThread):
         #Multiprocessing.
         manager = Manager()
         return_dict = manager.dict()
+        #Get the base empty canvas.
         base_image = Katana.getBaseImage()
         #Get the primary image path
         message = "Getting parent image for %s."%fsn
@@ -281,12 +282,6 @@ class Splinter(QtCore.QThread):
         message = "Getting the merged Flipkart and Brand Logo for %s."%(fsn)
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
         fk_brand_icon = Katana.getMergedFlipkartBrandImage(brand)
-        base_image.paste(
-                    fk_brand_icon, 
-                    (int(fk_brand_icon.size[0]*0.05), 
-                    int(fk_brand_icon.size[1]*0.05)), 
-                    fk_brand_icon
-                )
         message = "Waiting for the parent image strip process to complete for %s."%(fsn)
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
         #Waiting for the parent image strip process to complete so that we can retrieve the parent image.
@@ -309,18 +304,31 @@ class Splinter(QtCore.QThread):
                     message = "Encountered a problem while pasting the icon on base image at %s for %s." %(icon["Position"],fsn)
                 self.sendMessage.emit(message, self.last_eta, self.thread_index)
                 raise
-
         message = "Final preparations are ongoing for %s."%(fsn)
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
+        merged_base_image = Katana.getFinalBaseImage(base_image)
+        #Remove this later.
+        merged_base_image.paste(
+                    fk_brand_icon, 
+                    (0,0), 
+                    fk_brand_icon
+                )
+        merged_base_image.paste(
+                    base_image, 
+                    (0, int(fk_brand_icon.size[1]*1.05)), 
+                    base_image
+                )
+
+
         final_image = background_image.copy()
         margin = 1 - self.margin
         resized_dimensions = (
-                            int(margin*base_image.size[0]),
-                            int(margin*base_image.size[1])
+                            int(margin*merged_base_image.size[0]),
+                            int(margin*merged_base_image.size[1])
                         )
         message = "Adjusting for the margin for %s."%(fsn)
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
-        resized_base_image = base_image.resize(resized_dimensions,resample=PIL.Image.ANTIALIAS)
+        resized_base_image = merged_base_image.resize(resized_dimensions,resample=PIL.Image.ANTIALIAS)
         base_image_x = (background_image.size[0]-resized_base_image.size[0])/2
         base_image_y = (background_image.size[1]-resized_base_image.size[1])/2
         base_image_coords = (

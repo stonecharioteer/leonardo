@@ -31,7 +31,11 @@ def getRadians(degrees):
 
 def getBaseImage():
     from PIL import Image
-    return Image.new("RGBA", (1800, 2800), (0,0,0,0))
+    return Image.new("RGBA", (1800, 2800-200), (0,0,0,0))
+
+def getFinalBaseImage(base_image):
+    from PIL import Image
+    return Image.new("RGBA", (base_image.size[0], base_image.size[1]+200), (0,0,0,0))    
 
 def getBackgroundImage(background_path, use_category_specific_backgrounds, category):
     import random, os
