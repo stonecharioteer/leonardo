@@ -279,6 +279,8 @@ class DataSelector(QtGui.QWidget):
             self.fetching_activity.setText("Preparing to download images and specifications off the Flipkart website!")
             self.fk_retriever.fsn_list = fsns
             self.fk_retriever.allow_run = True
+        else:
+            print "No FSNS?"
 
     def prepareDataRetrievedFromFK(self, status, data_set, progress_value, completion_status, eta):
         """Gets data from FK from the thread's signal and prepares it."""

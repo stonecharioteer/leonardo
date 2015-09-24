@@ -57,8 +57,15 @@ class FKRetriever(QtCore.QThread):
                         else:
                             error = "Skipping fetching of images for %s since I've already got them."%fsn
                             self.sendException.emit(error)
-                        spec_table = self.downloadSpecTable(fk_page_soup)
-                        self.data_list[fsn] = spec_table
+                        try:
+                            spec_table = self.downloadSpecTable(fk_page_soup)
+                            self.data_list[fsn] = spec_table
+                        except:
+                            with open(os.path.join("cache","%s.html"%fsn), "w") as file_handle:
+                                file_handle.write(fk_page_soup.prettify())
+                            error = "Error retrieving specification table for %s. Dumped Soup to file."% fsn
+                            self.sendException.emit(error)
+                            self.data_list[fsn] = {}
                         counter += 1
                         status = "Completed %d of %d." % (counter, total)
                         data_set = self.data_list
@@ -102,7 +109,7 @@ class FKRetriever(QtCore.QThread):
                 error = "Incomplete Read error for %s. Retrying" %fsn
                 self.sendException.emit(error)
                 continue
-        soup = BeautifulSoup(html)
+        soup = BeautifulSoup(html, "html.parser")
         #validate the soup.
         try:
             item_id = self.getItemIDFromHTML(html)
@@ -144,6 +151,9 @@ class FKRetriever(QtCore.QThread):
         #find the section in this thing.
         spec_section_area = fk_page_soup.find(class_ = "productSpecs specSection")
         #get model name
+        if spec_section_area is None:
+            raise Exception("Didn't find a section that has the class 'productSpecs specSection' in the HTML for this FSN.")
+
         specTables = spec_section_area.find_all(class_ = "specTable")
         groupHeads_list = []
         specsKeys_list = []

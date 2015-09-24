@@ -15,16 +15,12 @@ class FSNTextEdit(QWidget):
         text_edit_contents = str(self.text_edit.toPlainText()).strip()
         #print "Got text!"
         fsns_string = []
-        if '"' in text_edit_contents:
-            text_edit_contents.replace('"',"")
-            #print "Removing quotes"
-        if " " in text_edit_contents:
-            text_edit_contents.replace(' ', "")
-            #print "Removing spaces"
+        possible_separators = [" ","'",'"', ","]
+        for separator in possible_separators:
+            if separator in text_edit_contents:
+                text_edit_contents = text_edit_contents.replace(separator,"\n")
         if "\n" in text_edit_contents:
             fsns_string = list(set(text_edit_contents.split("\n")))
-        if "," in text_edit_contents:
-            fsns_string = list(set(text_edit_contents.split(",")))
         if len(text_edit_contents) in [13, 16]:
             fsns_string = [text_edit_contents]
         #print fsns_string
