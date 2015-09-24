@@ -8,6 +8,7 @@ from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
 import PIL
+from PyQt4 import QtGui, QtCore
 
 def getTitleCase(sentence):
     import re
@@ -704,23 +705,13 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     import textwrap
     import numpy as np
     import PIL
-    clearance_factor_for_text = 2.0
-    font_resize_factor = 0.3
-    if fix_icon_text_case:
-        description_text = getTitleCase(description_text)
-
-    text_lengths = [len(word) for word in description_text.split(" ")]
-    max_text_length = max(text_lengths)
-    wrap_width = max_text_length if max_text_length > 10 else 10
-
-    text_as_paragraphs = textwrap.wrap(description_text, width=wrap_width)
     #get an image object using the icon path, and resize it to the required dimensions with respect to the height of the base image.
     #Don't strip for now.
     #icon_image = getStrippedImage(getResizedImage(Image.open(icon_path).convert("RGBA"),icon_relative_size,"height",base_image_size), threshold=30)
     icon_image = getResizedImage(Image.open(icon_path).convert("RGBA"), icon_relative_size,"height",base_image_size)
     if bounding_box != "None":
         shape = bounding_box.replace(" ","_")
-        shape_width = int(max(icon_image.size)*1.45)
+        shape_width = int((max(icon_image.size))*1.45)
         shape_path = os.path.join("Images","Shapes","%s.png"%shape)
         shape = Image.open(shape_path).convert("RGBA").resize((shape_width,shape_width), resample=PIL.Image.ANTIALIAS)
         shape_and_icon= shape
@@ -732,19 +723,6 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
         shape_and_icon = icon_image
     #icon_image = replaceColorInImage(resized_icon_image,(255,255,255,255),(0,0,0,255))
     #Create a blank canvas for the text.
-    max_w, max_h = 500, 500
-    icon_text_color = (193, 40, 28) #Microwave
-    icon_text_color = (25, 84, 102) #Rice cooker Blue
-    icon_text_color = (107,111,116) #something
-    icon_text_color = (122, 73, 97) #TV
-    icon_text_color = (30, 92, 89) #Dark Blue for hair dryer
-    icon_text_color = (30, 68, 96) #Water purifier
-    icon_text_color = (92, 46, 46) #Brown coffee, air fryer and furniture
-    icon_text_color = (92, 46, 46) #sofa
-    icon_text_color = (58, 141, 190) #iron box
-    icon_text_color = (255, 62, 13) #red
-    icon_text_color = (0,0,0) #air fryer 2, ICT powerbank, Smart Watch
-    icon_text_color = (19, 7, 58) #Some blue for refrigerator.
     #print colors_list
     black = [color for color in colors_list[0]]
     if len(black) == 3:
@@ -770,7 +748,7 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     if len(white) == 3:
         white.append(255)
     white = tuple(white)
-    text_canvas = Image.new("RGBA",(max_w, max_h),(0,0,0,0))
+
     icon_image = shape_and_icon #remove to disable circle.
     if preserve_icon_original_colors is None:
         preserve_icon_original_colors = False
@@ -796,23 +774,44 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
                 column_index += 1
             row_index += 1
         icon_image = Image.fromarray(icon_image_array,"RGBA")
-        #icon_image_array[(icon_image_array == (0,0,0,255)).all(axis = -1)] = (black[0],black[1],black[2],255)
-        #icon_image_array[(icon_image_array == (255,255,255,255)).all(axis = -1)] = (white[0],white[1],white[2],255)
-    draw_text_handle = ImageDraw.Draw(text_canvas)
-    #font_size = int(icon_image.size[1]*font_resize_factor)
+    #
+    #
+    #
+    #Put the text now.
+    #
+    #
+
     font_size = 72 #Set default font size for now.
+    if fix_icon_text_case:
+        description_text = getTitleCase(description_text)
+    text_lengths = [len(word) for word in description_text.split(" ")]
+    max_text_length = max(text_lengths)
+    wrap_width = max_text_length if max_text_length > 10 else 10
+    text_as_paragraphs = textwrap.wrap(description_text, width=wrap_width)
+    line_lengths = [len(line) for line in text_as_paragraphs]
+    max_line_width = max(line_lengths)
+    line_count = len(line_lengths)
+    #Create an ImageDraw text drawing handle.
+    text_measure_handle = ImageDraw.Draw(Image.new("RGBA",(10, 10),(0,0,0,0)))
+    canvas_width = shape_and_icon.size[0] #Set maximum width to the width of the canvas at first.
     if font_path is None:
         font = ImageFont.truetype(os.path.join("essentials","RionaSans-Regular.ttf"), font_size)
     else:
         font = ImageFont.truetype(font_path, font_size)
+    widths = [text_measure_handle.textsize(line, font=font)[0] for line in text_as_paragraphs]
+    heights = [text_measure_handle.textsize(line, font=font)[1] for line in text_as_paragraphs]
 
     current_h, pad = 0, 10 #this is the padding.
+    max_w = int(max(widths) if max(widths) > canvas_width else canvas_width)
+    max_h = int(sum(heights) + pad*(len(heights)-1))
+    text_canvas = Image.new("RGBA",(max_w, max_h),(0,0,0,0))
+    draw_text_handle = ImageDraw.Draw(text_canvas)
     #Ref: http://stackoverflow.com/questions/1970807/center-middle-align-text-with-pil
     if not use_icon_color_for_font_color:
-        icon_text_color = font_color
+        icon_text_color = tuple(font_color)
     else:
         icon_text_color = black
-        
+
     for line in text_as_paragraphs:
         w, h = draw_text_handle.textsize(line, font=font)
         draw_text_handle.text(((int((max_w-w)/2)), current_h), line, icon_text_color, font=font)
@@ -831,7 +830,7 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     text_canvas_position = (text_x, text_y)
     final_canvas.paste(icon_image, icon_position, icon_image)
     final_canvas.paste(text_canvas, text_canvas_position, text_canvas)
-    #final_canvas.save(os.path.join("cache",os.path.basename(icon_path)))
+    final_canvas.save(os.path.join("cache",os.path.basename(icon_path)))
     return final_canvas
 
 def getValidPlacementPoints(base_image_size, parent_image_size, parent_coordinates, past_icons_data, new_icon_data, allow_overlap):
