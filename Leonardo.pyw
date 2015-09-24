@@ -134,6 +134,9 @@ class Leonardo(Turtle):
             self.radical_rats[i].preserve_icon_colors = self.layout_designer_widget.preserveIconColors()
             self.radical_rats[i].fix_icon_text_case = self.layout_designer_widget.fixIconTextCase()
             self.radical_rats[i].font = self.layout_designer_widget.getFont()
+            self.radical_rats[i].font_color = self.layout_designer_widget.getIconFontColor()
+            self.radical_rats[i].use_icon_color_for_font_color = self.layout_designer_widget.useIconColorForFontColor()
+            
             self.radical_rats[i].allow_run = True
 
     

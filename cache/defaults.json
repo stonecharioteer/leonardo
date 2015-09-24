@@ -46,7 +46,7 @@
         9, 
         14
     ], 
-    "Load Icon Colors From Background": "False", 
+    "Load Icon Colors From Background": false, 
     "Margin": 0.05, 
     "Parent Image Position": [
         0.5, 
@@ -58,6 +58,6 @@
     "Primary Attribute Relative Size": 8, 
     "Secondary Attribute Relative Size": 8, 
     "Use Category Specific Backgrounds": false, 
-    "Use Icon Color For Font Color": true, 
+    "Use Icon Color For Font Color": false, 
     "Use Simple Color Replacement": true
 }

@@ -661,7 +661,7 @@ def getParentImage(fsn):
         parent_image_path = os.path.join("essentials","na_parent_image.png")
     return parent_image_path
 
-def getIcons(attribute_data, category, icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_original_colors=None, font=None, multiprocess=None, manager_return_handle=None, manager_return_dict=None):
+def getIcons(attribute_data, category, icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_original_colors=None, font=None, font_color=None, use_icon_color_for_font_color=None, multiprocess=None, manager_return_handle=None, manager_return_dict=None):
     #print attribute_data, category
     if multiprocess is None:
         multiprocess = False
@@ -684,7 +684,7 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size, colo
             #If it hasn't yet found an icon, or in first run.
             if not found_icon:
                 if attribute["Attribute"].lower().strip() in icon.lower().strip():
-                    icon_with_text = getIconImage(icon, attribute["Description Text"], icon_relative_size, base_image_size, colors_list,bounding_box, fix_icon_text_case, preserve_icon_original_colors, font)
+                    icon_with_text = getIconImage(icon, attribute["Description Text"], icon_relative_size, base_image_size, colors_list,bounding_box, fix_icon_text_case, preserve_icon_original_colors, font, font_color, use_icon_color_for_font_color)
                     attribute.update({"Icon": icon_with_text})
                     found_icon = True
                     #attribute.update({"Icon": None})
@@ -693,7 +693,7 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size, colo
                 break
         if not found_icon:
             na_icon_path = os.path.join("essentials","icon_na.png")
-            icon_with_text = getIconImage(na_icon_path, attribute["Description Text"], icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_original_colors, font)
+            icon_with_text = getIconImage(na_icon_path, attribute["Description Text"], icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_original_colors, font, font_color, use_icon_color_for_font_color)
             attribute.update({"Icon": icon_with_text})
             attributes_without_icons.append(attribute["Attribute"])
     #if (len(attributes_without_icons) > 0):
@@ -708,7 +708,7 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size, colo
 def checkIcon(attribute,description):
     return True
 
-def getIconImage(icon_path, description_text, icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_original_colors=None, font_path=None):
+def getIconImage(icon_path, description_text, icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_original_colors=None, font_path=None, font_color=None, use_icon_color_for_font_color=None):
     """This method generates an image object which contains the icon image 
     as well as the description text."""
     import textwrap
@@ -780,9 +780,6 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     if len(white) == 3:
         white.append(255)
     white = tuple(white)
-
-    icon_text_color = black
-
     text_canvas = Image.new("RGBA",(max_w, max_h),(0,0,0,0))
     icon_image = shape_and_icon #remove to disable circle.
     if preserve_icon_original_colors is None:
@@ -821,7 +818,11 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
 
     current_h, pad = 0, 10 #this is the padding.
     #Ref: http://stackoverflow.com/questions/1970807/center-middle-align-text-with-pil
-    icon_text_color = (25,25,25)
+    if not use_icon_color_for_font_color:
+        icon_text_color = font_color
+    else:
+        icon_text_color = black
+        
     for line in text_as_paragraphs:
         w, h = draw_text_handle.textsize(line, font=font)
         draw_text_handle.text(((int((max_w-w)/2)), current_h), line, icon_text_color, font=font)
