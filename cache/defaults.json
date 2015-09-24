@@ -8,9 +8,9 @@
     "Icon Bounding Box": "Circle", 
     "Icon Font Bold": false, 
     "Icon Font Color": [
-        25, 
-        25, 
-        25
+        255, 
+        255, 
+        255
     ], 
     "Icon Font Italics": false, 
     "Icon Font Size": 18, 
@@ -58,6 +58,6 @@
     "Primary Attribute Relative Size": 8, 
     "Secondary Attribute Relative Size": 8, 
     "Use Category Specific Backgrounds": false, 
-    "Use Icon Color For Font Color": false, 
+    "Use Icon Color For Font Color": true, 
     "Use Simple Color Replacement": true
 }

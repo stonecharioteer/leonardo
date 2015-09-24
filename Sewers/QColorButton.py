@@ -35,8 +35,9 @@ class QColorButton(QWidget):
         self.color_button.setIcon(icon)
         self.color_button.pressed.connect(self.onColorPicker)
         layout = QHBoxLayout()
-        layout.addWidget(self.color_button, 0)
+        layout.addWidget(self.color_button, 0, Qt.AlignTop)
         self.setMaximumHeight(button_size.height()*1.5)
+        
         self.setLayout(layout)
 
     def setColor(self, color):
@@ -79,3 +80,8 @@ class QColorButton(QWidget):
     def resetColor(self):
         self.setColor(None)    
         self.color_as_rgba = [255,255,255]
+
+    def setColorFromRGBA(self, rgb_color):
+        self.color_as_rgb = rgb_color
+        self.color_button.setStyleSheet("QPushButton{background-color: rgb(%d,%d,%d);}" % (self.color_as_rgb[0], self.color_as_rgb[1], self.color_as_rgb[2]))
+

@@ -139,16 +139,7 @@ class LayoutDesigner(QtGui.QWidget):
         #Set Icon font size
         icon_font_size = settings_from_json["Icon Font Size"]
 
-        #Set the icon font color
-        #Set the bool to use the icon color for font color.
-        use_icon_color_for_font_color = settings_from_json["Use Icon Color For Font Color"]
-        if type(use_icon_color_for_font_color) != bool:
-            use_icon_color_for_font_color = False
-        if use_icon_color_for_font_color:
-            icon_font_color = icon_colors_value[0]
-        else:
-            icon_font_color = settings_from_json["Icon Font Color"]
-        icon_font_r, icon_font_g, icon_font_b = icon_font_color
+
 
         #Set the background-appropriate icon color loading behaviour.
         load_icon_color_from_background = settings_from_json["Load Icon Colors From Background"]
@@ -172,6 +163,17 @@ class LayoutDesigner(QtGui.QWidget):
 
         background_image = settings_from_json["Background Image"]
         self.background_selection_combobox.setCurrentIndex(self.background_selection_combobox.findText(background_image))
+
+        #Set the icon font color
+        #Set the bool to use the icon color for font color.
+        font_color = settings_from_json["Icon Font Color"]
+        self.font_color_picker.setColorFromRGBA(font_color)
+
+        use_icon_color_for_font_color = settings_from_json["Use Icon Color For Font Color"]
+        if type(use_icon_color_for_font_color) == bool:
+            self.use_icon_color_for_font_color.setChecked(use_icon_color_for_font_color)
+        else:
+            print "The JSON has a non boolean value for the use_icon_color_for_font_color variable."
 
     def createUI(self):        
         self.preview_group_box = self.createPreviewWidget()
@@ -343,9 +345,8 @@ class LayoutDesigner(QtGui.QWidget):
         self.font_size_spinbox = QtGui.QSpinBox()
         self.font_size_spinbox.setRange(18,45)
         self.font_color_label = QtGui.QLabel("Font Color:")
-        self.font_color_combobox = QtGui.QComboBox()
-        self.font_color_combobox.addItems(["Black","White","FK Blue","FK Yellow","Auto Select","Choose Manually"])
         self.font_color_picker = QColorButton()
+        self.font_color_picker.setStyleSheet("Click to select a font color. You can override this color in the advanced panel,\nusing the primary icon color as the font color.")
 
         font_panel_layout = QtGui.QGridLayout()
         font_panel_layout.addWidget(self.bold_button, 0, 0, 1, 1,
@@ -355,18 +356,17 @@ class LayoutDesigner(QtGui.QWidget):
         font_panel_layout.addWidget(self.underline_button, 0, 2, 1, 1, 
                                     QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         font_panel_layout.addWidget(self.font_size_label, 1, 0, 1, 1, 
-                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        font_panel_layout.addWidget(self.font_size_spinbox,1, 1, 1, 1, 
-                                    QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
-        font_panel_layout.addWidget(self.font_color_label, 2, 0, 1, 1, 
                                     QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
-        font_panel_layout.addWidget(self.font_color_combobox, 2, 1, 1, 1, 
-                                    QtCore.Qt.AlignHCenter | QtCore.Qt.AlignTop)
-        font_panel_layout.addWidget(self.font_color_picker,2, 2, 1, 1, 
+        font_panel_layout.addWidget(self.font_size_spinbox,1, 1, 1, 1, 
+                                    QtCore.Qt.AlignRight | QtCore.Qt.AlignTop)
+        font_panel_layout.addWidget(self.font_color_label, 1, 2, 1, 1, 
+                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
+        font_panel_layout.addWidget(self.font_color_picker,1, 3, 1, 1, 
                                     QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
         font_panel_layout.setColumnStretch(0,0)
         font_panel_layout.setColumnStretch(1,0)
-        font_panel_layout.setColumnStretch(2,10)
+        font_panel_layout.setColumnStretch(2,0)
+        font_panel_layout.setColumnStretch(3,10)
         font_panel_layout.setColumnStretch(0,0)
         font_panel_layout.setColumnStretch(0,0)
         font_panel_layout.setRowStretch(0,0)
