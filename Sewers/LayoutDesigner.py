@@ -663,7 +663,7 @@ class LayoutDesigner(QtGui.QWidget):
          return (self.image_margin_spinbox.value()/100)
 
     def loadIconColorsFromBackground(self):
-        return "False" #Add handles for this later.
+        return False #Add handles for this later.
 
     def getIconFontColor(self):
         return self.font_color_picker.getColor()
