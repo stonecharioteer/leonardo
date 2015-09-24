@@ -310,38 +310,28 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                 clearance_on_bottom = height_base - (y_top_left_parent + height_parent)
                 clearance_on_left = x_top_left_parent
                 clearance_on_right = width_base - (x_top_left_parent + width_parent)
-
-
-                #Positions Calculation
-                #if width_parent >= height_parent:
-                    #diagonal_length = width_parent*0.7
-                #    diagonal_length = (width_base-width_parent)/2
-                #else:
-                    #diagonal_length = (height_parent)*0.7
-                #    diagonal_length = (height_base-height_parent)/2
-
-                if width_base<width_parent:
-                    diagonal_length = (height_base-max_icon_width/2)/2
-                else:
+                icon_space_required = max_icon_width*1.05
+                if (clearance_on_left >= icon_space_required) and (clearance_on_right >= icon_space_required):
+                    icon_arc_center_y_top = int(y_center_parent - 0.25*height_parent)
+                    icon_arc_center_y_bottom = int(y_center_parent + 0.15*height_parent)
                     diagonal_length = (width_base-max_icon_width/2)/2
-
-                diagonal_length = (width_base-max_icon_width/2)/2
+                else:
+                    print "There's no space on either side of the product image, so we'll shift the icons up and down respectively."
+                    y_clearance = (max_icon_height*0.155) #Need to tweak these numbers?
+                    icon_arc_center_y_top = int(y_center_parent - 0.35*height_parent - y_clearance)
+                    icon_arc_center_y_bottom = int(y_center_parent + 0.35*height_parent)
+                    diagonal_length = (width_base-max_icon_width)/2
 
                 primary_radius_multiplier = 1.0
                 secondary_radius_multiplier = 1.0
 
                 x_clearance = max_icon_width/2
 
-                y_top = int(y_center_parent - 0.25*height_parent)
-                y_bottom = int(y_center_parent + 0.15*height_parent)
-                
-                if ((y_bottom-y_top) >= max_icon_height):
-                    y_clearance = 0
-                else:
-                    y_clearance = int(max_icon_height*0.155)
+                icon_arc_center_x_bottom = int(x_center_parent-x_clearance)
+                icon_arc_center_x_top = int(x_center_parent-x_clearance)
 
-                primary_arc_center = (int(x_center_parent-x_clearance), y_top-y_clearance)
-                secondary_arc_center = (int(x_center_parent-x_clearance), y_bottom)
+                primary_arc_center = (icon_arc_center_x_top, icon_arc_center_y_top)
+                secondary_arc_center = (icon_arc_center_x_bottom, icon_arc_center_y_bottom)
                 
 
                 primary_radius = primary_radius_multiplier*diagonal_length
