@@ -815,7 +815,6 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
         icon_text_color = tuple(font_color)
     else:
         icon_text_color = black
-
     for line in text_as_paragraphs:
         w, h = draw_text_handle.textsize(line, font=font)
         draw_text_handle.text(((int((max_w-w)/2)), current_h), line, icon_text_color, font=font)
@@ -834,7 +833,7 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     text_canvas_position = (text_x, text_y)
     final_canvas.paste(icon_image, icon_position, icon_image)
     final_canvas.paste(text_canvas, text_canvas_position, text_canvas)
-    final_canvas.save(os.path.join("cache",os.path.basename(icon_path)))
+    #final_canvas.save(os.path.join("cache",os.path.basename(icon_path)))
     return final_canvas
 
 def getValidPlacementPoints(base_image_size, parent_image_size, parent_coordinates, past_icons_data, new_icon_data, allow_overlap):

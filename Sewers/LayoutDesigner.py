@@ -167,7 +167,7 @@ class LayoutDesigner(QtGui.QWidget):
         #Set the icon font color
         #Set the bool to use the icon color for font color.
         font_color = settings_from_json["Icon Font Color"]
-        self.font_color_picker.setColorFromRGBA(font_color)
+        self.font_color_picker.setColorFromRGB(font_color)
 
         use_icon_color_for_font_color = settings_from_json["Use Icon Color For Font Color"]
         if type(use_icon_color_for_font_color) == bool:

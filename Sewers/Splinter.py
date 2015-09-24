@@ -309,8 +309,8 @@ class Splinter(QtCore.QThread):
         merged_base_image = Katana.getFinalBaseImage(base_image)
         #Remove this later.
         merged_base_image.paste(
-                    fk_brand_icon, 
-                    (0,0), 
+                    fk_brand_icon,
+                    (int(fk_brand_icon.size[0]*0.05),0), 
                     fk_brand_icon
                 )
         merged_base_image.paste(
@@ -328,7 +328,7 @@ class Splinter(QtCore.QThread):
                         )
         message = "Adjusting for the margin for %s."%(fsn)
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
-        resized_base_image = merged_base_image.resize(resized_dimensions,resample=PIL.Image.ANTIALIAS)
+        resized_base_image = merged_base_image.resize(resized_dimensions, resample=PIL.Image.ANTIALIAS)
         base_image_x = (background_image.size[0]-resized_base_image.size[0])/2
         base_image_y = (background_image.size[1]-resized_base_image.size[1])/2
         base_image_coords = (

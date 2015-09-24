@@ -20,10 +20,9 @@ class QColorButton(QWidget):
         super(QColorButton, self).__init__(*args, **kwargs)
 
         self.color_button = QPushButton()
-        
         self._color = None
-        self.color_as_rgba = [255,255,255]
-        
+        self.color_as_rgb = (0, 0, 0)
+
         #self.setMaximumWidth(32)
         icon_path = os.path.join("essentials","eyedropper.png")
         icon_pixmap = QPixmap(icon_path)
@@ -50,13 +49,14 @@ class QColorButton(QWidget):
         else:
             self.color_button.setStyleSheet("")
 
-        self.color_as_rgba = PIL.ImageColor.getrgb(str(color))
+        self.color_as_rgb = PIL.ImageColor.getrgb(str(color))
 
     def color(self):
         return self._color
 
     def getColor(self):
-        return self.color_as_rgba
+        return self.color_as_rgb
+
 
     def onColorPicker(self):
         '''
@@ -79,9 +79,9 @@ class QColorButton(QWidget):
 
     def resetColor(self):
         self.setColor(None)    
-        self.color_as_rgba = [255,255,255]
+        self.color_as_rgb = [255,255,255]
 
-    def setColorFromRGBA(self, rgb_color):
+    def setColorFromRGB(self, rgb_color):
         self.color_as_rgb = rgb_color
         self.color_button.setStyleSheet("QPushButton{background-color: rgb(%d,%d,%d);}" % (self.color_as_rgb[0], self.color_as_rgb[1], self.color_as_rgb[2]))
 
