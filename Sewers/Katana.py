@@ -308,7 +308,7 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                 half_icons_required = math.ceil(icons_required/2)
                 other_half_icons_required = icons_required - half_icons_required
 
-                sweep_angle = 85
+                sweep_angle = 90
                 primary_theta_range = (getRadians(270-sweep_angle), getRadians(270+sweep_angle))
                 secondary_theta_range = (getRadians(90-sweep_angle), getRadians(90+sweep_angle))
                 clearance_on_top = y_top_left_parent
@@ -316,15 +316,15 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                 clearance_on_left = x_top_left_parent
                 clearance_on_right = width_base - (x_top_left_parent + width_parent)
                 icon_space_required = max_icon_width*1.05
+                
                 if (clearance_on_left >= icon_space_required) and (clearance_on_right >= icon_space_required):
                     icon_arc_center_y_top = int(y_center_parent - 0.25*height_parent)
-                    icon_arc_center_y_bottom = int(y_center_parent + 0.15*height_parent)
+                    icon_arc_center_y_bottom = int(y_top_left_parent + 0.75*height_parent)
                     diagonal_length = (width_base-max_icon_width/2)/2
                 else:
                     print "There's no space on either side of the product image, so we'll shift the icons up and down respectively."
-                    y_clearance = (max_icon_height*0.155) #Need to tweak these numbers?
-                    icon_arc_center_y_top = int(y_center_parent - 0.35*height_parent - y_clearance)
-                    icon_arc_center_y_bottom = int(y_center_parent + 0.35*height_parent)
+                    icon_arc_center_y_top = int(y_top_left_parent-max_icon_height/4)
+                    icon_arc_center_y_bottom = int(y_top_left_parent+height_parent)
                     diagonal_length = (width_base-max_icon_width)/2
 
                 primary_radius_multiplier = 1.0

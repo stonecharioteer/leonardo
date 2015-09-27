@@ -315,7 +315,7 @@ class Splinter(QtCore.QThread):
                 )
         merged_base_image.paste(
                     base_image, 
-                    (0, int(fk_brand_icon.size[1]*1.05)), 
+                    (int(fk_brand_icon.size[0]*0.05), int(fk_brand_icon.size[1]*1.05)), 
                     base_image
                 )
 
