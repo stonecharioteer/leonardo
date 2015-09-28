@@ -10,6 +10,7 @@ from PIL import ImageDraw
 import PIL
 from PyQt4 import QtGui, QtCore
 
+
 def getTitleCase(sentence):
     import re
     exceptions = ["a", "an", "the", "of", "is", "and", "at", "if","but", "to", "upto"]
@@ -324,7 +325,7 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                 else:
                     print "There's no space on either side of the product image, so we'll shift the icons up and down respectively."
                     icon_arc_center_y_top = int(y_top_left_parent-max_icon_height/4)
-                    icon_arc_center_y_bottom = int(y_top_left_parent+height_parent)
+                    icon_arc_center_y_bottom = int(y_top_left_parent+height_parent-max_icon_height/4)
                     diagonal_length = (width_base-max_icon_width)/2
 
                 primary_radius_multiplier = 1.0
@@ -361,10 +362,15 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                 icons = primary_icons + secondary_icons
                 counter = 0
                 for icon in icons:
-                    coord = {
-                        "Icon": icon,
-                        "Position":icon_positions[counter]
-                    }
+                    try:
+                        coord = {
+                            "Icon": icon,
+                            "Position":icon_positions[counter]
+                        }
+                    except: 
+                        print counter
+                        icon.save("this.png")
+                        raise
                     coordinates_and_icons.append(coord)
                     counter+=1
             elif icon_arrangement == "Rectangular":
