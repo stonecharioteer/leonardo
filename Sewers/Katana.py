@@ -988,9 +988,9 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     widths = [text_measure_handle.textsize(line, font=font)[0] for line in text_as_paragraphs]
     heights = [text_measure_handle.textsize(line, font=font)[1] for line in text_as_paragraphs]
 
-    current_h, pad = 0, 10 #this is the padding.
+    current_h, pad = 0, 15 #this is the padding.
     max_w = int(max(widths) if max(widths) > canvas_width else canvas_width)
-    max_h = int(sum(heights) + pad*(len(heights)-1))
+    max_h = int(sum(heights) + pad*(len(heights)))
     text_canvas = Image.new("RGBA",(max_w, max_h),(0,0,0,0))
     draw_text_handle = ImageDraw.Draw(text_canvas)
     #Ref: http://stackoverflow.com/questions/1970807/center-middle-align-text-with-pil
@@ -1005,14 +1005,14 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     
     #merge both images now.
     final_canvas_width = text_canvas.size[0] if text_canvas.size[0] >= icon_image.size[0] else icon_image.size[0]
-    final_canvas_height = text_canvas.size[1] + icon_image.size[1] + pad
+    final_canvas_height = text_canvas.size[1] + icon_image.size[1] + 2*pad
 
     final_canvas = Image.new("RGBA",(final_canvas_width, final_canvas_height))
     icon_x = int((final_canvas.size[0]-icon_image.size[0])/2)
     icon_y = 0
     icon_position = (icon_x, icon_y)
     text_x = int((final_canvas.size[0]-text_canvas.size[0])/2)
-    text_y = int(final_canvas.size[1]-text_canvas.size[1])
+    text_y = int(final_canvas.size[1]-text_canvas.size[1]+pad)
     text_canvas_position = (text_x, text_y)
     final_canvas.paste(icon_image, icon_position, icon_image)
     final_canvas.paste(text_canvas, text_canvas_position, text_canvas)
