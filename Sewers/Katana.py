@@ -386,7 +386,7 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                 canvas_x_left = 0
                 canvas_x_right = canvas_x_left + width_base - 1*max_icon_width
                 canvas_y_top = int(clearance_factor*height_base)
-                canvas_y_bottom = canvas_y_top + (1-clearance_factor)*height_base - 1.1*max_icon_height
+                canvas_y_bottom = canvas_y_top + (1-clearance_factor)*height_base - 1.5*max_icon_height
                 canvas_center_x = (canvas_x_left+canvas_x_right)/2
                 
                 print "Requested for %d icons."%(icons_required)
@@ -420,18 +420,18 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                             ]
                 elif icons_required == 6:
                     icon_positions = [
-                            (canvas_center_x-max_icon_width, canvas_y_top),
+                            (canvas_center_x-1.5*max_icon_width, canvas_y_top),
                             (canvas_center_x, canvas_y_top),
-                            (canvas_center_x+max_icon_width, canvas_y_top),
-                            (canvas_center_x-max_icon_width, canvas_y_bottom),
+                            (canvas_center_x+1.5*max_icon_width, canvas_y_top),
+                            (canvas_center_x-1.5*max_icon_width, canvas_y_bottom),
                             (canvas_center_x, canvas_y_bottom),
-                            (canvas_center_x+max_icon_width, canvas_y_bottom)
+                            (canvas_center_x+1.5*max_icon_width, canvas_y_bottom)
                             ]
                 elif icons_required == 7:
                     icon_positions = [
                             (canvas_x_left, canvas_y_top),
-                            (canvas_center_x-0.4*max_icon_width, canvas_y_top),
-                            (canvas_center_x+0.4*max_icon_width, canvas_y_top),
+                            (canvas_center_x-0.5*max_icon_width, canvas_y_top),
+                            (canvas_center_x+0.5*max_icon_width, canvas_y_top),
                             (canvas_x_right, canvas_y_top),
                             (canvas_x_left, canvas_y_bottom),
                             (canvas_center_x, canvas_y_bottom),
