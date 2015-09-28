@@ -325,7 +325,7 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                 else:
                     print "There's no space on either side of the product image, so we'll shift the icons up and down respectively."
                     icon_arc_center_y_top = int(y_top_left_parent-max_icon_height/4)
-                    icon_arc_center_y_bottom = int(y_top_left_parent+height_parent-max_icon_height/4)
+                    icon_arc_center_y_bottom = int(y_top_left_parent+height_parent-max_icon_height*2/3)
                     diagonal_length = (width_base-max_icon_width)/2
 
                 primary_radius_multiplier = 1.0
@@ -374,13 +374,189 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                     coordinates_and_icons.append(coord)
                     counter+=1
             elif icon_arrangement == "Rectangular":
-                pass
+                #Center position, rectangular placement.  Bottom gets precedence, more icons there than at the top,
+                #unless symmetry comes into the picture.
+                
+                #Need to pass a list of dictionaries with icons and positions.
+                primary_plot_points_required = len(primary_icons)
+                secondary_plot_points_required = len(secondary_icons)
+                icons_required = (primary_plot_points_required + secondary_plot_points_required)
+                clearance_factor = 0.05
+                
+                canvas_x_left = 0
+                canvas_x_right = canvas_x_left + width_base - 1*max_icon_width
+                canvas_y_top = int(clearance_factor*height_base)
+                canvas_y_bottom = canvas_y_top + (1-clearance_factor)*height_base - 1.1*max_icon_height
+                canvas_center_x = (canvas_x_left+canvas_x_right)/2
+                
+                print "Requested for %d icons."%(icons_required)
+                if icons_required == 1:
+                    icon_positions = [(canvas_center_x, canvas_y_top)]
+                elif icons_required == 2:
+                    icon_positions = [
+                            (canvas_center_x-max_icon_width/3, canvas_y_top), 
+                            (canvas_center_x+max_icon_width/2, canvas_y_top)
+                            ]
+                elif icons_required == 3:
+                    icon_positions = [
+                            (canvas_center_x-max_icon_width, canvas_y_top),
+                            (canvas_center_x, canvas_y_bottom),
+                            (canvas_center_x+max_icon_width, canvas_y_top)
+                            ]
+                elif icons_required == 4:
+                    icon_positions = [
+                            (canvas_center_x-max_icon_width/3, canvas_y_top), 
+                            (canvas_center_x+max_icon_width/2, canvas_y_top),
+                            (canvas_center_x-max_icon_width/3, canvas_y_bottom), 
+                            (canvas_center_x+max_icon_width/2, canvas_y_bottom)
+                            ]
+                elif icons_required == 5:
+                    icon_positions =  [
+                            (canvas_center_x-max_icon_width, canvas_y_top),
+                            (canvas_center_x, canvas_y_top),
+                            (canvas_center_x+max_icon_width, canvas_y_top)
+                            (canvas_center_x-max_icon_width/3, canvas_y_bottom), 
+                            (canvas_center_x+max_icon_width/2, canvas_y_bottom)
+                            ]
+                elif icons_required == 6:
+                    icon_positions = [
+                            (canvas_center_x-max_icon_width, canvas_y_top),
+                            (canvas_center_x, canvas_y_top),
+                            (canvas_center_x+max_icon_width, canvas_y_top),
+                            (canvas_center_x-max_icon_width, canvas_y_bottom),
+                            (canvas_center_x, canvas_y_bottom),
+                            (canvas_center_x+max_icon_width, canvas_y_bottom)
+                            ]
+                elif icons_required == 7:
+                    icon_positions = [
+                            (canvas_x_left, canvas_y_top),
+                            (canvas_x_left+1.1*max_icon_width, canvas_y_top),
+                            (canvas_x_right-1.1*max_icon_width, canvas_y_top),
+                            (canvas_x_right, canvas_y_top),
+
+                            (canvas_center_x-max_icon_width, canvas_y_bottom),
+                            (canvas_center_x, canvas_y_bottom),
+                            (canvas_center_x+max_icon_width, canvas_y_bottom)
+                    ]
+                else:
+                    raise Exception("I  haven't accounted for %d icons"%icons_required)                
+                counter = 0
+                coordinates_and_icons = []
+                for icon in icons:
+                    try:
+                        coord = {
+                            "Icon": icon,
+                            "Position":icon_positions[counter]
+                        }
+                    except: 
+                        print counter
+                        icon.save("this.png")
+                        raise Exception("Too few USPS!")
+                    coordinates_and_icons.append(coord)
+                    counter+=1
             else:
                 print "Invalid icon arrangement passed to Katana. Icon Arrangement asked for is %s"%icon_arrangement
         else:
             print "Parent image positioning hint isn't valid. %r" %parent_image_positioning
     return coordinates_and_icons
+
+def getIconRectangularPosition(icon_number, total_icons, icon_size, canvas_size, parent_image_size=None, parent_image_coords=None, max_icon_height=None, max_icon_width=None):
+    #Currently accounts only for 0.5,0.5 position
+    icon_width, icon_height = icon_size
+    icon_width, icon_height = max_icon_width, max_icon_height
+    canvas_width, canvas_height = canvas_size
+    canvas_left = 0 + canvas_width/2
+    canvas_right = canvas_left+canvas_width
+    canvas_top = 0
+    canvas_bottom = canvas_top + canvas_height
+    canvas_x_center = (canvas_left+canvas_right)/2
+
+    if total_icons == 1:
+        #*
+        #
+        pos = (canvas_x_center-icon_width,canvas_top)
     
+    elif total_icons == 2:
+        #**
+        #
+        if icon_number == 1:
+            pos = (canvas_x_center-3/2*icon_width,canvas_top)
+        else:
+            pos = (canvas_x_center+3/2*icon_width,canvas_top)
+
+    elif total_icons == 3:
+        #**
+        #*
+        if icon_number == 1:
+            pos = (canvas_x_center-3/2*icon_width,canvas_top)
+        elif icon_number == 2:
+            pos = (canvas_x_center-icon_width,canvas_top)
+        else:
+            pos = (canvas_x_center-3/2*icon_width,canvas_top)
+
+    elif total_icons == 4:
+        #**
+        #**
+        if icon_number == 1:
+            pos = (canvas_x_center-3/2*icon_width,canvas_top)
+        elif icon_number == 2:
+            pos = (canvas_x_center-3/2*icon_width,canvas_bottom-max_icon_height)
+        elif icon_number == 3:
+            pos = (canvas_x_center+3/2*icon_width,canvas_top)
+        else:
+            pos = (canvas_x_center+3/2*icon_width,canvas_bottom-max_icon_height)
+
+    elif total_icons == 5:
+        #***
+        #**
+        if icon_number == 1:
+            pos = (canvas_x_center-3/2*icon_width,canvas_top)
+        elif icon_number == 2:
+            pos = (canvas_x_center-1*icon_width,canvas_top)
+        elif icon_number == 3:
+            pos = (canvas_x_center+3/2*icon_width,canvas_top)
+        elif icon_number == 4:
+            pos = (canvas_x_center-3/2*icon_width,canvas_bottom-max_icon_height)
+        else:
+            pos = (canvas_x_center+3/2*icon_width,canvas_bottom-max_icon_height)
+
+    elif total_icons == 6:
+        #***
+        #***
+        if icon_number == 1:
+            pos = (canvas_x_center-3/2*icon_width,canvas_top)
+        elif icon_number == 2:
+            pos = (canvas_x_center-icon_width,canvas_top)
+        elif icon_number == 3:
+            pos = (canvas_x_center+3/2*icon_width,canvas_top)
+        elif icon_number == 4:
+            pos = (canvas_x_center-3/2*icon_width,canvas_bottom-max_icon_height)
+        elif icon_number == 5:
+            pos = (canvas_x_center-icon_width,canvas_bottom-max_icon_height)
+        else:
+            pos = (canvas_x_center+3/2*icon_width,canvas_bottom-max_icon_height)
+
+    elif total_icons == 7:
+        #****
+        #***
+        if icon_number == 1:
+            pos = (canvas_x_center-icon_width/2-icon_width,canvas_top)
+        elif icon_number == 2:
+            pos = (canvas_x_center-icon_width/2+icon_width,canvas_top)
+        elif icon_number == 3:
+            pos = (canvas_x_center-icon_width/2-2*icon_width,canvas_top)
+        elif icon_number == 4:
+            pos = (canvas_x_center-icon_width/2+2*icon_width,canvas_top)
+        elif icon_number == 5:
+            pos = (canvas_x_center-icon_width/2-icon_width,canvas_bottom-max_icon_height)
+        elif icon_number == 6:
+            pos = (canvas_x_center-icon_width/2,canvas_bottom-max_icon_height)
+        else:
+            pos = (canvas_x_center-icon_width/2+icon_width,canvas_bottom-max_icon_height)
+    else:
+        raise Exception("Number of USPs is out of the scope of Leonardo.")
+    return pos
+
 def getPointsOnCircle(origin, radius, divisions):
     return getPointsOnArc(origin, radius, divisions, (0,2*math.pi)) #What is a circle, but an arc between 0 and 2*Pi?
 

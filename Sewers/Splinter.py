@@ -294,7 +294,8 @@ class Splinter(QtCore.QThread):
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
         for icon in icons_and_coordinates:
             try:
-                base_image.paste(icon["Icon"],icon["Position"],icon["Icon"])
+                position = tuple([int(pos) for  pos in  icon["Position"]])
+                base_image.paste(icon["Icon"], position, icon["Icon"])
                 #message = "Pasted icon on base image at %s for %s." %(icon["Position"],fsn)
                 #self.sendMessage.emit(message, self.last_eta, self.thread_index)
             except:

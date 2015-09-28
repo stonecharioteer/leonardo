@@ -2,7 +2,7 @@
     "Allow Icons Overlap": false, 
     "Allow Icons Without Text": false, 
     "Background Color Threshold Value": 15, 
-    "Background Image": "C:\\Users\\vinay.keerthi\\Code\\Leonardo\\leonardo\\Images\\Backgrounds\\Background 3.png", 
+    "Background Image": "C:\\Users\\vinay.keerthi\\Code\\Leonardo\\leonardo\\Images\\Backgrounds\\background AIRFRIER (RGB 92, 46, 46).jpg", 
     "Fix Icon Text Case": true, 
     "Icon Arrangement": "Circular", 
     "Icon Bounding Box": "Circle", 
@@ -52,7 +52,7 @@
         0.5, 
         0.5
     ], 
-    "Parent Image Resize Factor": 0.42, 
+    "Parent Image Resize Factor": 0.37, 
     "Parent Image Resize Reference": "Height", 
     "Preserve Icon Colors": false, 
     "Primary Attribute Relative Size": 8, 
