@@ -412,11 +412,11 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                             ]
                 elif icons_required == 5:
                     icon_positions =  [
-                            (canvas_center_x-max_icon_width, canvas_y_top),
+                            (canvas_x_left, canvas_y_top),
                             (canvas_center_x, canvas_y_top),
-                            (canvas_center_x+max_icon_width, canvas_y_top),
-                            (canvas_center_x-max_icon_width/3, canvas_y_bottom), 
-                            (canvas_center_x+max_icon_width/2, canvas_y_bottom)
+                            (canvas_x_right, canvas_y_top),
+                            (canvas_x_left-max_icon_width/2, canvas_y_bottom), 
+                            (canvas_x_right-max_icon_width/2, canvas_y_bottom)
                             ]
                 elif icons_required == 6:
                     icon_positions = [
