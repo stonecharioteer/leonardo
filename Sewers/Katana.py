@@ -414,7 +414,7 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                     icon_positions =  [
                             (canvas_center_x-max_icon_width, canvas_y_top),
                             (canvas_center_x, canvas_y_top),
-                            (canvas_center_x+max_icon_width, canvas_y_top)
+                            (canvas_center_x+max_icon_width, canvas_y_top),
                             (canvas_center_x-max_icon_width/3, canvas_y_bottom), 
                             (canvas_center_x+max_icon_width/2, canvas_y_bottom)
                             ]
