@@ -387,7 +387,7 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                 canvas_x_right = canvas_x_left + width_base - max_icon_width
                 canvas_y_top = int(clearance_factor*height_base)
                 canvas_y_bottom = canvas_y_top + (1-clearance_factor)*height_base - 1.5*max_icon_height
-                if canvas_y_bottom >= (y_top_left_parent+height_parent):
+                if canvas_y_bottom <= (y_top_left_parent+height_parent):
                     canvas_y_bottom = y_top_left_parent+height_parent + 0.05*max_icon_height
                 canvas_center_x = (canvas_x_left+canvas_x_right)/2
                 
