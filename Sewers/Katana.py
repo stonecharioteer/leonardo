@@ -883,8 +883,35 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size, colo
     else:
         return attribute_data
 
-def checkIcon(attribute,description):
-    return True
+def checkIcon(attribute, category, repository_path=None, description_text=None):
+    import glob
+    import os
+    from PIL import Image
+    if not repository_path:
+        images_path = os.path.join("Images","Repository")
+    else:
+        images_path = repository_path
+    icon_name = "%s.png"%attribute
+    category_folder_path = os.path.join(images_path, category)
+    search_string = os.path.join(category_folder_path,icon_name)
+    possible_icons_list = glob.glob(search_string)
+    folders_with_icons = []
+    if len(possible_icons_list)>0:
+        icon_found = True
+        icon_path = possible_icons_list[0]
+        folders_with_icons.append(os.path.basename(category_folder_path))
+    else:
+        list_of_folders = glob.glob(os.path.join(images_path,"*",""))
+        for folder in list_of_folders:
+            possible_icons_list = glob.glob(os.path.join(folder,icon_name))
+            if len(possible_icons_list) >0:
+                folders_with_icons.append(os.path.basename(os.path.normpath(folder)))
+        if len(folders_with_icons) >0:
+            icon_found = True
+        else:
+            icon_found = False
+
+    return icon_found, folders_with_icons
 
 def getIconImage(icon_path, description_text, icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_original_colors=None, font_path=None, font_color=None, use_icon_color_for_font_color=None):
     """This method generates an image object which contains the icon image 

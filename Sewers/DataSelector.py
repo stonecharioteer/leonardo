@@ -95,8 +95,13 @@ class DataSelector(QtGui.QWidget):
         self.csv_mode_widget = QtGui.QWidget()
         self.input_data_set_button = IconButton(os.path.join("essentials","csv_file.png"))
         self.input_data_set_button.setToolTip("Click to select a data file if you want manual control.")
-        csv_mode_layout = QtGui.QGridLayout()
-        csv_mode_layout.addWidget(self.input_data_set_button,0,0)
+        self.check_icons_button = QtGui.QPushButton("Check Icon Availability\nand Export Report")
+        csv_mode_layout = QtGui.QHBoxLayout()
+        csv_mode_layout.addStretch(1)
+        csv_mode_layout.addWidget(self.input_data_set_button,0)
+        csv_mode_layout.addWidget(self.check_icons_button,0)
+        csv_mode_layout.addStretch(1)
+
         self.csv_mode_widget.setLayout(csv_mode_layout)
 
         self.fsn_or_csv_stacked_widget = QtGui.QStackedWidget()
@@ -125,6 +130,44 @@ class DataSelector(QtGui.QWidget):
         self.remove_from_secondary_button.clicked.connect(self.removeFromSecondary)
         self.category_combo_box.currentIndexChanged.connect(self.changeCategory)
         self.export_scraped_data_button.clicked.connect(self.exportData)
+        self.check_icons_button.clicked.connect(self.checkIconsAvailability)
+
+    def checkIconsAvailability(self):
+        import pandas as pd
+        import xlsxwriter
+        import Katana
+        data = self.getData()
+        icons = {}
+        repo_path = str(QtGui.QFileDialog.getExistingDirectory(self, "Select the repository folder.", os.getcwd(), 
+                                                    QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks))
+        if not repo_path:
+            repo_path = os.path.join(os.getcwd(), "Images","Repository")
+        for fsn_row in self.getData():
+            category = fsn_row["Category"]
+            for key in fsn_row.keys():
+                if "Attribute" in key:
+                    attribute = fsn_row[key].strip()
+                    if attribute.strip() != "":
+                        icon_status, folders = Katana.checkIcon(attribute, category, repository_path=repo_path)
+                        if attribute not in icons.keys():
+                            icons[attribute] = {
+                                        "Category": category,
+                                        "Icon in Folder(s)": folders
+                            }
+                        else:
+                            if category not in icons[attribute]["Category"]:
+                                icons[attribute]["Category"] = icons[attribute]["Category"] + ", "  +category
+                            icons[attribute]["Icon in Folder(s)"] = [folder for folder in list(set(icons[attribute]["Icon in Folder(s)"] + folders)) if len(folder)>0]
+        icons_data_frame = pd.DataFrame.from_dict(icons)
+        file_path = os.path.join(os.getcwd(),"temp.csv")
+        #file_handler = pd.ExcelWriter(file_path,engine="xlsxwriter")
+        icons_data_frame.T.to_csv(file_path)
+        os.startfile(file_path,"open")
+
+
+        #icons_data_frame.to_excel(file_handler, "Sheet1")
+        #file_handler.save()
+        print "Saved file to %s!"%file_path
 
     def exportData(self):
         import pandas as pd
@@ -148,7 +191,8 @@ class DataSelector(QtGui.QWidget):
                     seggregated_data_set[prefix][fsn] = self.data_from_fk[fsn]
                 #Create dataframes for each data set.
                 prefix_data_set = pd.DataFrame.from_dict(seggregated_data_set[prefix])
-                #Save the dataframe in an excel file with the entire dataset in one sheet, and individual sheets containing prefix-wise data, stored in the output folder.
+                #Save the dataframe in an excel file with the entire dataset in one sheet, 
+                #and individual sheets containing prefix-wise data, stored in the output folder.
                 prefix_data_set.T.to_excel(file_handler, prefix)
             file_handler.save()
         pd.DataFrame.from_dict(self.data_from_fk).T.to_csv(os.path.join(output_path,"flipkart_data_%s.csv"%datetime.datetime.now().strftime("%Y%m%d_%H%M%S")))
