@@ -159,15 +159,27 @@ class DataSelector(QtGui.QWidget):
                                 icons[attribute]["Category"] = icons[attribute]["Category"] + ", "  +category
                             icons[attribute]["Icon in Folder(s)"] = [folder for folder in list(set(icons[attribute]["Icon in Folder(s)"] + folders)) if len(folder)>0]
         icons_data_frame = pd.DataFrame.from_dict(icons)
-        file_path = os.path.join(os.getcwd(),"temp.csv")
+        icons_data_frame = icons_data_frame.apply(self.getMeaningfulPathText,axis=0)
+        file_path = os.path.join(os.getcwd(),"cache","temp_%s.csv"%datetime.datetime.now().strftime("%y%m%d_%H%M%S"))
         #file_handler = pd.ExcelWriter(file_path,engine="xlsxwriter")
         icons_data_frame.T.to_csv(file_path)
         os.startfile(file_path,"open")
-
-
         #icons_data_frame.to_excel(file_handler, "Sheet1")
         #file_handler.save()
-        print "Saved file to %s!"%file_path
+#        print "Saved file to %s!"%file_path
+    
+    def getMeaningfulPathText(self, text):
+        if type(text["Icon in Folder(s)"]) == str:
+            return text
+        elif type(text["Icon in Folder(s)"]) == list:
+            if len(text["Icon in Folder(s)"]) == 0:
+                text["Icon in Folder(s)"] = "No Icons Available."
+            else:                
+                text["Icon in Folder(s)"] = ", ".join(text["Icon in Folder(s)"])
+        else:
+            print "What happened?"
+            print text
+        return text
 
     def exportData(self):
         import pandas as pd

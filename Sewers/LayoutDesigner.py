@@ -176,15 +176,15 @@ class LayoutDesigner(QtGui.QWidget):
             print "The JSON has a non boolean value for the use_icon_color_for_font_color variable."
 
     def createUI(self):        
-        self.preview_group_box = self.createPreviewWidget()
+        #self.preview_group_box = self.createPreviewWidget()
         self.settings_group_box = self.createSettingsWidget()
         self.validate_button  = IconButton(os.path.join("essentials","validate.png"))
         self.validate_button.setToolTip("Validate and Proceed")
         
         final_ui_layout = QtGui.QGridLayout()
         final_ui_layout.addWidget(self.settings_group_box,0, 0, 10, 4)
-        final_ui_layout.addWidget(self.preview_group_box,0, 4, 10, 4, 
-                                QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        #final_ui_layout.addWidget(self.preview_group_box,0, 4, 10, 4, 
+        #                        QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         final_ui_layout.addWidget(self.validate_button,10, 9, 1, 1, 
                                 QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
         
@@ -218,15 +218,16 @@ class LayoutDesigner(QtGui.QWidget):
 
     def createSettingsWidget(self):
         #Create the settings panels.
-        self.settings_group_box = QtGui.QGroupBox("Settings")
 
-        self.settings_tool_box = QtGui.QToolBox()
+        self.settings_group_box = QtGui.QGroupBox("Settings")
+        self.settings_tool_box = QtGui.QTabWidget()
         self.layout_panel = self.getLayoutPanel()
         self.font_panel = self.getFontPanel()
         self.advanced_panel = self.getAdvancedPanel()
-        self.settings_tool_box.addItem(self.layout_panel, "Layout and Icon Positions")
-        self.settings_tool_box.addItem(self.font_panel, "Icon Text Font Settings")
-        self.settings_tool_box.addItem(self.advanced_panel, "Advanced Settings")
+
+        self.settings_tool_box.addTab(self.layout_panel, "Layout and Icon Positions")
+        self.settings_tool_box.addTab(self.font_panel, "Icon Text Font Settings")
+        self.settings_tool_box.addTab(self.advanced_panel, "Advanced Settings")
         
         self.save_settings_button = QtGui.QPushButton("Save Current\nSettings")
         self.save_settings_button.setToolTip("Click to save all the current settings to a JSON file.")
