@@ -905,7 +905,11 @@ def checkIcon(attribute, category, repository_path=None, description_text=None):
         icon_path = possible_icons_list[0]
         folders_with_icons.append(os.path.basename(category_folder_path))
     else:
-        list_of_folders = glob.glob(os.path.join(images_path,"*",""))
+        try:
+            list_of_folders = glob.glob(os.path.join(images_path,"*",""))
+        except:
+            print os.path.join(images_path,"*","")
+            raise
         for folder in list_of_folders:
             possible_icons_list = glob.glob(os.path.join(folder,icon_name))
             if len(possible_icons_list) >0:
