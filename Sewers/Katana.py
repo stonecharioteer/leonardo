@@ -43,8 +43,7 @@ def getBackgroundImage(background_path, use_category_specific_backgrounds, categ
     from PIL import Image
     import PIL
     if use_category_specific_backgrounds:
-        backgrounds = glob.glob(os.path.join(os.getcwd(), "Images", "Backgrounds", "%s*.*"%category.replace(" ","_")))
-        print category
+        backgrounds = glob.glob(os.path.join(os.getcwd(), "Images", "Backgrounds", "*%s*.*"%category.replace(" ","*")))
         background_path =  backgrounds[0]
     else:
         if background_path == "Random":
@@ -130,6 +129,8 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
     #Get the maximum Icon width and height.
     max_icon_width = max(icon_widths)
     max_icon_height = max(icon_heights)
+    mean_icon_width = sum(icon_widths)/len(icon_widths)
+    mean_icon_height = sum(icon_heights)/len(icon_heights)
 
     #Split the operation based on whether the ordering is separate or alternate.
     if ordering == "Separate":
@@ -383,8 +384,8 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                 icons_required = (primary_plot_points_required + secondary_plot_points_required)
                 clearance_factor = 0.05
                 
-                canvas_x_left = 0
-                canvas_x_right = canvas_x_left + width_base - max_icon_width
+                canvas_x_left = 0.25*max_icon_width
+                canvas_x_right = canvas_x_left + width_base - 1.5*max_icon_width
                 canvas_y_top = int(clearance_factor*height_base)
                 canvas_y_bottom = canvas_y_top + (1-clearance_factor)*height_base - 1.5*max_icon_height
                 if canvas_y_bottom <= (y_top_left_parent+height_parent):
@@ -422,22 +423,22 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                             ]
                 elif icons_required == 6:
                     icon_positions = [
-                            (canvas_center_x-1.5*max_icon_width, canvas_y_top),
-                            (canvas_center_x+0.05*max_icon_width, canvas_y_top),
-                            (canvas_center_x+1.5*max_icon_width, canvas_y_top),
-                            (canvas_center_x-1.5*max_icon_width, canvas_y_bottom),
-                            (canvas_center_x+0.05*max_icon_width, canvas_y_bottom),
-                            (canvas_center_x+1.5*max_icon_width, canvas_y_bottom)
+                            (canvas_center_x-1.5*mean_icon_width, canvas_y_top),
+                            (canvas_center_x+0.05*mean_icon_width, canvas_y_top),
+                            (canvas_center_x+1.5*mean_icon_width, canvas_y_top),
+                            (canvas_center_x-1.5*mean_icon_width, canvas_y_bottom),
+                            (canvas_center_x+0.05*mean_icon_width, canvas_y_bottom),
+                            (canvas_center_x+1.5*mean_icon_width, canvas_y_bottom)
                             ]
                 elif icons_required == 7:
                     icon_positions = [
                             (canvas_x_left, canvas_y_top),
-                            (canvas_center_x-0.5*max_icon_width, canvas_y_top),
-                            (canvas_center_x+0.5*max_icon_width, canvas_y_top),
+                            (canvas_center_x-0.5*mean_icon_width, canvas_y_top),
+                            (canvas_center_x+0.5*mean_icon_width, canvas_y_top),
                             (canvas_x_right, canvas_y_top),
-                            (canvas_center_x-1.5*max_icon_width, canvas_y_bottom),
+                            (canvas_center_x-1.5*mean_icon_width, canvas_y_bottom),
                             (canvas_center_x, canvas_y_bottom),
-                            (canvas_center_x+1.5*max_icon_width, canvas_y_bottom)
+                            (canvas_center_x+1.5*mean_icon_width, canvas_y_bottom)
                     ]
                 else:
                     raise Exception("I  haven't accounted for %d icons"%icons_required)                
@@ -462,7 +463,7 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
     return coordinates_and_icons
 
 def getIconRectangularPosition(icon_number, total_icons, icon_size, canvas_size, parent_image_size=None, parent_image_coords=None, max_icon_height=None, max_icon_width=None):
-    #Currently accounts only for 0.5,0.5 position
+    #Currently accounts only for 0.5, 0.5 position
     icon_width, icon_height = icon_size
     icon_width, icon_height = max_icon_width, max_icon_height
     canvas_width, canvas_height = canvas_size

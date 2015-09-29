@@ -2,7 +2,7 @@
     "Allow Icons Overlap": false, 
     "Allow Icons Without Text": false, 
     "Background Color Threshold Value": 15, 
-    "Background Image": "C:\\Users\\vinay.keerthi\\Code\\Leonardo\\leonardo\\Images\\Backgrounds\\Background 0001.jpg", 
+    "Background Image": "C:\\Users\\vinay.keerthi\\Code\\Leonardo\\leonardo\\Images\\Backgrounds\\Background PHC.jpg", 
     "Fix Icon Text Case": true, 
     "Icon Arrangement": "Rectangular", 
     "Icon Bounding Box": "Circle", 
@@ -57,7 +57,7 @@
     "Preserve Icon Colors": false, 
     "Primary Attribute Relative Size": 8, 
     "Secondary Attribute Relative Size": 8, 
-    "Use Category Specific Backgrounds": false, 
+    "Use Category Specific Backgrounds": true, 
     "Use Icon Color For Font Color": false, 
     "Use Simple Color Replacement": true
 }
