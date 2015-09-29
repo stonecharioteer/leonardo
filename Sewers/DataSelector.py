@@ -396,6 +396,7 @@ class DataSelector(QtGui.QWidget):
             for header in required_file_headers:
                 if header not in file_headers:
                     data_is_valid = False
+                    self.sendAlert("Wrong Data set." "%s column is required!"%header)
                     break
             if data_is_valid:
                 self.validate_button.setEnabled(True)

@@ -391,7 +391,7 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                     canvas_y_bottom = y_top_left_parent+height_parent + 0.05*max_icon_height
                 canvas_center_x = (canvas_x_left+canvas_x_right)/2
                 
-                print "Requested for %d icons."%(icons_required)
+                #print "Requested for %d icons."%(icons_required)
                 if icons_required == 1:
                     icon_positions = [(canvas_center_x, canvas_y_top)]
                 elif icons_required == 2:
