@@ -175,7 +175,7 @@ class LayoutDesigner(QtGui.QWidget):
         else:
             print "The JSON has a non boolean value for the use_icon_color_for_font_color variable."
 
-        icon_font_size = settings_from_json["Icon Font Color"]
+        icon_font_size = settings_from_json["Icon Font Size"]
         self.font_size_spinbox.setValue(icon_font_size)
 
     def createUI(self):        
