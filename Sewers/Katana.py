@@ -13,6 +13,8 @@ from PyQt4 import QtGui, QtCore
 
 def getTitleCase(sentence):
     import re
+    while "  " in sentence:
+        sentence = sentence.replace("  ", " ")
     exceptions = ["a", "an", "the", "of", "is", "and", "at", "if","but", "to", "upto"]
     word_list = re.split(" ", sentence)
     final = [word_list[0][0].capitalize()+word_list[0][1:]]
@@ -131,6 +133,8 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
     max_icon_height = max(icon_heights)
     mean_icon_width = sum(icon_widths)/len(icon_widths)
     mean_icon_height = sum(icon_heights)/len(icon_heights)
+    working_average_icon_width = (max_icon_width + mean_icon_width)/2
+    working_average_icon_height = (max_icon_height + mean_icon_height)/2
 
     #Split the operation based on whether the ordering is separate or alternate.
     if ordering == "Separate":
@@ -433,8 +437,8 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                 elif icons_required == 7:
                     icon_positions = [
                             (canvas_x_left, canvas_y_top),
-                            (canvas_center_x-0.5*mean_icon_width, canvas_y_top),
-                            (canvas_center_x+0.5*mean_icon_width, canvas_y_top),
+                            (canvas_center_x-0.5*working_average_icon_width, canvas_y_top),
+                            (canvas_center_x+0.5*working_average_icon_width, canvas_y_top),
                             (canvas_x_right, canvas_y_top),
                             (canvas_center_x-1.5*mean_icon_width, canvas_y_bottom),
                             (canvas_center_x, canvas_y_bottom),
@@ -840,7 +844,7 @@ def getParentImage(fsn):
         parent_image_path = os.path.join("essentials","na_parent_image.png")
     return parent_image_path
 
-def getIcons(attribute_data, category, icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_original_colors=None, font=None, font_color=None, use_icon_color_for_font_color=None, multiprocess=None, manager_return_handle=None, manager_return_dict=None):
+def getIcons(attribute_data, category, icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_original_colors=None, font=None, font_color=None, use_icon_color_for_font_color=None, icon_font_size=None, multiprocess=None, manager_return_handle=None, manager_return_dict=None):
     #print attribute_data, category
     if multiprocess is None:
         multiprocess = False
@@ -863,7 +867,13 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size, colo
             #If it hasn't yet found an icon, or in first run.
             if not found_icon:
                 if attribute["Attribute"].lower().strip() in icon.lower().strip():
-                    icon_with_text = getIconImage(icon, attribute["Description Text"], icon_relative_size, base_image_size, colors_list,bounding_box, fix_icon_text_case, preserve_icon_original_colors, font, font_color, use_icon_color_for_font_color)
+                    icon_with_text = getIconImage(icon, 
+                                            attribute["Description Text"], icon_relative_size, 
+                                            base_image_size, colors_list,bounding_box, fix_icon_text_case, 
+                                            preserve_icon_original_colors, font, font_color, 
+                                            use_icon_color_for_font_color, icon_font_size
+                                            )
+
                     attribute.update({"Icon": icon_with_text})
                     found_icon = True
                     #attribute.update({"Icon": None})
@@ -872,7 +882,13 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size, colo
                 break
         if not found_icon:
             na_icon_path = os.path.join("essentials","icon_na.png")
-            icon_with_text = getIconImage(na_icon_path, attribute["Description Text"], icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_original_colors, font, font_color, use_icon_color_for_font_color)
+            icon_with_text = getIconImage(na_icon_path, 
+                                    attribute["Description Text"], icon_relative_size, base_image_size, 
+                                    colors_list, bounding_box, fix_icon_text_case, 
+                                    preserve_icon_original_colors, font, font_color, 
+                                    use_icon_color_for_font_color, icon_font_size
+                                    )
+
             attribute.update({"Icon": icon_with_text})
             attributes_without_icons.append(attribute["Attribute"])
     #if (len(attributes_without_icons) > 0):
@@ -922,7 +938,7 @@ def checkIcon(attribute, category, repository_path=None, description_text=None):
 
     return icon_found, folders_with_icons
 
-def getIconImage(icon_path, description_text, icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_original_colors=None, font_path=None, font_color=None, use_icon_color_for_font_color=None):
+def getIconImage(icon_path, description_text, icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_original_colors=None, font_path=None, font_color=None, use_icon_color_for_font_color=None, icon_font_size=None):
     """This method generates an image object which contains the icon image 
     as well as the description text."""
     import textwrap
@@ -1003,8 +1019,8 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     #Put the text now.
     #
     #
-
-    font_size = 72 #Set default font size for now.
+    font_size=72
+    font_size = icon_font_size #Set default font size for now.
     if fix_icon_text_case:
         description_text = getTitleCase(description_text)
     text_lengths = [len(word) for word in description_text.split(" ")]

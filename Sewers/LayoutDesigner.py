@@ -175,6 +175,9 @@ class LayoutDesigner(QtGui.QWidget):
         else:
             print "The JSON has a non boolean value for the use_icon_color_for_font_color variable."
 
+        icon_font_size = settings_from_json["Icon Font Color"]
+        self.font_size_spinbox.setValue(icon_font_size)
+
     def createUI(self):        
         #self.preview_group_box = self.createPreviewWidget()
         self.settings_group_box = self.createSettingsWidget()
@@ -344,7 +347,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.underline_button.setStyleSheet("QPushButton {text-decoration: underline;}")
         self.font_size_label = QtGui.QLabel("Font Size:")
         self.font_size_spinbox = QtGui.QSpinBox()
-        self.font_size_spinbox.setRange(18,45)
+        self.font_size_spinbox.setRange(10,120)
         self.font_color_label = QtGui.QLabel("Font Color:")
         self.font_color_picker = QColorButton()
         self.font_color_picker.setStyleSheet("Click to select a font color. You can override this color in the advanced panel,\nusing the primary icon color as the font color.")
@@ -729,6 +732,7 @@ class LayoutDesigner(QtGui.QWidget):
         icon_bounding_box = self.getIconBoundingBox()
         use_category_specific_backgrounds = self.useCategorySpecificBackgrounds()
         background_image = self.getBackgroundImage()
+        icon_font_size = self.getIconFontSize()
 
 
         settings = {
@@ -756,6 +760,7 @@ class LayoutDesigner(QtGui.QWidget):
                     "Fix Icon Text Case": fix_icon_text_case,
                     "Preserve Icon Colors": preserve_icon_colors,
                     "Use Category Specific Backgrounds": use_category_specific_backgrounds,
-                    "Background Image": background_image
+                    "Background Image": background_image,
+                    "Icon Font Size": icon_font_size
                 }
         return settings

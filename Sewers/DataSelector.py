@@ -160,7 +160,7 @@ class DataSelector(QtGui.QWidget):
                             icons[attribute]["Icon in Folder(s)"] = [folder for folder in list(set(icons[attribute]["Icon in Folder(s)"] + folders)) if len(folder)>0]
         icons_data_frame = pd.DataFrame.from_dict(icons)
         icons_data_frame = icons_data_frame.apply(self.getMeaningfulPathText,axis=0)
-        file_path = os.path.join(os.getcwd(),"cache","temp_%s.csv"%datetime.datetime.now().strftime("%y%m%d_%H%M%S"))
+        file_path = os.path.join(os.getcwd(),"cache","Icon_Search_Results_%s.csv"%datetime.datetime.now().strftime("%y%m%d_%H%M%S"))
         #file_handler = pd.ExcelWriter(file_path,engine="xlsxwriter")
         icons_data_frame.T.to_csv(file_path)
         os.startfile(file_path,"open")
