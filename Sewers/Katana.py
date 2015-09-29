@@ -894,7 +894,11 @@ def checkIcon(attribute, category, repository_path=None, description_text=None):
     icon_name = "%s.png"%attribute
     category_folder_path = os.path.join(images_path, category)
     search_string = os.path.join(category_folder_path,icon_name)
-    possible_icons_list = glob.glob(search_string)
+    try:
+        possible_icons_list = glob.glob(search_string)
+    except:
+        print search_string
+        raise
     folders_with_icons = []
     if len(possible_icons_list)>0:
         icon_found = True
