@@ -866,7 +866,8 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size, colo
         for icon in images_in_look_in_path:
             #If it hasn't yet found an icon, or in first run.
             if not found_icon:
-                if attribute["Attribute"].lower().strip() in icon.lower().strip():
+                if attribute["Attribute"].lower().strip() == os.path.basename(icon.lower().strip())[:os.path.basename(icon.lower().strip()).find(".")]:
+                    #print attribute["Attribute"].lower().strip(), icon.lower().strip()
                     icon_with_text = getIconImage(icon, 
                                             attribute["Description Text"], icon_relative_size, 
                                             base_image_size, colors_list,bounding_box, fix_icon_text_case, 
