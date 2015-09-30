@@ -179,15 +179,18 @@ class LayoutDesigner(QtGui.QWidget):
         self.font_size_spinbox.setValue(icon_font_size)
 
     def createUI(self):        
-        #self.preview_group_box = self.createPreviewWidget()
+        self.preview_group_box = self.createPreviewWidget()
         self.settings_group_box = self.createSettingsWidget()
         self.validate_button  = IconButton(os.path.join("essentials","validate.png"))
         self.validate_button.setToolTip("Validate and Proceed")
-        
+        self.fsn_list_box = QtGui.QListWidget()
+        self.fsn_list_box.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+
         final_ui_layout = QtGui.QGridLayout()
-        final_ui_layout.addWidget(self.settings_group_box,0, 0, 10, 4)
-        #final_ui_layout.addWidget(self.preview_group_box,0, 4, 10, 4, 
-        #                        QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        final_ui_layout.addWidget(self.fsn_list_box,0,0,10,1)
+        final_ui_layout.addWidget(self.settings_group_box,0, 1, 10, 4)
+        final_ui_layout.addWidget(self.preview_group_box,0, 5, 10, 4, 
+                                QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
         final_ui_layout.addWidget(self.validate_button,10, 9, 1, 1, 
                                 QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
         
@@ -218,6 +221,12 @@ class LayoutDesigner(QtGui.QWidget):
         preview_group_box = QtGui.QGroupBox("Preview")
         preview_group_box.setLayout(preview_layout)
         return preview_group_box
+
+    def setFSNs(self, fsn_data):
+        fsns = list(set([fsn_row["FSN"] for fsn_row in fsn_data]))
+        fsns.sort()
+        self.fsn_list_box.clear()
+        self.fsn_list_box.addItems(fsns)
 
     def createSettingsWidget(self):
         #Create the settings panels.

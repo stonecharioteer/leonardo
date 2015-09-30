@@ -96,6 +96,7 @@ class Leonardo(Turtle):
     def allowDesign(self):
         self.page_changer.item(1).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
         self.page_changer.setCurrentRow(1)
+        self.layout_designer_widget.setFSNs(self.data_selector_widget.data)
     
     def runSplinter(self):
         entry_count = len(self.data_selector_widget.data)
