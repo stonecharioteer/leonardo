@@ -346,7 +346,10 @@ class Splinter(QtCore.QThread):
         final_image = final_image.convert("RGB")
         message = "Saving the image for %s."%(fsn)
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
-        image_path = os.path.join("Output",fsn+"_app_image.png")
+        output_path = os.path.join("Output",category)
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+        image_path = os.path.join(output_path,fsn+"_app_image_%s.png"%datetime.datetime.now().strftime("%y%m%d%H%M%S"))
         final_image.save(image_path,dpi=(300,300))
         return image_path
 

@@ -15,7 +15,7 @@ def getTitleCase(sentence):
     import re
     while "  " in sentence:
         sentence = sentence.replace("  ", " ")
-    exceptions = ["a", "an", "the", "of", "is", "and", "at", "if","but", "to", "upto","mm","nm","cm","kPa","m","km","kmph","mph","hr","hrs"]
+    exceptions = ["a", "an", "the", "of", "is", "and", "at", "if","but", "to", "upto","mm","l","ml","nm","cm","kPa","m","km","kmph","mph","hr","hrs", "kg", "gm", "gms"]
     word_list = re.split(" ", sentence)
     final = [word_list[0][0].capitalize()+word_list[0][1:]]
     for word in word_list[1:]:

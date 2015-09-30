@@ -53,11 +53,11 @@
         0.5
     ], 
     "Parent Image Resize Factor": 0.37, 
-    "Parent Image Resize Reference": "Height", 
+    "Parent Image Resize Reference": "Smart Fit", 
     "Preserve Icon Colors": false, 
     "Primary Attribute Relative Size": 8, 
     "Secondary Attribute Relative Size": 8, 
     "Use Category Specific Backgrounds": true, 
     "Use Icon Color For Font Color": false, 
-    "Use Simple Color Replacement": true
+    "Use Simple Color Replacement": false
 }
