@@ -15,7 +15,7 @@ def getTitleCase(sentence):
     import re
     while "  " in sentence:
         sentence = sentence.replace("  ", " ")
-    exceptions = ["a", "an", "the", "of", "is", "and", "at", "if","but", "to", "upto","mm","l","ml","nm","cm","kPa","m","km","kmph","mph","hr","hrs", "kg", "gm", "gms"]
+    exceptions = ["a", "an", "the", "of", "is", "and", "at", "if","but", "to", "upto","mm","l","ml","nm","cm","kPa","m","km","kmph","mph","hr","hrs", "kg", "gm", "gms", "s"]
     word_list = re.split(" ", sentence)
     final = [word_list[0][0].capitalize()+word_list[0][1:]]
     for word in word_list[1:]:
@@ -1057,7 +1057,7 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
         current_h += h + pad
     
     #merge both images now.
-    final_canvas_width = int(text_canvas.size[0] if text_canvas.size[0] >= icon_image.size[0] else icon_image.size[0]*1.1)
+    final_canvas_width = int(text_canvas.size[0] if text_canvas.size[0] >= icon_image.size[0]*1.5 else icon_image.size[0]*1.5)
     final_canvas_height = int(text_canvas.size[1] + icon_image.size[1] + 2*pad)
 
     final_canvas = Image.new("RGBA",(final_canvas_width, final_canvas_height))
