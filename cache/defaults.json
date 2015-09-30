@@ -2,7 +2,7 @@
     "Allow Icons Overlap": false, 
     "Allow Icons Without Text": false, 
     "Background Color Threshold Value": 15, 
-    "Background Image": "C:\\Users\\vinay.keerthi\\Code\\Leonardo\\leonardo\\Images\\Backgrounds\\Background PHC.jpg", 
+    "Background Image": "Background PHC.jpg", 
     "Fix Icon Text Case": true, 
     "Icon Arrangement": "Rectangular", 
     "Icon Bounding Box": "Circle", 

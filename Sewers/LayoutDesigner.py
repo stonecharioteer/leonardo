@@ -291,7 +291,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.background_selection_combobox = QtGui.QComboBox()
         self.background_selection_combobox.setToolTip("Choose a background to use for all the FSNs.\nIf you need to add more backgrounds to this list, just add them to the Images\\Backgrounds folder.\nEnsure that the first word of the image is Background, with an uppercase B.\nFormat doesn't matter. Please use images of 9:16 aspect ratio.\nYes, portrait mode only.")
         self.background_selection_combobox.setMaximumWidth(200)
-        self.backgrounds = ["Random"] + glob.glob(os.path.join(os.path.join(os.path.join(os.getcwd(),"Images"),"Backgrounds"),"Background*.*"))
+        self.backgrounds = ["Random"] + [os.path.basename(file_path) for file_path in glob.glob(os.path.join(os.path.join(os.path.join(os.getcwd(),"Images"),"Backgrounds"),"Background*.*"))]
         self.background_selection_combobox.addItems(self.backgrounds)
 
         #Create icon positions toggle buttons. Set default to circular.
@@ -596,7 +596,7 @@ class LayoutDesigner(QtGui.QWidget):
     def changeBackground(self):
         self.current_background = str(self.background_selection_combobox.currentText())
         if self.current_background != "Random":
-            self.current_background_path = self.current_background
+            self.current_background_path = os.path.join(os.getcwd(),"Images","Backgrounds",self.current_background)
             self.background_image_pixmap = QtGui.QPixmap(self.current_background_path)
             self.background_image_pixmap = self.background_image_pixmap.scaled(self.background_preview_space.size(),QtCore.Qt.IgnoreAspectRatio,QtCore.Qt.SmoothTransformation)
             self.background_preview_space.setPixmap(self.background_image_pixmap)
@@ -631,7 +631,7 @@ class LayoutDesigner(QtGui.QWidget):
 
     def getBackgroundImage(self):
         self.changeBackground()
-        return self.current_background
+        return (self.current_background if self.current_background == "Random" else self.current_background_path)
 
     def getIconBoundingBox(self):
         return str(self.icon_bounding_box_combobox.currentText())
@@ -731,7 +731,7 @@ class LayoutDesigner(QtGui.QWidget):
         fix_icon_text_case = self.fixIconTextCase()
         icon_bounding_box = self.getIconBoundingBox()
         use_category_specific_backgrounds = self.useCategorySpecificBackgrounds()
-        background_image = self.getBackgroundImage()
+        background_image = self.current_background
         icon_font_size = self.getIconFontSize()
 
 

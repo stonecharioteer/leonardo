@@ -1057,8 +1057,8 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
         current_h += h + pad
     
     #merge both images now.
-    final_canvas_width = text_canvas.size[0] if text_canvas.size[0] >= icon_image.size[0] else icon_image.size[0]
-    final_canvas_height = text_canvas.size[1] + icon_image.size[1] + 2*pad
+    final_canvas_width = int(text_canvas.size[0] if text_canvas.size[0] >= icon_image.size[0] else icon_image.size[0]*1.1)
+    final_canvas_height = int(text_canvas.size[1] + icon_image.size[1] + 2*pad)
 
     final_canvas = Image.new("RGBA",(final_canvas_width, final_canvas_height))
     icon_x = int((final_canvas.size[0]-icon_image.size[0])/2)
