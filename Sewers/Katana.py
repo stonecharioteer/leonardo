@@ -40,12 +40,19 @@ def getFinalBaseImage(base_image):
     from PIL import Image
     return Image.new("RGBA", (base_image.size[0], base_image.size[1]+200), (0,0,0,0))    
 
-def getBackgroundImage(background_path, use_category_specific_backgrounds, category):
+def getBackgroundImage(background_path, use_category_specific_backgrounds, category, fsn=None):
     import random, os
     from PIL import Image
     import PIL
     if use_category_specific_backgrounds:
-        backgrounds = glob.glob(os.path.join(os.getcwd(), "Images", "Backgrounds", "*%s*.*"%category.replace(" ","*")))
+        search_string = os.path.join(os.getcwd(),"Images","Backgrounds","*%s*%s.*"%(category.replace(" ","*"),fsn[:3].replace(" ","*")))
+        backgrounds = glob.glob(search_string)
+        if len(backgrounds) == 0:
+            print search_string
+            print "No vertical level."
+            backgrounds = glob.glob(os.path.join(os.getcwd(), "Images", "Backgrounds", "*%s.*"%category.replace(" ","*")))
+        else:
+            print "Vertical level!"
         background_path =  backgrounds[0]
     else:
         if background_path == "Random":
