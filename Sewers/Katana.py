@@ -144,6 +144,7 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
     working_average_icon_height = (max_icon_height + mean_icon_height)/2
 
     #Split the operation based on whether the ordering is separate or alternate.
+    print parent_image_positioning
     if ordering == "Separate":
         #Primary and secondary icon lines and arrangement is to be kept separate.
         #Determine the kind of parent_image_alignment, based on the original parameter.
@@ -153,6 +154,7 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
             if icon_arrangement == "Circular":
                 #icons are to be arranged in arcs.
                 if parent_image_positioning == (0.0,0.0):
+                    #Top, Left.
                     #Validated.
                     primary_radius_multiplier = 0.65
                     secondary_radius_multiplier = 1.05
@@ -160,6 +162,7 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                     primary_arc_center = (x_top_left_parent, y_center_parent)
                     secondary_theta_range = (getRadians(0),getRadians(90))
                 elif parent_image_positioning == (1.0,0.0):
+                    #Top, Right
                     #Validated.
                     primary_radius_multiplier = 0.65
                     secondary_radius_multiplier = 1.0
@@ -176,6 +179,7 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                     secondary_theta_range = (getRadians(270-2),getRadians(360-50))
                 elif parent_image_positioning == (1.0, 1.0):
                     #Validated.
+                    #Bottom, Right
                     primary_radius_multiplier = 0.95
                     secondary_radius_multiplier = 1.25
                     theta_range = ((math.pi),(math.pi*1.5)) #180deg and ~270deg.
@@ -246,59 +250,95 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                 elif parent_image_positioning == (0.0,0.5):
                     #Validated and perfected.
                     #parent image is placed at the left-middle.
-                    primary_radius_multiplier = 1.1
+                    primary_radius_multiplier = 1.0
                     secondary_radius_multiplier = 1.6
                     #Arc center positions
                     primary_arc_center = (-x_center_parent, y_center_parent)
                     secondary_arc_center = primary_arc_center
                     #Angles
-                    primary_theta_range = (getRadians(270),getRadians(360+90))
-                    secondary_theta_range = (getRadians(270+30),getRadians(360-10))
+                    primary_sweep_angle_bottom = 70
+                    primary_sweep_angle_top = 50
+                    secondary_sweep_angle_bottom = 70
+                    secondary_sweep_angle_top = 50
+                    primary_theta_range = (
+                                    getRadians(360-primary_sweep_angle_bottom),
+                                    getRadians(360+primary_sweep_angle_top)
+                                )
+
+                    secondary_theta_range = (
+                                        getRadians(360+secondary_sweep_angle_bottom),
+                                        getRadians(360-secondary_sweep_angle_top)
+                                    )
                 elif parent_image_positioning == (1.0, 0.5):
                     #Needs tweaking.
                     #parent image is placed at the right-middle
+                    #Most important layout for now.
                     primary_radius_multiplier = 1.65
                     secondary_radius_multiplier = 2.10
                     #Arc center positions
-                    primary_arc_center = (int(x_top_left_parent+width_parent), int(y_center_parent*0.9))
-                    secondary_arc_center = (int(x_top_left_parent+width_parent), int(y_center_parent*0.9))
+                    primary_arc_center = (
+                                    int(x_top_left_parent+width_parent-working_average_icon_width*0.5), 
+                                    int(y_center_parent-max_icon_height*0.5)
+                                )
+                    secondary_arc_center = (
+                                    int(x_top_left_parent+width_parent-working_average_icon_width*1.5), 
+                                    int(y_center_parent-working_average_icon_height*0.5)
+                                )
                     #Angles
-                    primary_theta_range = (getRadians(180-35), getRadians(180+35))
-                    secondary_theta_range = (getRadians(180-30), getRadians(180+30))
+                    primary_sweep_angle_top = 59
+                    primary_sweep_angle_bottom = 59
+                    primary_theta_range = (
+                                    getRadians(180-primary_sweep_angle_bottom), 
+                                    getRadians(180+primary_sweep_angle_top)
+                                    )
+                    secondary_sweep_angle_top = 60
+                    secondary_sweep_angle_bottom = 60
+                    secondary_theta_range = (
+                                    getRadians(180-secondary_sweep_angle_top), 
+                                    getRadians(180+secondary_sweep_angle_bottom)
+                                )
                 
                 primary_plot_points_required = len(primary_icons)
+                secondary_plot_points_required = len(secondary_icons)
+                icons_required = (primary_plot_points_required + secondary_plot_points_required)
+                half_icons_required = math.ceil(icons_required/2)
+                print icons_required, "icons required."
+                if icons_required == 7:
+                    half_icons_required = 5
+                other_half_icons_required = icons_required - half_icons_required
+
                 #This isn't the diagonal per se. It's the maximum allowable radius.
                 diagonal_length = width_base/2 
                 #I need to detach this from the individual multipliers and use a better system.
                 primary_radius = primary_radius_multiplier*diagonal_length
-                
+                #primary_radius = (width_parent if width_parent>=height_parent else height_parent)+working_average_icon_width/3
                 primary_icon_positions = getPointsOnArc(
                                                 primary_arc_center, 
                                                 primary_radius, 
-                                                primary_plot_points_required, 
+                                                half_icons_required, 
                                                 primary_theta_range
                                             )
 
-                secondary_plot_points_required = len(secondary_icons)
                 secondary_radius = secondary_radius_multiplier*diagonal_length
-                secondary_icon_positions = getPointsOnArc(secondary_arc_center, secondary_radius, secondary_plot_points_required, secondary_theta_range)
+                #secondary_radius = primary_radius
+
+                secondary_icon_positions = getPointsOnArc(
+                                                    secondary_arc_center, 
+                                                    secondary_radius, 
+                                                    other_half_icons_required, 
+                                                    secondary_theta_range
+                                                )
+                icons = primary_icons + secondary_icons
+                icon_positions = primary_icon_positions + secondary_icon_positions
                 coordinates_and_icons = []
                 counter = 0
-                for icon in primary_icons:
+                for icon in icons:
                     coord = {
                         "Icon": icon,
-                        "Position":primary_icon_positions[counter]
+                        "Position": icon_positions[counter]
                     }
                     coordinates_and_icons.append(coord)
-                    counter+=1
-                counter = 0
-                for icon in secondary_icons:
-                    coord = {
-                        "Icon": icon,
-                        "Position":secondary_icon_positions[counter]
-                    }
-                    coordinates_and_icons.append(coord)
-                    counter+=1
+                    counter += 1
             elif icon_arrangement == "Rectangular":
                 #icons are to be laid out in arrays.
                 pass
@@ -340,8 +380,8 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                     icon_arc_center_y_bottom = int(y_top_left_parent+height_parent-max_icon_height*2/3)
                     diagonal_length = (width_base-max_icon_width)/2
 
-                primary_radius_multiplier = 1.0
-                secondary_radius_multiplier = 1.0
+                primary_radius_multiplier = 1.04
+                secondary_radius_multiplier = 1.07
 
                 x_clearance = max_icon_width/2
 

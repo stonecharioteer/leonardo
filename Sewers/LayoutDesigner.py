@@ -66,7 +66,7 @@ class LayoutDesigner(QtGui.QWidget):
         #Set the Parent Image position y and x.
         parent_image_position_value = settings_from_json["Parent Image Position"]
         if type(parent_image_position_value) != str:
-            y, x = parent_image_position_value
+            x, y = parent_image_position_value
             self.parent_image_position_position_radiobuttons[int(2*y)][int(2*x)].setChecked(True)
         else:
             self.parent_image_position_position_radiobuttons[1][1].setChecked(True)
@@ -193,7 +193,7 @@ class LayoutDesigner(QtGui.QWidget):
         final_ui_layout.addWidget(self.settings_group_box,0, 1, 10, 4)
         final_ui_layout.addWidget(self.preview_group_box,0, 5, 10, 4, 
                                 QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-        final_ui_layout.addWidget(self.validate_button,10, 9, 1, 1, 
+        final_ui_layout.addWidget(self.validate_button,10, 5, 1, 1, 
                                 QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
         
         self.over_all_group_box = QtGui.QGroupBox("Design")
@@ -227,9 +227,9 @@ class LayoutDesigner(QtGui.QWidget):
 
         preview_layout = QtGui.QVBoxLayout()
         preview_layout.addLayout(buttons_layout, 0)
-        preview_layout.addWidget(self.preview_widget, 3)
-        preview_layout.addWidget(self.progress_bar, 1)
-        preview_layout.addWidget(self.progress_status, 1)
+        preview_layout.addWidget(self.preview_widget, 3, QtCore.Qt.AlignHCenter)
+        preview_layout.addWidget(self.progress_bar, 1, QtCore.Qt.AlignHCenter)
+        preview_layout.addWidget(self.progress_status, 1, QtCore.Qt.AlignHCenter)
         preview_group_box = QtGui.QGroupBox("Preview")
         preview_group_box.setLayout(preview_layout)
         return preview_group_box
@@ -369,7 +369,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.background_selection_combobox = QtGui.QComboBox()
         self.background_selection_combobox.setToolTip("Choose a background to use for all the FSNs.\nIf you need to add more backgrounds to this list, just add them to the Images\\Backgrounds folder.\nEnsure that the first word of the image is Background, with an uppercase B.\nFormat doesn't matter. Please use images of 9:16 aspect ratio.\nYes, portrait mode only.")
         self.background_selection_combobox.setMaximumWidth(200)
-        self.backgrounds = ["Random"] + [os.path.basename(file_path) for file_path in glob.glob(os.path.join(os.path.join(os.path.join(os.getcwd(),"Images"),"Backgrounds"),"Background*.*"))]
+        self.backgrounds = ["Random"] + [os.path.basename(file_path) for file_path in glob.glob(os.path.join(os.path.join(os.path.join(os.getcwd(),"Images"),"Backgrounds"),"*.*"))]
         self.background_selection_combobox.addItems(self.backgrounds)
 
         #Create icon positions toggle buttons. Set default to circular.
@@ -478,12 +478,12 @@ class LayoutDesigner(QtGui.QWidget):
         self.primary_attr_icon_size_spin_box = QtGui.QSpinBox()
         self.primary_attr_icon_size_spin_box.setSuffix("%")
         self.primary_attr_icon_size_spin_box.setToolTip("This sets the size of the primary attribute icons, at a percentage relative to the background image.")
-        self.primary_attr_icon_size_spin_box.setRange(5,10)
+        self.primary_attr_icon_size_spin_box.setRange(5,20)
         self.secondary_attr_icon_size_label = QtGui.QLabel("Set Secondary Attribute Icon\nRelative Size:")
         self.secondary_attr_icon_size_spin_box = QtGui.QSpinBox()
-        self.secondary_attr_icon_size_spin_box  .setSuffix("%")
+        self.secondary_attr_icon_size_spin_box.setSuffix("%")
         self.secondary_attr_icon_size_spin_box.setToolTip("This sets the size of the secondary attribute icons, at a percentage relative to the background image.")
-        self.secondary_attr_icon_size_spin_box.setRange(5,10)
+        self.secondary_attr_icon_size_spin_box.setRange(5,20)
         #For changing color replacement algorithm.
         self.use_simple_color_replacement = QtGui.QCheckBox("Use a Simple Colour Extraction Method to remove Parent Image Background.")
         self.use_simple_color_replacement.setToolTip("If selected, the code just finds the likely background color and removes it from the entire message.\nThis method saves a large amount of runtime.\nThis is a risky method if the product image has similar colors, or if the image quality is dodgy.\nExercise with caution.")

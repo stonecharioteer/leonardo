@@ -1,40 +1,40 @@
 {
     "Allow Icons Overlap": false, 
     "Allow Icons Without Text": false, 
-    "Background Color Threshold Value": 15, 
-    "Background Image": "Background PHC.jpg", 
+    "Background Color Threshold Value": 8, 
+    "Background Image": "Background FPR.jpg", 
     "Fix Icon Text Case": true, 
     "Icon Arrangement": "Circular", 
-    "Icon Bounding Box": "Circle ascending", 
+    "Icon Bounding Box": "Octagon Straight", 
     "Icon Font Bold": false, 
     "Icon Font Color": [
-        25, 
-        25, 
-        25
+        0, 
+        0, 
+        0
     ], 
     "Icon Font Italics": false, 
     "Icon Font Size": 72, 
     "Icon Font Underline": false, 
     "Icon Palette": [
         [
-            103, 
-            65, 
-            114
+            126, 
+            62, 
+            9
         ], 
         [
-            133, 
-            102, 
-            142
+            151, 
+            100, 
+            58
         ], 
         [
-            179, 
-            160, 
-            184
+            190, 
+            158, 
+            132
         ], 
         [
-            224, 
-            217, 
-            226
+            229, 
+            216, 
+            205
         ], 
         [
             255, 
@@ -47,17 +47,17 @@
         14
     ], 
     "Load Icon Colors From Background": false, 
-    "Margin": 0.05, 
+    "Margin": 0.06, 
     "Parent Image Position": [
         0.5, 
         0.5
     ], 
-    "Parent Image Resize Factor": 0.37, 
-    "Parent Image Resize Reference": "Smart Fit", 
+    "Parent Image Resize Factor": 0.39, 
+    "Parent Image Resize Reference": "Height", 
     "Preserve Icon Colors": false, 
-    "Primary Attribute Relative Size": 8, 
-    "Secondary Attribute Relative Size": 8, 
-    "Use Category Specific Backgrounds": true, 
+    "Primary Attribute Relative Size": 10, 
+    "Secondary Attribute Relative Size": 10, 
+    "Use Category Specific Backgrounds": false, 
     "Use Icon Color For Font Color": false, 
     "Use Simple Color Replacement": true
 }

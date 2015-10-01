@@ -316,7 +316,7 @@ class Splinter(QtCore.QThread):
         #Remove this later.
         merged_base_image.paste(
                     fk_brand_icon,
-                    (int(fk_brand_icon.size[0]*0.05),0), 
+                    (int(fk_brand_icon.size[0]*0.005),0), 
                     fk_brand_icon
                 )
         merged_base_image.paste(
@@ -336,7 +336,7 @@ class Splinter(QtCore.QThread):
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
         resized_base_image = merged_base_image.resize(resized_dimensions, resample=PIL.Image.ANTIALIAS)
         base_image_x = (background_image.size[0]-resized_base_image.size[0])/2
-        base_image_y = (background_image.size[1]-resized_base_image.size[1])/2
+        base_image_y = (background_image.size[1]-resized_base_image.size[1])/4
         base_image_coords = (
                         int(base_image_x), 
                         int(base_image_y)
