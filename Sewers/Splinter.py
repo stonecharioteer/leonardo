@@ -222,8 +222,8 @@ class Splinter(QtCore.QThread):
             message = "Stripping parent image background using simple strip algorithm for %s."%fsn
             self.sendMessage.emit(message, self.last_eta, self.thread_index)
             #Added for multiprocessing
-            parent_image_strip_process = Process(target=Katana.replaceColorInImage, args=(resized_parent_image, (255,255,255,255), (0,0,0,0), bg_color_strip_threshold, True, "Parent Image", return_dict))
-            #parent_image = Katana.replaceColorInImage(resized_parent_image, (255,255,255,255), (0,0,0,0), bg_color_strip_threshold)
+            #parent_image_strip_process = Process(target=Katana.replaceColorInImage, args=(resized_parent_image, (255,255,255,255), (0,0,0,0), bg_color_strip_threshold, True, "Parent Image", return_dict))
+            parent_image = Katana.replaceColorInImage(resized_parent_image, (255,255,255,255), (0,0,0,0), bg_color_strip_threshold)
         else:
             #The complex movement algorithm takes thing by strokes.
             #First, it identifies the background colour, reading the
@@ -233,9 +233,9 @@ class Splinter(QtCore.QThread):
             #that is below or above the threshold.
             message = "Stripping parent image background using movement algorithm for %s."%fsn
             self.sendMessage.emit(message, self.last_eta, self.thread_index)
-            #parent_image = Katana.getStrippedImage(resized_parent_image, bg_color_strip_threshold)
-            parent_image_strip_process = Process(target=Katana.getStrippedImage, args=(resized_parent_image, bg_color_strip_threshold, True, "Parent Image", return_dict))
-        parent_image_strip_process.start()
+            parent_image = Katana.getStrippedImage(resized_parent_image, bg_color_strip_threshold)
+            #parent_image_strip_process = Process(target=Katana.getStrippedImage, args=(resized_parent_image, bg_color_strip_threshold, True, "Parent Image", return_dict))
+        #parent_image_strip_process.start()
 
         #Get the background image.
         message = "Getting background image for %s."%fsn
@@ -244,17 +244,17 @@ class Splinter(QtCore.QThread):
                                             self.use_category_specific_backgrounds, category, fsn)
         #Get the primary and secondary attribute icons.
         
-        primary_attributes_process = Process(target=Katana.getIcons, args=(primary_attribute_data, category, primary_attribute_relative_size, base_image.size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_colors, font, font_color, use_icon_color_for_font_color, icon_font_size, True, "Primary", return_dict))
-        primary_attributes_process.start()
+        #primary_attributes_process = Process(target=Katana.getIcons, args=(primary_attribute_data, category, primary_attribute_relative_size, base_image.size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_colors, font, font_color, use_icon_color_for_font_color, icon_font_size, True, "Primary", return_dict))
+        #primary_attributes_process.start()
         message = "Getting primary attribute data image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
-        #primary_attributes_and_icons_data = Katana.getIcons(primary_attribute_data, category, primary_attribute_relative_size, base_image.size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_colors)
+        primary_attributes_and_icons_data = Katana.getIcons(primary_attribute_data, category, primary_attribute_relative_size, base_image.size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_colors, font, font_color, use_icon_color_for_font_color, icon_font_size)
 
         secondary_attributes_process = Process(target=Katana.getIcons, args=(secondary_attribute_data,category,secondary_attribute_relative_size, base_image.size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_colors, font, font_color, use_icon_color_for_font_color, icon_font_size, True, "Secondary", return_dict))
-        secondary_attributes_process.start()
+        #secondary_attributes_process.start()
         message = "Getting secondary attribute data image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
-        #secondary_attributes_and_icons_data = Katana.getIcons(secondary_attribute_data,category,secondary_attribute_relative_size, base_image.size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_colors)
+        secondary_attributes_and_icons_data = Katana.getIcons(secondary_attribute_data,category,secondary_attribute_relative_size, base_image.size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_colors, font, font_color, use_icon_color_for_font_color, icon_font_size)
         #Based on the input control parameters, get the coordinates for the parent image.
         message = "Getting parent image coordinates corresponding to %s for %s."%(parent_image_positioning, fsn)
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
@@ -264,16 +264,16 @@ class Splinter(QtCore.QThread):
 
         counter = 0
         #Added for multiprocessing
-        message = "Waiting for the primary icons process to complete for %s."%(fsn)
-        self.sendMessage.emit(message, self.last_eta, self.thread_index)
-        primary_attributes_process.join()
-        primary_attributes_and_icons_data = return_dict["Primary"] 
-        message = "Waiting for the secondary icons process to complete for %s."%(fsn)
-        self.sendMessage.emit(message, self.last_eta, self.thread_index)
-        secondary_attributes_process.join()
-        secondary_attributes_and_icons_data = return_dict["Secondary"]
-        message = "Getting USP icon coordinates for %s."%(fsn)
-        self.sendMessage.emit(message, self.last_eta, self.thread_index)
+        #message = "Waiting for the primary icons process to complete for %s."%(fsn)
+        #self.sendMessage.emit(message, self.last_eta, self.thread_index)
+        #primary_attributes_process.join()
+        #primary_attributes_and_icons_data = return_dict["Primary"] 
+        #message = "Waiting for the secondary icons process to complete for %s."%(fsn)
+        #self.sendMessage.emit(message, self.last_eta, self.thread_index)
+        #secondary_attributes_process.join()
+        #secondary_attributes_and_icons_data = return_dict["Secondary"]
+        #message = "Getting USP icon coordinates for %s."%(fsn)
+        #self.sendMessage.emit(message, self.last_eta, self.thread_index)
         icons_and_coordinates = Katana.getIconsAndCoordinates(base_image, 
                                             parent_image_size, parent_image_coords, 
                                             primary_attributes_and_icons_data, 
@@ -284,11 +284,11 @@ class Splinter(QtCore.QThread):
         message = "Getting the merged Flipkart and Brand Logo for %s."%(fsn)
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
         fk_brand_icon = Katana.getMergedFlipkartBrandImage(brand)
-        message = "Waiting for the parent image strip process to complete for %s."%(fsn)
-        self.sendMessage.emit(message, self.last_eta, self.thread_index)
+        #message = "Waiting for the parent image strip process to complete for %s."%(fsn)
+        #self.sendMessage.emit(message, self.last_eta, self.thread_index)
         #Waiting for the parent image strip process to complete so that we can retrieve the parent image.
-        parent_image_strip_process.join()
-        parent_image = return_dict["Parent Image"]
+        #parent_image_strip_process.join()
+        #parent_image = return_dict["Parent Image"]
         message = "Pasting the parent image for %s."%(fsn)
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
         base_image.paste(parent_image, parent_image_coords, parent_image)

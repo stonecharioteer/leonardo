@@ -634,6 +634,7 @@ def getDistanceBetweenPoints(point_1,point_2):
     return ((point_1[0]-point_2[0])**2 + (point_1[1]-point_2[1])**2)**0.5
 
 def replaceColorInImage(image, original_colour, replacement_color, threshold, multiprocess=None, manager_return_handle=None, manager_return_dict=None):
+    """This method replaces color, pixel by pixel. It's a real bottle neck. If I fix this, I have solved the problem."""
     import numpy as np
     if multiprocess is None:
         multiprocess = False

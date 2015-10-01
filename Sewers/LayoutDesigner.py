@@ -8,6 +8,8 @@ from IconButton import IconButton
 from PrimaryButton import PrimaryButton
 from QColorButton import QColorButton
 from QColorPanel import QColorPanel
+from ProgressBar import ProgressBar
+from Splinter import Splinter
 
 class LayoutDesigner(QtGui.QWidget):
     def __init__(self):
@@ -36,10 +38,12 @@ class LayoutDesigner(QtGui.QWidget):
                 }
         #with open(os.path.join("cache","defaults.json"),"w") as json_file_handler:
         #    json.dump(defaults,json_file_handler, indent=4, sort_keys=True)
+        self.splinter_thread = Splinter(0)
         self.createUI()
         self.mapEvents()
         #Load values from the default file.
         self.resetValues()
+        #Start a splinter thread.
 
 
     def resetValues(self):
@@ -139,8 +143,6 @@ class LayoutDesigner(QtGui.QWidget):
         #Set Icon font size
         icon_font_size = settings_from_json["Icon Font Size"]
 
-
-
         #Set the background-appropriate icon color loading behaviour.
         load_icon_color_from_background = settings_from_json["Load Icon Colors From Background"]
         if type(load_icon_color_from_background) != bool:
@@ -215,14 +217,72 @@ class LayoutDesigner(QtGui.QWidget):
                                 };
                                 """
         self.preview_widget.setStyleSheet(preview_widget_style_sheet)
+        self.progress_bar = ProgressBar()
+        self.progress_status = QtGui.QLabel("Humpty Dumpty sat on a wall.")
+
         preview_layout = QtGui.QVBoxLayout()
-        preview_layout.addWidget(self.update_preview_button,0)
-        preview_layout.addWidget(self.preview_widget,3)
+        preview_layout.addWidget(self.update_preview_button, 0)
+        preview_layout.addWidget(self.preview_widget, 3)
+        preview_layout.addWidget(self.progress_bar, 1)
+        preview_layout.addWidget(self.progress_status, 1)
         preview_group_box = QtGui.QGroupBox("Preview")
         preview_group_box.setLayout(preview_layout)
         return preview_group_box
 
+    def displayProgress(self,status, progress_value, eta, completion_status, images_list, thread_index):
+        self.progress_bar.setValue(progress_value)
+        self.progress_status.setText(status)
+        image_pixmap = QtGui.QPixmap(images_list[-1])
+        image_pixmap = image_pixmap.scaled(self.preview_widget.size(), QtCore.Qt.IgnoreAspectRatio, QtCore.Qt.SmoothTransformation)
+        self.preview_widget.setPixmap(image_pixmap)
+        self.preview_widget.setStyleSheet("QLabel {background-color: grey; border: 1px solid black;}")
+        if completion_status:
+            self.update_preview_button.setEnabled(True)
+
+    def displayActivity(self, status, eta, thread_index):
+        self.progress_status.setText(status)
+        print eta
+
+    def runSplinter(self):
+        required_fsns = [str(fsn_item.text()) for fsn_item in self.fsn_list_box.selectedItems()]
+        if len(required_fsns) >0:
+            self.update_preview_button.setEnabled(False)
+
+            requested_data = []
+            for fsn in required_fsns:
+                for fsn_row in self.fsn_data:
+                    if fsn_row["FSN"] == fsn:
+                        requested_data.append(fsn_row)
+            self.splinter_thread.data = requested_data
+            self.splinter_thread.parent_image_position = self.getParentImageCoords()
+            self.splinter_thread.icon_positioning = self.getIconPosition()
+            self.splinter_thread.icon_palette = self.getIconPalette() #Enable this later.
+            self.splinter_thread.allow_overlap = self.getOverlap()
+            self.splinter_thread.background_image_path = self.getBackgroundImage()
+            self.splinter_thread.primary_attribute_relative_size = self.getPrimaryAttrRelativeSize()
+            self.splinter_thread.secondary_attribute_relative_size = self.getSecondaryAttrRelativeSize()
+            self.splinter_thread.bounding_box = self.getIconBoundingBox()
+            self.splinter_thread.use_simple_bg_color_strip = self.useSimpleColorStripAlgorithm()
+            self.splinter_thread.bg_color_strip_threshold = self.getColorStripThreshold()
+            self.splinter_thread.parent_image_resize_reference = self.getParentImageResizeReference()
+            self.splinter_thread.parent_image_resize_factor = self.getParentImageResizeFactor()
+            self.splinter_thread.allow_textless_icons = self.allowTextlessIcons()
+            self.splinter_thread.margin = self.getMargin()
+            self.splinter_thread.use_category_specific_backgrounds = self.useCategorySpecificBackgrounds()
+            self.splinter_thread.output_location = os.getcwd()
+            self.splinter_thread.colors_list = self.getIconPalette()
+            self.splinter_thread.preserve_icon_colors = self.preserveIconColors()
+            self.splinter_thread.fix_icon_text_case = self.fixIconTextCase()
+            self.splinter_thread.font = self.getFont()
+            self.splinter_thread.font_color = self.getIconFontColor()
+            self.splinter_thread.use_icon_color_for_font_color = self.useIconColorForFontColor()
+            self.splinter_thread.icon_font_size = self.getIconFontSize()
+            
+            self.splinter_thread.allow_run = True
+
     def setFSNs(self, fsn_data):
+        self.fsn_data = fsn_data
+        self.update_preview_button.setEnabled(True)
         fsns = list(set([fsn_row["FSN"] for fsn_row in fsn_data]))
         fsns.sort()
         self.fsn_list_box.clear()
@@ -574,6 +634,9 @@ class LayoutDesigner(QtGui.QWidget):
         self.reset_settings_button.clicked.connect(self.resetValues)
         self.save_settings_button.clicked.connect(self.saveSettingsToJSON)
         self.load_settings_from_file_button.clicked.connect(self.loadSettingsFromJSON)
+        self.splinter_thread.progress.connect(self.displayProgress)
+        self.splinter_thread.sendMessage.connect(self.displayActivity)
+        self.update_preview_button.clicked.connect(self.runSplinter)
 
     def loadSettingsFromJSON(self):
         open_file_name = QtGui.QFileDialog.getOpenFileName(self, "Load Settings from a JSON",

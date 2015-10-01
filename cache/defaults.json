@@ -4,8 +4,8 @@
     "Background Color Threshold Value": 15, 
     "Background Image": "Background PHC.jpg", 
     "Fix Icon Text Case": true, 
-    "Icon Arrangement": "Rectangular", 
-    "Icon Bounding Box": "Circle", 
+    "Icon Arrangement": "Circular", 
+    "Icon Bounding Box": "Circle ascending", 
     "Icon Font Bold": false, 
     "Icon Font Color": [
         25, 
