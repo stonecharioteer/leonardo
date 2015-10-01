@@ -335,7 +335,7 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                     icon_arc_center_y_bottom = int(y_top_left_parent + 0.75*height_parent)
                     diagonal_length = (width_base-max_icon_width/2)/2
                 else:
-                    print "There's no space on either side of the product image, so we'll shift the icons up and down respectively."
+                    #print "There's no space on either side of the product image, so we'll shift the icons up and down respectively."
                     icon_arc_center_y_top = int(y_top_left_parent-max_icon_height/4)
                     icon_arc_center_y_bottom = int(y_top_left_parent+height_parent-max_icon_height*2/3)
                     diagonal_length = (width_base-max_icon_width)/2
