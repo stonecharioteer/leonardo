@@ -644,11 +644,29 @@ def replaceColorInImage(image, original_colour, replacement_color, threshold, mu
             print "No key was provided for the dictionary. Defaulting to 0."
             manager_return_handle = 0
     image_data = np.array(image)
-    #print image.size
-    #print image_data.shape
-    #raw_input("Waiting!")
     rows, columns, rgba = image_data.shape
     original_r, original_g, original_b, original_a = original_colour
+    #image_data_T = image_data.T
+    #r, g, b, a = image_data_T
+    #where_r_above_threshold = r>=(original_r-threshold)
+    #where_r_below_threshold = r<=(original_r+threshold)
+    #print where_r_above_threshold
+
+    #matching_r = [r_is_above_threshold and r_is_below_threshold for (r_is_above_threshold, r_is_below_threshold) in zip(where_r_above_threshold, where_r_above_threshold)]
+    
+    #where_g_above_threshold = g>=(original_g-threshold)
+    #where_g_below_threshold = g<=(original_g+threshold)
+    #matching_g = [g_is_above_threshold and g_is_below_threshold for (g_is_above_threshold, g_is_below_threshold) in zip(where_g_above_threshold, where_g_above_threshold)]
+    
+    #where_b_above_threshold = b>=(original_b-threshold)
+    #where_b_below_threshold = r<=(original_b+threshold)
+    #matching_r = [b_is_above_threshold and b_is_below_threshold for (b_is_above_threshold, b_is_below_threshold) in zip(where_b_above_threshold, where_b_above_threshold)]
+
+    #required_areas = [(match_r and match_g and match_b) for match_r, match_g, match_b in zip(matching_r, matching_g, matching_b)]
+    #image_data[0][required_areas] = replacement_color[0]
+    #image_data[1][required_areas] = replacement_color[1]
+    #image_data[2][required_areas] = replacement_color[2]
+
     for row in range(rows):
         for column in range(columns):
             pixel = image_data[row][column]
@@ -657,7 +675,7 @@ def replaceColorInImage(image, original_colour, replacement_color, threshold, mu
                 image_data[row][column] = replacement_color
 #    image_data[(image_data == original_colour).all(axis=-1)] = replacement_color
     #image_data[(min_color <=image_data <= max_colour).all(axis=-1)] = replacement_color
-    requested_image = Image.fromarray(image_data,mode="RGBA")
+    requested_image = Image.fromarray(image_data, mode="RGBA")
     if multiprocess:
         manager_return_dict.update({manager_return_handle: requested_image})
     else:
