@@ -207,6 +207,11 @@ class LayoutDesigner(QtGui.QWidget):
     def createPreviewWidget(self):
         #Creates the preview pane.
         self.update_preview_button = QtGui.QPushButton("Update")
+        self.stop_button = QtGui.QPushButton("Stop")
+        buttons_layout = QtGui.QHBoxLayout()
+        buttons_layout.addWidget(self.update_preview_button)
+        buttons_layout.addWidget(self.stop_button)
+
         self.preview_widget = QtGui.QLabel("Preview goes here.")
         size_modifier = 3
         self.preview_widget.setFixedSize(90*size_modifier, 140*size_modifier)
@@ -221,7 +226,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.progress_status = QtGui.QLabel("Humpty Dumpty sat on a wall.")
 
         preview_layout = QtGui.QVBoxLayout()
-        preview_layout.addWidget(self.update_preview_button, 0)
+        preview_layout.addLayout(buttons_layout, 0)
         preview_layout.addWidget(self.preview_widget, 3)
         preview_layout.addWidget(self.progress_bar, 1)
         preview_layout.addWidget(self.progress_status, 1)
@@ -241,11 +246,15 @@ class LayoutDesigner(QtGui.QWidget):
 
     def displayActivity(self, status, eta, thread_index):
         self.progress_status.setText(status)
-        print eta
+    
+    def stopRunning(self):
+        self.splinter_thread.allow_run = False
+        self.update_preview_button.setEnabled(True)
 
     def runSplinter(self):
         required_fsns = [str(fsn_item.text()) for fsn_item in self.fsn_list_box.selectedItems()]
         if len(required_fsns) >0:
+            self.progress_bar.setValue(0)
             self.update_preview_button.setEnabled(False)
 
             requested_data = []
@@ -637,6 +646,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.splinter_thread.progress.connect(self.displayProgress)
         self.splinter_thread.sendMessage.connect(self.displayActivity)
         self.update_preview_button.clicked.connect(self.runSplinter)
+        self.stop_button.clicked.connect(self.stopRunning)
 
     def loadSettingsFromJSON(self):
         open_file_name = QtGui.QFileDialog.getOpenFileName(self, "Load Settings from a JSON",

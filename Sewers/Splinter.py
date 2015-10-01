@@ -62,85 +62,88 @@ class Splinter(QtCore.QThread):
                 start_time = datetime.datetime.now()
                 images_list = []
                 for row in self.data:
-                    fsn_start_time = datetime.datetime.now()
-                    counter+=1
-                    self.sendMessage.emit("Starting to process %d of %d FSNs."%(counter,total), self.last_eta, self.thread_index)
-                    fsn = row["FSN"]
-                    if "Brand" in row.keys():
-                        brand = row["Brand"]
+                    if not self.allow_run:
+                        self.sendMessage.emit("Stopped...", datetime.datetime.now(), self.thread_index)
                     else:
-                        print "No brand for %s (%s)."%(fsn,category)
-                        brand = None
-                    category = row["Category"]
-                    primary_attribute_data = []
-                    primary_attributes = []
-                    secondary_attributes = []
-                    for key in row.keys():
-                        if "Primary USP" in key:
-                            primary_attributes.append(key)
-                        elif "Secondary USP" in key:
-                            secondary_attributes.append(key)
-                    self.sendMessage.emit("Seggregated primary and secondary attributes for %d of %d FSNs."%(counter,total), self.last_eta, self.thread_index)
+                        fsn_start_time = datetime.datetime.now()
+                        counter+=1
+                        self.sendMessage.emit("Starting to process %d of %d FSNs."%(counter,total), self.last_eta, self.thread_index)
+                        fsn = row["FSN"]
+                        if "Brand" in row.keys():
+                            brand = row["Brand"]
+                        else:
+                            print "No brand for %s (%s)."%(fsn,category)
+                            brand = None
+                        category = row["Category"]
+                        primary_attribute_data = []
+                        primary_attributes = []
+                        secondary_attributes = []
+                        for key in row.keys():
+                            if "Primary USP" in key:
+                                primary_attributes.append(key)
+                            elif "Secondary USP" in key:
+                                secondary_attributes.append(key)
+                        self.sendMessage.emit("Seggregated primary and secondary attributes for %d of %d FSNs."%(counter,total), self.last_eta, self.thread_index)
 
-                    primary_attributes_count = len(primary_attributes)/2
-                    primary_attribute_data = [] 
-                    #print primary_attributes_count
-                    for i in range(int(primary_attributes_count)):
-                        index = i+1
-                        attribute_name = row["Primary USP-%d Attribute"%index].strip()
-                        if len(attribute_name) != 0:
-                            description_text = row["Primary USP-%d Description Text"%index].strip()
-                            if (len(description_text) == 0):
-                                if(not self.allow_textless_icons):
-                                    description_text = attribute_name
-                                else:
-                                    description_text = " "
-                            primary_attribute_data.append({"Attribute":attribute_name,"Description Text":description_text})
-                    secondary_attributes_count = len(secondary_attributes)/2
-                    secondary_attribute_data = [] 
-                    #print secondary_attributes_count
-                    for i in range(int(secondary_attributes_count)):
-                        index = i+1
-                        attribute_name = row["Secondary USP-%d Attribute"%index].strip()
-                        if len(attribute_name) != 0:
-                            description_text = row["Secondary USP-%d Description Text"%index].strip()
-                            if (len(description_text) == 0):
-                                if(not self.allow_textless_icons):
-                                    description_text = attribute_name
-                                else:
-                                    description_text = " "
-                            secondary_attribute_data.append({"Attribute":attribute_name,"Description Text":description_text})
-                    self.sendMessage.emit("Preparing app image for %d of %d FSNs."%(counter,total), self.last_eta, self.thread_index)
+                        primary_attributes_count = len(primary_attributes)/2
+                        primary_attribute_data = [] 
+                        #print primary_attributes_count
+                        for i in range(int(primary_attributes_count)):
+                            index = i+1
+                            attribute_name = row["Primary USP-%d Attribute"%index].strip()
+                            if len(attribute_name) != 0:
+                                description_text = row["Primary USP-%d Description Text"%index].strip()
+                                if (len(description_text) == 0):
+                                    if(not self.allow_textless_icons):
+                                        description_text = attribute_name
+                                    else:
+                                        description_text = " "
+                                primary_attribute_data.append({"Attribute":attribute_name,"Description Text":description_text})
+                        secondary_attributes_count = len(secondary_attributes)/2
+                        secondary_attribute_data = [] 
+                        #print secondary_attributes_count
+                        for i in range(int(secondary_attributes_count)):
+                            index = i+1
+                            attribute_name = row["Secondary USP-%d Attribute"%index].strip()
+                            if len(attribute_name) != 0:
+                                description_text = row["Secondary USP-%d Description Text"%index].strip()
+                                if (len(description_text) == 0):
+                                    if(not self.allow_textless_icons):
+                                        description_text = attribute_name
+                                    else:
+                                        description_text = " "
+                                secondary_attribute_data.append({"Attribute":attribute_name,"Description Text":description_text})
+                        self.sendMessage.emit("Preparing app image for %d of %d FSNs."%(counter,total), self.last_eta, self.thread_index)
 
-                    image_name = self.prepareAppImage(
-                                                fsn, brand, category, 
-                                                primary_attribute_data, secondary_attribute_data, 
-                                                self.parent_image_position, self.icon_positioning, 
-                                                self.icon_palette, self.allow_overlap, 
-                                                self.background_image_path, 
-                                                self.primary_attribute_relative_size, 
-                                                self.secondary_attribute_relative_size, 
-                                                self.bounding_box, self.use_simple_bg_color_strip, 
-                                                self.bg_color_strip_threshold, self.colors_list,
-                                                self.fix_icon_text_case, self.preserve_icon_colors, 
-                                                self.font, self.font_color, self.use_icon_color_for_font_color,
-                                                self.icon_font_size,
-                                                self.output_location
-                                            )
+                        image_name = self.prepareAppImage(
+                                                    fsn, brand, category, 
+                                                    primary_attribute_data, secondary_attribute_data, 
+                                                    self.parent_image_position, self.icon_positioning, 
+                                                    self.icon_palette, self.allow_overlap, 
+                                                    self.background_image_path, 
+                                                    self.primary_attribute_relative_size, 
+                                                    self.secondary_attribute_relative_size, 
+                                                    self.bounding_box, self.use_simple_bg_color_strip, 
+                                                    self.bg_color_strip_threshold, self.colors_list,
+                                                    self.fix_icon_text_case, self.preserve_icon_colors, 
+                                                    self.font, self.font_color, self.use_icon_color_for_font_color,
+                                                    self.icon_font_size,
+                                                    self.output_location
+                                                )
 
-                    self.eta = Katana.getETA(start_time, counter, total)
-                    images_list.append(image_name)
-                    if counter < total:
-                        message = "Processing %d of %d FSNs. Spent %ss for the last FSN." %(counter, total, (datetime.datetime.now()-fsn_start_time))
-                        progress = int(counter/total*100)
-                        completion_status = False
-                    else:
-                        message = "Completed."
-                        progress = 100
-                        completion_status = True
-                    self.progress.emit(message, progress, self.eta, completion_status, images_list, self.thread_index)
-                    self.last_eta = self.eta
-                    self.sendMessage.emit("Completed %d in %ss." %(counter, datetime.datetime.now() - start_time), self.last_eta, self.thread_index)
+                        self.eta = Katana.getETA(start_time, counter, total)
+                        images_list.append(image_name)
+                        if counter < total:
+                            message = "Processing %d of %d FSNs. Spent %ss for the last FSN." %(counter, total, (datetime.datetime.now()-fsn_start_time))
+                            progress = int(counter/total*100)
+                            completion_status = False
+                        else:
+                            message = "Completed."
+                            progress = 100
+                            completion_status = True
+                        self.progress.emit(message, progress, self.eta, completion_status, images_list, self.thread_index)
+                        self.last_eta = self.eta
+                        self.sendMessage.emit("Completed %d in %ss." %(counter, datetime.datetime.now() - start_time), self.last_eta, self.thread_index)
                 self.allow_run = False
 
     def prepareAppImage(self, fsn, brand, category, primary_attribute_data, secondary_attribute_data, parent_image_positioning, icon_positioning, icon_palette, allow_overlap, background_image_path, primary_attribute_relative_size, secondary_attribute_relative_size, bounding_box, use_simple_bg_color_strip, bg_color_strip_threshold, colors_list, fix_icon_text_case, preserve_icon_colors, font, font_color, use_icon_color_for_font_color, icon_font_size, output_location):
