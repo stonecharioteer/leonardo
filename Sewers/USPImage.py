@@ -52,7 +52,18 @@ class USPImage:
             4. resize_factor: Product image resize factor as percentage, from 0.00 to 1.00
             5. color_strip_algorithm: algorithm with which to strip background colors. 0, 1, 2, 3. 
             Explained in the prepareProductImage() method.
-            6. icon_colors: None, or a list of RGBs.
+            6. icon_palettes: None, or a list of RGBs, such as:
+                ["Black","Grey 1", "Grey 2", "Grey 3",....,"Grey n", "White"]
+                or a list of list of RGBs corresponding to this:
+                [            
+                    ["Black","Grey 1", "Grey 2", "Grey 3",....,"Grey n", "White"],
+                    ["Black","Grey 1", "Grey 2", "Grey 3",....,"Grey n", "White"],
+                    ["Black","Grey 1", "Grey 2", "Grey 3",....,"Grey n", "White"],
+                    ["Black","Grey 1", "Grey 2", "Grey 3",....,"Grey n", "White"],
+                    ["Black","Grey 1", "Grey 2", "Grey 3",....,"Grey n", "White"]
+                ]
+                This allows a different palette to be used for each icon. 
+
             7. icon_text_color: An RGB value.
             8. icon_shape: String. Name of the file that should be in the repository.
             9. use_category_specific_backgrounds
@@ -60,7 +71,7 @@ class USPImage:
             11. preserve_icon_colors: Boolean. Defaults to True if icon_colors is None. If False, the icon is given a color palette guided by the icon_colors.
             12. icon_text_font_type
             13. icon_opacity: float from 0.00 to 1.00. Defaults to 1.00. This applies to all icon colors except the outlines.
-            14. icon_shape_color:
+            14. icon_shape_color: Color of the shape surrounding the icon. Defaults to None, and icon's "black" color is used.
             15. icon_font_size: Size of the font used for the icon description text.
         """
         self.fsn = fsn
