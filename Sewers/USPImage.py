@@ -36,8 +36,7 @@ class USPImage:
             [
                 {
                     "Attribute": "Attribute name, and the icon basename.",
-                    "Icon Image Path": "Path to the icon. If this is None, then the algorithm assumes there 
-                                    will be one in the category's icon repository folder.",
+                    "Icon Image Path": "Path to the icon. Preprocess alternate icons in the UI end.",
                     "Description": "Text one would like to see below the icon. Of course, None will force 
                                     the same text as the attribute itself."
                 }
@@ -78,12 +77,22 @@ class USPImage:
             8. icon_shape: String. Name of the file that should be in the repository.
             9. use_category_specific_backgrounds
             10. icon_text_inside_shape: Boolean. Defaults to False. If True, the shape is placed around the icon and text.
-            11. preserve_icon_colors: Boolean. Defaults to True if icon_colors is None. If False, the icon is given a color palette guided by the icon_colors.
+            11. preserve_icon_colors: Boolean. Defaults to True if icon_palettes is None. If False, the icon is given a color palette guided by the icon_palettes.
             12. icon_text_font_type
             13. icon_opacity: float from 0.00 to 1.00. Defaults to 1.00. This applies to all icon colors except the outlines.
             14. icon_shape_color: Color of the shape surrounding the icon. Defaults to None, and icon's "black" color is used.
             15. icon_font_size: Size of the font used for the icon description text.
+            16. icon_layout: 0, 1, 2: 0 is circular. 1 is Linear, 2 is mixed.
+            17. parent_image_position: Position (x,y) as a list. The values x and y are percentages of the canvas.
+            18. margin: margin for the canvas as a percentage.
+            19. icon_groups: Number of clusters for the icons. Cannot be more than the number of icons.
+            20. icon_group_sizes: Size factors for the icon groups, given as percentages of the canvas height.
+                supplied as a list: [0.10, 0.9, 0.8] for 3 groups.
+            21. use_icon_group_colors: This super-cedes the icon-colors.
+            22. icon_text_padding: Padding between lines of text.
+            23. icon_padding: Padding between icons. Used to detect overlap.
         """
+        self.layers = {}
         self.fsn = fsn
         self.category = category
         self.vertical = fsn[:3]
@@ -96,18 +105,26 @@ class USPImage:
         resize_reference = 0
         resize_factor = 0.5
         color_strip_algorithm = 0
-        icon_colors = None
+        icon_palettes = None
         icon_text_color = [0, 0, 0]
         icon_shape = None
         use_category_specific_backgrounds = False
         icon_text_inside_shape = False
 
-        if not icon_colors:       
-            preserve_icon_colors = False
-        else:
+        if icon_palettes is None:       
             preserve_icon_colors = True
+        else:
+            preserve_icon_colors = False
         
-        icon_text_inside_shape = 0
+        parent_image_position = [0.5, 0.5]
+        icon_layout = 0
+        margin = 0.05
+        icon_groups = 2
+        icon_group_sizes = [0.5, 0.5]
+        use_icon_group_colors = False
+        icon_text_padding = 10
+        icon_padding = 10
+
         if kwargs is not none:
             if "aspect_ratio" in kwargs.keys():
                 aspect_ratio = kwargs["aspect_ratio"]
@@ -119,8 +136,8 @@ class USPImage:
                 resize_factor = kwargs["resize_factor"]
             if "color_strip_algorithm" in kwargs.keys():
                 color_strip_algorithm = kwargs["color_strip_algorithm"]
-            if "icon_colors" in kwargs.keys():
-                icon_colors = kwargs["icon_colors"]
+            if "icon_palettes" in kwargs.keys():
+                icon_palettes = kwargs["icon_palettes"]
             if "icon_text_color" in kwargs.keys():
                 icon_text_color = kwargs["icon_text_color"]
             if "icon_shape" in kwargs.keys():
@@ -139,24 +156,45 @@ class USPImage:
                 parent_image_position = kwargs["parent_image_position"]
             if "icon_layout" in kwargs.keys():
                 icon_layout = kwargs["icon_layout"]
+            if "margin" in kwargs.keys():
+                margin = kwargs["margin"]
+            if "icon_groups" in kwargs.keys():
+                icon_groups = kwargs["icon_groups"]
+            if "icon_group_sizes" in kwargs.keys():
+                icon_group_sizes = kwargs["icon_group_sizes"]
+            if "use_icon_group_colors" in kwargs.keys():
+                use_icon_group_colors = kwargs["use_icon_group_colors"]
+            if "icon_text_padding" in kwargs.keys():
+                icon_text_padding = kwargs["icon_text_padding"]
+            if "icon_padding" in kwargs.keys():
+                icon_padding = kwargs["icon_padding"]
 
 
         self.prepareCanvas(aspect_ratio, image_width)
         self.loadBackgroundImage(background_image_path)
         self.prepareProductImage(resize_reference, resize_factor, color_strip_algorithm)
         self.prepareIcons(
-                    icon_colors, 
+                    icon_palettes, 
                     icon_text_color, 
                     icon_text_font_type, 
                     icon_shape, 
                     use_primary_icon_color_for_font_color, 
                     preserve_icon_colors,
-                    icon_text_inside_shape
-                )
+                    icon_text_inside_shape,
+                    icon_groups,
+                    icon_group_sizes,
+                    use_icon_group_colors)
 
         self.prepareFSNBrandLogo(brand_name)
         self.resizeAllObjects(icon_sizes, parent_image_size)
-        self.calculatePositions(parent_image_position, icon_layout)
+        self.calculatePositions(
+                            parent_image_position, 
+                            icon_layout, 
+                            icon_text_padding, 
+                            icon_padding,
+                            icon_groups,
+                            icon_group_sizes
+                            )
         if not self.detectOverlaps(): 
             self.applyLayout()
             self.saveImage()
@@ -216,21 +254,39 @@ class USPImage:
 
     def prepareIcons(
                 self, 
-                icon_colors, 
+                icon_palettes, 
                 icon_text_color, 
                 icon_text_font_type, 
                 icon_shape, 
                 use_primary_icon_color_for_font_color, 
                 preserve_icon_colors,
-                icon_text_inside_shape
-            ):
+                icon_text_inside_shape,
+                icon_groups,
+                icon_group_sizes,
+                use_icon_group_colors):
         """
         Given the data dictionary of icons, this method prepares them appropriately.
         1. 
         """
-        pass
+        icon_count = len(self.icon_data)
+        for index in range(icon_count):
+            attribute = self.icon_data[index]["Attribute"]
+            icon_path = self.icon_data[index]["Icon Path"]
+            description_text = self.icon_data[index]["Description"]
+            if len(description_text.strip()) == 0:
+                self.icon_data[index]["Icon Text Image"] = self.getIconTextImage(attribute)
+            else
+                self.icon_data[index]["Icon Text Image"] = self.getIconTextImage(description_text)
 
-    def calculatePositions(self):
+
+            self.icon_data[index]["Icon Image"] = self.getIconImage(icon_path)
+
+    def calculatePositions(
+                        self, 
+                        parent_image_position, 
+                        icon_layout, 
+                        icon_text_padding, 
+                        icon_padding):
         pass
         
     def detectOverlaps(self):
@@ -253,7 +309,8 @@ class USPImage:
     def dumpLayers(self):
         for layer in self.layers:
             layer_name = layer["Name"]
-            os.path.makedirs(os.path.join(self.output_path, self.fsn)
+            if not os.path.exists(os.path.join(self.output_path, self.fsn):
+                os.makedirs(os.path.join(self.output_path, self.fsn)
             layer_object.save(os.path.join(self.output_path, self.fsn,layer_name+".png"))
 
     def getPILImage(self):
