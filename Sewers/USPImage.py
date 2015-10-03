@@ -14,7 +14,17 @@ import Katana
 
 
 class USPImage:
-    def __init__(self, fsn, category, product_image_path, icon_data, background_image_path, brand_name, image_repository_path, output_path, **kwargs):
+    def __init__(
+                self, 
+                fsn, 
+                category, 
+                product_image_path, 
+                icon_data, 
+                background_image_path, 
+                brand_name, 
+                image_repository_path, 
+                output_path, 
+                **kwargs):
         """
         Initializes the USPImage object. It also runs a preliminary preparation algorithm.
         1. fsn, is the Flipkart Serial Number.
@@ -125,6 +135,10 @@ class USPImage:
                 icon_text_inside_shape = kwargs["icon_text_font_type"]
             if "icon_font_size" in kwargs.keys():
                 icon_font_size = kwargs["icon_font_size"]
+            if "parent_image_position" in kwargs.keys():
+                parent_image_position = kwargs["parent_image_position"]
+            if "icon_layout" in kwargs.keys():
+                icon_layout = kwargs["icon_layout"]
 
 
         self.prepareCanvas(aspect_ratio, image_width)
@@ -141,10 +155,11 @@ class USPImage:
                 )
 
         self.prepareFSNBrandLogo(brand_name)
-        self.resizeAllObjects()
-        self.calculatePositions()
-        if not self.detectOverlaps(): self.applyLayout()
-        self.saveImage()
+        self.resizeAllObjects(icon_sizes, parent_image_size)
+        self.calculatePositions(parent_image_position, icon_layout)
+        if not self.detectOverlaps(): 
+            self.applyLayout()
+            self.saveImage()
 
     def prepareCanvas(self, aspect_ratio, image_width):
         """Prepares a canvas for plotting the image. 
@@ -172,7 +187,12 @@ class USPImage:
             if len(background_color) == 3: background_color.append(255)
             self.background_image = Image.new("RGBA", self.canvas.size, background_color)
 
-    def prepareProductImage(self, resize_reference, resize_factor, color_strip_algorithm, **kwargs):
+    def prepareProductImage(
+                        self, 
+                        resize_reference, 
+                        resize_factor, 
+                        color_strip_algorithm, 
+                        **kwargs):
         """
         * resize_reference can be 0 or 1.
             0. Height
@@ -194,7 +214,20 @@ class USPImage:
         #self.current_product_image
         pass
 
-    def prepareIcons(self):
+    def prepareIcons(
+                self, 
+                icon_colors, 
+                icon_text_color, 
+                icon_text_font_type, 
+                icon_shape, 
+                use_primary_icon_color_for_font_color, 
+                preserve_icon_colors,
+                icon_text_inside_shape
+            ):
+        """
+        Given the data dictionary of icons, this method prepares them appropriately.
+        1. 
+        """
         pass
 
     def calculatePositions(self):

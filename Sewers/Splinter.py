@@ -41,7 +41,12 @@ class Splinter(QtCore.QThread):
         self.margin = 0.05
         self.output_location = None
         self.preserve_icon_colors = False
-        self.colors_list = [(0,0,0),(55,55,55),(127,127,127),(255,255,255)]
+        self.colors_list = [
+                                (0,0,0),
+                                (55,55,55),
+                                (127,127,127),
+                                (255,255,255)
+                            ]
         self.fix_icon_text_case = False
         self.use_category_specific_backgrounds = True
         self.font = os.path.join("essentials", "RionaSans-Regular.ttf")
@@ -146,7 +151,31 @@ class Splinter(QtCore.QThread):
                         self.sendMessage.emit("Completed %d in %ss." %(counter, datetime.datetime.now() - start_time), self.last_eta, self.thread_index)
                 self.allow_run = False
 
-    def prepareAppImage(self, fsn, brand, category, primary_attribute_data, secondary_attribute_data, parent_image_positioning, icon_positioning, icon_palette, allow_overlap, background_image_path, primary_attribute_relative_size, secondary_attribute_relative_size, bounding_box, use_simple_bg_color_strip, bg_color_strip_threshold, colors_list, fix_icon_text_case, preserve_icon_colors, font, font_color, use_icon_color_for_font_color, icon_font_size, output_location):
+    def prepareAppImage(
+                    self, 
+                    fsn, 
+                    brand, 
+                    category, 
+                    primary_attribute_data, 
+                    secondary_attribute_data, 
+                    parent_image_positioning, 
+                    icon_positioning, 
+                    icon_palette, 
+                    allow_overlap, 
+                    background_image_path, 
+                    primary_attribute_relative_size, 
+                    secondary_attribute_relative_size, 
+                    bounding_box, 
+                    use_simple_bg_color_strip, 
+                    bg_color_strip_threshold, 
+                    colors_list, 
+                    fix_icon_text_case, 
+                    preserve_icon_colors, 
+                    font, 
+                    font_color, 
+                    use_icon_color_for_font_color, 
+                    icon_font_size, 
+                    output_location):
         """This method takes one fsn set, and prepares the app-image.
         ALGORITHM:
         1. If the background image is specified, 
@@ -215,7 +244,11 @@ class Splinter(QtCore.QThread):
             parent_image_resize_factor = self.parent_image_resize_factor
         message = "Resizing parent image to %f%% along the %s. (%s)"%(parent_image_resize_factor*100, parent_image_resize_reference, fsn)
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
-        resized_parent_image = Katana.getResizedImage(original_parent_image, parent_image_resize_factor, parent_image_resize_reference, base_image.size)
+        resized_parent_image = Katana.getResizedImage(
+                                                original_parent_image, 
+                                                parent_image_resize_factor, 
+                                                parent_image_resize_reference, 
+                                                base_image.size)
         parent_image_size = resized_parent_image.size
         #Use the selected background colour strip algorithm 
         #to strip the parent image of its colour.
@@ -226,7 +259,11 @@ class Splinter(QtCore.QThread):
             self.sendMessage.emit(message, self.last_eta, self.thread_index)
             #Added for multiprocessing
             #parent_image_strip_process = Process(target=Katana.replaceColorInImage, args=(resized_parent_image, (255,255,255,255), (0,0,0,0), bg_color_strip_threshold, True, "Parent Image", return_dict))
-            parent_image = Katana.replaceColorInImage(resized_parent_image, (255,255,255,255), (0,0,0,0), bg_color_strip_threshold)
+            parent_image = Katana.replaceColorInImage(
+                                                resized_parent_image, 
+                                                (255,255,255,255), 
+                                                (0,0,0,0), 
+                                                bg_color_strip_threshold)
         else:
             #The complex movement algorithm takes thing by strokes.
             #First, it identifies the background colour, reading the
@@ -251,13 +288,37 @@ class Splinter(QtCore.QThread):
         #primary_attributes_process.start()
         message = "Getting primary attribute data image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
-        primary_attributes_and_icons_data = Katana.getIcons(primary_attribute_data, category, primary_attribute_relative_size, base_image.size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_colors, font, font_color, use_icon_color_for_font_color, icon_font_size)
+        primary_attributes_and_icons_data = Katana.getIcons(
+                                                    primary_attribute_data, 
+                                                    category, 
+                                                    primary_attribute_relative_size, 
+                                                    base_image.size, 
+                                                    colors_list, 
+                                                    bounding_box, 
+                                                    fix_icon_text_case, 
+                                                    preserve_icon_colors, 
+                                                    font, 
+                                                    font_color, 
+                                                    use_icon_color_for_font_color, 
+                                                    icon_font_size)
 
-        secondary_attributes_process = Process(target=Katana.getIcons, args=(secondary_attribute_data,category,secondary_attribute_relative_size, base_image.size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_colors, font, font_color, use_icon_color_for_font_color, icon_font_size, True, "Secondary", return_dict))
+        #secondary_attributes_process = Process(target=Katana.getIcons, args=(secondary_attribute_data,category,secondary_attribute_relative_size, base_image.size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_colors, font, font_color, use_icon_color_for_font_color, icon_font_size, True, "Secondary", return_dict))
         #secondary_attributes_process.start()
         message = "Getting secondary attribute data image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
-        secondary_attributes_and_icons_data = Katana.getIcons(secondary_attribute_data,category,secondary_attribute_relative_size, base_image.size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_colors, font, font_color, use_icon_color_for_font_color, icon_font_size)
+        secondary_attributes_and_icons_data = Katana.getIcons(
+                                                    secondary_attribute_data,
+                                                    category,
+                                                    secondary_attribute_relative_size, 
+                                                    base_image.size, 
+                                                    colors_list, 
+                                                    bounding_box, 
+                                                    fix_icon_text_case, 
+                                                    preserve_icon_colors, 
+                                                    font, 
+                                                    font_color, 
+                                                    use_icon_color_for_font_color, 
+                                                    icon_font_size)
         #Based on the input control parameters, get the coordinates for the parent image.
         message = "Getting parent image coordinates corresponding to %s for %s."%(parent_image_positioning, fsn)
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
@@ -277,11 +338,15 @@ class Splinter(QtCore.QThread):
         #secondary_attributes_and_icons_data = return_dict["Secondary"]
         #message = "Getting USP icon coordinates for %s."%(fsn)
         #self.sendMessage.emit(message, self.last_eta, self.thread_index)
-        icons_and_coordinates = Katana.getIconsAndCoordinates(base_image, 
-                                            parent_image_size, parent_image_coords, 
+        icons_and_coordinates = Katana.getIconsAndCoordinates(
+                                            base_image, 
+                                            parent_image_size, 
+                                            parent_image_coords, 
                                             primary_attributes_and_icons_data, 
-                                            secondary_attributes_and_icons_data, icon_positioning,
-                                            "Separate", parent_image_positioning
+                                            secondary_attributes_and_icons_data, 
+                                            icon_positioning,
+                                            "Separate", 
+                                            parent_image_positioning
                                             )
         #Paste the FK and Brand Icon
         message = "Getting the merged Flipkart and Brand Logo for %s."%(fsn)
