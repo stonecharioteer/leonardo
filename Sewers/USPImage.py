@@ -14,11 +14,41 @@ import Katana
 
 
 class USPImage:
-    def __init__(self, fsn, product_image_path, icon_data, background_image_path, brand_name, output_path, **kwargs):
+    def __init__(self, fsn, category, product_image_path, icon_data, background_image_path, brand_name, image_repository_path, output_path, **kwargs):
         """
         Initializes the USPImage object. It also runs a preliminary preparation algorithm.
+        1. fsn, is the Flipkart Serial Number.
+        2. Category serves two purposes. First, it is indicative of what category we're running.
+        Second, it should have a folder within the Icon Repository, containing all the required icons.
+        3. product_image_path is the exact product image that needs to be used. This should be contained
+        within in the repository folder.
+        4. icon_data is a list of dictionaries with this structure.
+            [
+                {
+                    "Attribute": "Attribute name, and the icon basename.",
+                    "Icon Image Path": "Path to the icon. If this is None, then the algorithm assumes there 
+                                    will be one in the category's icon repository folder.",
+                    "Description": "Text one would like to see below the icon. Of course, None will force 
+                                    the same text as the attribute itself."
+                }
+            ]
+        5. background_image_path: This can be either the path to the background_image, "Random", or an RGB value.
+        If "Random", the algorithm will pick a random background from those available in the repo.
+        If an RGB value, the algorithm will create a background palette from the color.
+        6. brand_name is the name of the brand. This helps the algorithm pick a brand logo from the repo.
+        If there's no available brand logo, the algorithm picks just the FK logo.
+        7. image_repository_path is the path to the repository. It should have the following structure:
+            repository:
+                    \Icons
+                    \Parent Images
+                    \Brands
+                    \Shapes
+                    \Background Images
         """
         self.fsn = fsn
+        self.category = category
+        self.vertical = fsn[:3]
+        self.image_repository_path = image_repository_path
         self.product_image_path = product_image_path
         self.icon_data = icon_data
         self.output_path = output_path
@@ -30,6 +60,9 @@ class USPImage:
         icon_colors = None
         icon_text_color = [0, 0, 0]
         icon_shape = None
+        use_category_specific_backgrounds = False
+        icon_text_inside_shape = False
+        preserve_icon_colors = False
 
         if kwargs is not none:
             if "aspect_ratio" in kwargs.keys():
@@ -48,12 +81,20 @@ class USPImage:
                 icon_text_color = kwargs["icon_text_color"]
             if "icon_shape" in kwargs.keys():
                 icon_shape = kwargs["icon_shape"]
+            if "use_category_specific_backgrounds" in kwargs.keys():
+                use_category_specific_backgrounds = kwargs["use_category_specific_backgrounds"]
+            if "icon_text_inside_shape" in kwargs.keys():
+                icon_text_inside_shape = kwargs["icon_text_inside_shape"]
+            if "preserve_icon_colors" in kwargs.keys():
+                preserve_icon_colors = kwargs["preserve_icon_colors"]
+
 
         self.prepareCanvas(aspect_ratio, image_width)
         self.loadBackgroundImage(background_image_path)
         self.prepareProductImage(resize_reference, resize_factor, color_strip_algorithm)
         self.prepareIcons()
         self.prepareFSNBrandLogo(brand_name)
+        self.resizeAllObjects()
         self.calculatePositions()
         if not self.detectOverlaps(): self.applyLayout()
         self.saveImage()
@@ -65,10 +106,24 @@ class USPImage:
         canvas_size = (int(image_width), int(image_height))
         self.canvas = Image.new("RGBA", canvas_size, (255,255,255,255))
         
-    def loadBackgroundImage(self):
-        """Opens the background image and resizes it to suit the size of the canvas."""
-        canvas_size = self.canvas.size
-
+    def loadBackgroundImage(self, background_path, use_category_specific_backgrounds):
+        """Opens the background image."""
+        if use_category_specific_backgrounds:
+            search_string = os.path.join(self.image_repository_path,"Images","Backgrounds","*%s*%s.*"%(category.replace(" ","*"),fsn[:3].replace(" ","*")))
+            backgrounds = glob.glob(search_string)
+            if len(backgrounds) == 0:
+                backgrounds = glob.glob(os.path.join(self.image_repository_path, "Images", "Backgrounds", "*%s.*"%category.replace(" ","*")))
+            background_path =  backgrounds[0]
+        else:
+            if background_path == "Random":
+                backgrounds = glob.glob(os.path.join(os.getcwd(), "Images", "Backgrounds", "Background*.*"))
+                background_path = random.choice(backgrounds)
+        if type(background_path) is not tuple: #IF the path isn't an RGBA
+            self.background_image = Image.open(background_path).convert("RGBA")
+        else: #If the path is actually an RGB value
+            background_color = [color for color in background_path]
+            if len(background_color) == 3: background_color.append(255)
+            self.background_image = Image.new("RGBA", self.canvas.size, background_color)
 
     def prepareProductImage(self, resize_reference, resize_factor, color_strip_algorithm, **kwargs):
         """
@@ -86,6 +141,10 @@ class USPImage:
             1. threshold
             2. Nothing else for now.
         """
+        #self.original_product_image
+        #self.color_stripped_product_image
+        #self.resized_product_image
+        #self.current_product_image
         pass
 
     def prepareIcons(self):
