@@ -44,6 +44,24 @@ class USPImage:
                     \Brands
                     \Shapes
                     \Background Images
+        8. output_path: where to save the processed image.
+        9. keyword arguments (kwargs): In addition, these arguments may be passed. Preserve the name carefully.
+            1. aspect_ratio: A list, with the aspect ratio. Default is 9:14.
+            2. image_width: The width of the final image. Height will be automatically calculated.
+            3. resize_reference: Reference for resizing the product image. Values: 0, 1, 2. 0 = Width, 1 = Height, 2= SmartFit
+            4. resize_factor: Product image resize factor as percentage, from 0.00 to 1.00
+            5. color_strip_algorithm: algorithm with which to strip background colors. 0, 1, 2, 3. 
+            Explained in the prepareProductImage() method.
+            6. icon_colors: None, or a list of RGBs.
+            7. icon_text_color: An RGB value.
+            8. icon_shape: String. Name of the file that should be in the repository.
+            9. use_category_specific_backgrounds
+            10. icon_text_inside_shape: Boolean. Defaults to False. If True, the shape is placed around the icon and text.
+            11. preserve_icon_colors: Boolean. Defaults to True if icon_colors is None. If False, the icon is given a color palette guided by the icon_colors.
+            12. icon_text_font_type
+            13. icon_opacity: float from 0.00 to 1.00. Defaults to 1.00. This applies to all icon colors except the outlines.
+            14. icon_shape_color:
+            15. icon_font_size: Size of the font used for the icon description text.
         """
         self.fsn = fsn
         self.category = category
@@ -62,8 +80,13 @@ class USPImage:
         icon_shape = None
         use_category_specific_backgrounds = False
         icon_text_inside_shape = False
-        preserve_icon_colors = False
 
+        if not icon_colors:       
+            preserve_icon_colors = False
+        else:
+            preserve_icon_colors = True
+        
+        icon_text_inside_shape = 0
         if kwargs is not none:
             if "aspect_ratio" in kwargs.keys():
                 aspect_ratio = kwargs["aspect_ratio"]
@@ -87,12 +110,25 @@ class USPImage:
                 icon_text_inside_shape = kwargs["icon_text_inside_shape"]
             if "preserve_icon_colors" in kwargs.keys():
                 preserve_icon_colors = kwargs["preserve_icon_colors"]
+            if "icon_text_font_type" in kwargs.keys():
+                icon_text_inside_shape = kwargs["icon_text_font_type"]
+            if "icon_font_size" in kwargs.keys():
+                icon_font_size = kwargs["icon_font_size"]
 
 
         self.prepareCanvas(aspect_ratio, image_width)
         self.loadBackgroundImage(background_image_path)
         self.prepareProductImage(resize_reference, resize_factor, color_strip_algorithm)
-        self.prepareIcons()
+        self.prepareIcons(
+                    icon_colors, 
+                    icon_text_color, 
+                    icon_text_font_type, 
+                    icon_shape, 
+                    use_primary_icon_color_for_font_color, 
+                    preserve_icon_colors,
+                    icon_text_inside_shape
+                )
+
         self.prepareFSNBrandLogo(brand_name)
         self.resizeAllObjects()
         self.calculatePositions()
