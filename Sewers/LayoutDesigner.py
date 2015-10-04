@@ -679,7 +679,7 @@ class LayoutDesigner(QtGui.QWidget):
     def changeBackground(self):
         self.current_background = str(self.background_selection_combobox.currentText())
         if self.current_background != "Random":
-            self.current_background_path = os.path.join(os.getcwd(),"Images","Backgrounds",self.current_background)
+            self.current_background_path = os.path.join(self.repo_path,"Backgrounds",self.current_background)
             self.background_image_pixmap = QtGui.QPixmap(self.current_background_path)
             self.background_image_pixmap = self.background_image_pixmap.scaled(self.background_preview_space.size(),QtCore.Qt.IgnoreAspectRatio,QtCore.Qt.SmoothTransformation)
             self.background_preview_space.setPixmap(self.background_image_pixmap)

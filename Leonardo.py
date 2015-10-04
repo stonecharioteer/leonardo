@@ -177,6 +177,7 @@ if __name__ == "__main__":
     #If the user hits cancel, then quit.
     if repository_exists:
         repo_path = Katana.getRepoPath()
+        print repo_path
         splash = showSplashScreen()
         leo = Leonardo(repo_path)
         QtGui.QApplication.processEvents()

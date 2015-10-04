@@ -10,6 +10,21 @@ from PIL import ImageDraw
 import PIL
 from PyQt4 import QtGui, QtCore
 
+def getFilePathsFromGoogleDriveFolder(file_name, extension, folder_path):
+    """
+    Given a file, its extension and a folder name, this function looks for an exact match.
+    Since I'm using Google Drive for the storage and synchronization of files,
+    I'll need to also match files with ([1-9]) as suffixes.
+    Example:
+    When searching for LED in a Mobile folder.
+    If LED.png isn't available, LED (1).png is also a permissable match while LED Display.png isn't.
+    usage = getFilePathsFromGoogleDriveFolder(file_name="LED",extension="png",folder_path=os.getcwd())
+    """
+    import os, re, glob
+    search_string = os.path.join(folder_path, file_name+"."+extension)
+    regex_search_string = "%s \(\d+\).%s"%(file_name, extension)
+    possible_file_list = glob.glob(image_search_string) + [file_name for file_name in os.listdir(folder_path) if re.search(regex_search_string, file_name, flags=re.IGNORECASE)]
+    return possible_file_list
 
 def getTitleCase(sentence):
     import re
@@ -69,11 +84,7 @@ def getFlipkartIconImage():
 def getBrandImagePaths(brand, repo_path):
     import os, glob, re
     brand_folder_path = os.path.join(repo_path, "Brands")
-    image_search_string = os.path.join(brand_folder_path,brand+".*")
-    brand_image_paths = glob.glob(image_search_string)
-    if len(brand_image_paths) == 0:
-        regex_search_string = "%s \(\d+\).png"%attribute
-        brand_image_paths = [file_name for file_name in os.listdir(brand_folder_path) if re.search(regex_search_string, file_name, flags=re.IGNORECASE)]
+    brand_image_paths = getFilePathsFromGoogleDriveFolder(file_name=brand,extension="*",folder_path=brand_folder_path)
     return brand_image_paths
 
 def getMergedFlipkartBrandImage(brand=None, repo_path=None):
@@ -112,7 +123,7 @@ def getMergedFlipkartBrandImage(brand=None, repo_path=None):
             line_bottom = (int(line_bottom_x), int(line_bottom_y))
             line_path = [line_top, line_bottom]
             line_thickness = int(padding_factor/15*(flipkart_image.size[0]+brand_image.size[0]))
-            final_image_drawing_handle.line(line_path, (0,0,0,200), line_thickness)        
+            final_image_drawing_handle.line(line_path, (0,0,0,200), line_thickness)
             final_image.save(os.path.join("cache","FK_"+brand+".png"),dpi=(300,300), quality=100)
     return final_image
 
@@ -912,7 +923,24 @@ def getParentImage(fsn,repo_path):
         parent_image_path = os.path.join("essentials","na_parent_image.png")
     return parent_image_path
 
-def getIcons(attribute_data, category, icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, repo_path, preserve_icon_original_colors=None, font=None, font_color=None, use_icon_color_for_font_color=None, icon_font_size=None, multiprocess=None, manager_return_handle=None, manager_return_dict=None):
+def getIcons(
+            attribute_data, 
+            category, 
+            icon_relative_size, 
+            base_image_size, 
+            colors_list, 
+            bounding_box, 
+            fix_icon_text_case, 
+            repo_path, 
+            preserve_icon_original_colors=None, 
+            font=None, 
+            font_color=None, 
+            use_icon_color_for_font_color=None, 
+            icon_font_size=None, 
+            multiprocess=None, 
+            manager_return_handle=None, 
+            manager_return_dict=None):
+
     #print attribute_data, category
     if multiprocess is None:
         multiprocess = False
@@ -936,12 +964,18 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size, colo
             if not found_icon:
                 if attribute["Attribute"].lower().strip() == os.path.basename(icon.lower().strip())[:os.path.basename(icon.lower().strip()).find(".")]:
                     #print attribute["Attribute"].lower().strip(), icon.lower().strip()
-                    icon_with_text = getIconImage(icon, 
-                                            attribute["Description Text"], icon_relative_size, 
-                                            base_image_size, colors_list,bounding_box, fix_icon_text_case, 
-                                            preserve_icon_original_colors, font, font_color, 
-                                            use_icon_color_for_font_color, icon_font_size
-                                            )
+                    icon_with_text = getIconImage(
+                                            icon, 
+                                            attribute["Description Text"], 
+                                            icon_relative_size, 
+                                            base_image_size, 
+                                            colors_list,bounding_box, 
+                                            fix_icon_text_case,
+                                            repo_path,
+                                            preserve_icon_original_colors, 
+                                            font, font_color, 
+                                            use_icon_color_for_font_color, 
+                                            icon_font_size)
 
                     attribute.update({"Icon": icon_with_text})
                     found_icon = True
@@ -951,12 +985,20 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size, colo
                 break
         if not found_icon:
             na_icon_path = os.path.join("essentials","icon_na.png")
-            icon_with_text = getIconImage(na_icon_path, 
-                                    attribute["Description Text"], icon_relative_size, base_image_size, 
-                                    colors_list, bounding_box, fix_icon_text_case, 
-                                    preserve_icon_original_colors, font, font_color, 
-                                    use_icon_color_for_font_color, icon_font_size
-                                    )
+            icon_with_text = getIconImage(
+                                    na_icon_path, 
+                                    attribute["Description Text"], 
+                                    icon_relative_size, 
+                                    base_image_size, 
+                                    colors_list, 
+                                    bounding_box, 
+                                    fix_icon_text_case, 
+                                    repo_path,
+                                    preserve_icon_original_colors, 
+                                    font, 
+                                    font_color, 
+                                    use_icon_color_for_font_color, 
+                                    icon_font_size)
 
             attribute.update({"Icon": icon_with_text})
             attributes_without_icons.append(attribute["Attribute"])
@@ -1000,22 +1042,13 @@ def checkIcon(attribute, category, repository_path=None, description_text=None):
     import glob
     import os
     from PIL import Image
-    if not repository_path:
-        images_path = os.path.join("Images","Repository")
-    else:
-        images_path = repository_path
-    icon_name = "%s.png"%attribute
-    regex_expression = "%s \(\d+\).png"%attribute
+    images_path = repository_path
     category_folder_path = os.path.join(images_path, category)
-    search_string = os.path.join(category_folder_path,icon_name)
-    try:
-        possible_icons_list = glob.glob(search_string)
-        if len(possible_icons_list) == 0:
-            possible_icons_list = [file_name for file_name in os.listdir(category_folder_path) if re.search(regex_expression, file_name, flags=re.IGNORECASE)]
-
-    except:
-        print search_string
-        raise
+    
+    possible_icons_list = getFilePathsFromGoogleDriveFolder(
+                                                        file_name=attribute,
+                                                        extension="png",
+                                                        folder_path=category_folder_path)
     folders_with_icons = []
     if len(possible_icons_list)>0:
         icon_found = True
@@ -1028,9 +1061,10 @@ def checkIcon(attribute, category, repository_path=None, description_text=None):
             print os.path.join(images_path,"*","")
             raise
         for folder in list_of_folders:
-            possible_icons_list = glob.glob(os.path.join(folder,icon_name))
-            if len(possible_icons_list) == 0:
-                possible_icons_list = [file_name for file_name in os.listdir(folder) if re.search(regex_expression, file_name, flags=re.IGNORECASE)]
+            possible_icons_list = getFilePathsFromGoogleDriveFolder(
+                                                            file_name=attribute,
+                                                            extension="png",
+                                                            folder_path=folder)
             if len(possible_icons_list) >0:
                 folders_with_icons.append(os.path.basename(os.path.normpath(folder)))
         if len(folders_with_icons) >0:
@@ -1040,7 +1074,20 @@ def checkIcon(attribute, category, repository_path=None, description_text=None):
 
     return icon_found, folders_with_icons
 
-def getIconImage(icon_path, description_text, icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_original_colors=None, font_path=None, font_color=None, use_icon_color_for_font_color=None, icon_font_size=None):
+def getIconImage(
+    icon_path, 
+    description_text, 
+    icon_relative_size, 
+    base_image_size, 
+    colors_list, 
+    bounding_box, 
+    fix_icon_text_case, 
+    repo_path,
+    preserve_icon_original_colors=None, 
+    font_path=None, 
+    font_color=None, 
+    use_icon_color_for_font_color=None, 
+    icon_font_size=None):
     """This method generates an image object which contains the icon image 
     as well as the description text."""
     import textwrap
@@ -1053,7 +1100,7 @@ def getIconImage(icon_path, description_text, icon_relative_size, base_image_siz
     if bounding_box != "None":
         shape = bounding_box.replace(" ","_")
         shape_width = int((max(icon_image.size))*1.45)
-        shape_path = os.path.join("Images","Shapes","%s.png"%shape)
+        shape_path = os.path.join(repo_path,"Shapes","%s.png"%shape)
         shape = Image.open(shape_path).convert("RGBA").resize((shape_width,shape_width), resample=PIL.Image.ANTIALIAS)
         shape_and_icon= shape
         icon_x = int(shape.size[0]/2-icon_image.size[0]/2)
