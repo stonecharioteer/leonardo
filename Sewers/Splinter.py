@@ -56,6 +56,7 @@ class Splinter(QtCore.QThread):
         self.font_color = [0,0,0]
         self.icon_font_size = 38
         self.use_icon_color_for_font_color = True
+        self.bypass_parent_image_cleanup = False
 
         if not self.isRunning():
             self.start(QtCore.QThread.LowPriority)
@@ -255,29 +256,32 @@ class Splinter(QtCore.QThread):
         parent_image_size = resized_parent_image.size
         #Use the selected background colour strip algorithm 
         #to strip the parent image of its colour.
-        if use_simple_bg_color_strip:
-            #Simple background strip just searches for white and removes it.
-            #Later, this should be extended to remove any background color.
-            message = "Stripping parent image background using simple strip algorithm for %s."%fsn
-            self.sendMessage.emit(message, self.last_eta, self.thread_index)
-            #Added for multiprocessing
-            #parent_image_strip_process = Process(target=Katana.replaceColorInImage, args=(resized_parent_image, (255,255,255,255), (0,0,0,0), bg_color_strip_threshold, True, "Parent Image", return_dict))
-            parent_image = Katana.replaceColorInImage(
-                                                resized_parent_image, 
-                                                (255,255,255,255), 
-                                                (0,0,0,0), 
-                                                bg_color_strip_threshold)
+        if self.bypass_parent_image_cleanup:
+            parent_image = resized_parent_image
         else:
-            #The complex movement algorithm takes thing by strokes.
-            #First, it identifies the background colour, reading the
-            #four corner pixels and taking the median of that list.
-            #Then, it swipes up, down, left and right, turning the alpha
-            #channel to zero, quitting whenever it encounters an RGB value
-            #that is below or above the threshold.
-            message = "Stripping parent image background using movement algorithm for %s."%fsn
-            self.sendMessage.emit(message, self.last_eta, self.thread_index)
-            parent_image = Katana.getStrippedImage(resized_parent_image, bg_color_strip_threshold)
-            #parent_image_strip_process = Process(target=Katana.getStrippedImage, args=(resized_parent_image, bg_color_strip_threshold, True, "Parent Image", return_dict))
+            if use_simple_bg_color_strip:
+                #Simple background strip just searches for white and removes it.
+                #Later, this should be extended to remove any background color.
+                message = "Stripping parent image background using simple strip algorithm for %s."%fsn
+                self.sendMessage.emit(message, self.last_eta, self.thread_index)
+                #Added for multiprocessing
+                #parent_image_strip_process = Process(target=Katana.replaceColorInImage, args=(resized_parent_image, (255,255,255,255), (0,0,0,0), bg_color_strip_threshold, True, "Parent Image", return_dict))
+                parent_image = Katana.replaceColorInImage(
+                                                    resized_parent_image, 
+                                                    (255,255,255,255), 
+                                                    (0,0,0,0), 
+                                                    bg_color_strip_threshold)
+            else:
+                #The complex movement algorithm takes thing by strokes.
+                #First, it identifies the background colour, reading the
+                #four corner pixels and taking the median of that list.
+                #Then, it swipes up, down, left and right, turning the alpha
+                #channel to zero, quitting whenever it encounters an RGB value
+                #that is below or above the threshold.
+                message = "Stripping parent image background using movement algorithm for %s."%fsn
+                self.sendMessage.emit(message, self.last_eta, self.thread_index)
+                parent_image = Katana.getStrippedImage(resized_parent_image, bg_color_strip_threshold)
+                #parent_image_strip_process = Process(target=Katana.getStrippedImage, args=(resized_parent_image, bg_color_strip_threshold, True, "Parent Image", return_dict))
         #parent_image_strip_process.start()
 
         #Get the background image.

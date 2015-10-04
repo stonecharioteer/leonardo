@@ -10,11 +10,13 @@ from QColorButton import QColorButton
 from QColorPanel import QColorPanel
 from ProgressBar import ProgressBar
 from Splinter import Splinter
+from ParentImageSelectorWidget import ParentImageSelectorWidget
 
 class LayoutDesigner(QtGui.QWidget):
     def __init__(self, repo_path):
         super(LayoutDesigner,self).__init__()
         self.repo_path = repo_path
+        self.current_image = None
         defaults = {
                     "Parent Image Resize Factor": 42, 
                     "Icon Font Italics": True, 
@@ -213,8 +215,9 @@ class LayoutDesigner(QtGui.QWidget):
         buttons_layout.addWidget(self.update_preview_button)
         buttons_layout.addWidget(self.stop_button)
 
-        self.preview_widget = QtGui.QLabel("Preview goes here.")
-        size_modifier = 3
+        self.preview_widget = QtGui.QPushButton()
+        self.preview_widget.setToolTip("Preview Goes Here.")
+        size_modifier = 2.5
         self.preview_widget.setFixedSize(90*size_modifier, 140*size_modifier)
         preview_widget_style_sheet = """
                                 QLabel {
@@ -225,6 +228,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.preview_widget.setStyleSheet(preview_widget_style_sheet)
         self.progress_bar = ProgressBar()
         self.progress_status = QtGui.QLabel("Humpty Dumpty sat on a wall.")
+        self.progress_status.setWordWrap(True)
 
         preview_layout = QtGui.QVBoxLayout()
         preview_layout.addLayout(buttons_layout, 0)
@@ -235,12 +239,23 @@ class LayoutDesigner(QtGui.QWidget):
         preview_group_box.setLayout(preview_layout)
         return preview_group_box
 
+    def openImage(self):
+        if self.current_image is not None:
+            os.startfile(self.current_image,"open")
+
+
     def displayProgress(self,status, progress_value, eta, completion_status, images_list, thread_index):
         self.progress_bar.setValue(progress_value)
         self.progress_status.setText(status)
-        image_pixmap = QtGui.QPixmap(images_list[-1])
-        image_pixmap = image_pixmap.scaled(self.preview_widget.size(), QtCore.Qt.IgnoreAspectRatio, QtCore.Qt.SmoothTransformation)
-        self.preview_widget.setPixmap(image_pixmap)
+        self.current_image = images_list[-1]
+        image_pixmap = QtGui.QPixmap(self.current_image)
+        image_pixmap = image_pixmap.scaled(
+                                        self.preview_widget.size(),
+                                        QtCore.Qt.IgnoreAspectRatio, 
+                                        QtCore.Qt.SmoothTransformation)
+        icon = QtGui.QIcon(image_pixmap)
+        self.preview_widget.setIcon(icon)
+        self.preview_widget.setIconSize(image_pixmap.rect().size())
         self.preview_widget.setStyleSheet("QLabel {background-color: grey; border: 1px solid black;}")
         if completion_status:
             self.update_preview_button.setEnabled(True)
@@ -287,6 +302,7 @@ class LayoutDesigner(QtGui.QWidget):
             self.splinter_thread.font_color = self.getIconFontColor()
             self.splinter_thread.use_icon_color_for_font_color = self.useIconColorForFontColor()
             self.splinter_thread.icon_font_size = self.getIconFontSize()
+            self.splinter_thread.bypass_parent_image_cleanup = self.bypassParentImageCleanup()
             
             self.splinter_thread.allow_run = True
 
@@ -297,6 +313,7 @@ class LayoutDesigner(QtGui.QWidget):
         fsns.sort()
         self.fsn_list_box.clear()
         self.fsn_list_box.addItems(fsns)
+        self.parent_image_selector.setFSNs(fsns)
 
     def createSettingsWidget(self):
         #Create the settings panels.
@@ -306,10 +323,13 @@ class LayoutDesigner(QtGui.QWidget):
         self.layout_panel = self.getLayoutPanel()
         self.font_panel = self.getFontPanel()
         self.advanced_panel = self.getAdvancedPanel()
+        self.parent_image_selector = self.getParentImageSelector()
 
         self.settings_tool_box.addTab(self.layout_panel, "Layout and Icon Positions")
         self.settings_tool_box.addTab(self.font_panel, "Icon Text Font Settings")
+        self.settings_tool_box.addTab(self.parent_image_selector, "Parent Image Selector")
         self.settings_tool_box.addTab(self.advanced_panel, "Advanced Settings")
+
         
         self.save_settings_button = QtGui.QPushButton("Save Current\nSettings")
         self.save_settings_button.setToolTip("Click to save all the current settings to a JSON file.")
@@ -460,6 +480,10 @@ class LayoutDesigner(QtGui.QWidget):
         font_panel.setLayout(font_panel_layout)
         return font_panel
 
+    def getParentImageSelector(self):
+        parent_image_selector = ParentImageSelectorWidget(self.repo_path)
+        return parent_image_selector
+
     def getAdvancedPanel(self):
         #Widget for controlling parent image scaling factor.
         self.product_image_scale_label = QtGui.QLabel("Parent Image Scale:")
@@ -536,6 +560,9 @@ class LayoutDesigner(QtGui.QWidget):
         self.use_category_specific_backgrounds = QtGui.QCheckBox("Use Category-Specific Background Images.")
         #
         self.use_icon_color_for_font_color = QtGui.QCheckBox("Use the first color from Icon palette as font color.")
+
+        self.bypass_parent_image_cleanup = QtGui.QCheckBox("Bypass Parent Image Background Cleanup.")
+        self.bypass_parent_image_cleanup.setToolTip("This method is useful when running trials.\nIt won't attempt to clean the parent image, and it will paste it as-is.\nBe careful when using this.")
         #Layout
         left_center_alignment = QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter
         left_top_alignment = QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop
@@ -599,6 +626,11 @@ class LayoutDesigner(QtGui.QWidget):
         column = 0
         advanced_panel_layout.addWidget(self.use_simple_color_replacement, row, column,1,2, 
                                     left_center_alignment)
+        
+        row += 1
+        column = 0
+        advanced_panel_layout.addWidget(self.bypass_parent_image_cleanup, row, column,1,2, 
+                                    left_center_alignment)
         row += 1
         column = 0
         advanced_panel_layout.addWidget(self.preserve_icon_colors, row, column, 1, 2, 
@@ -626,7 +658,6 @@ class LayoutDesigner(QtGui.QWidget):
         column = 0
         advanced_panel_layout.addWidget(self.allow_textless_icons_checkbox, row, column, 1, 2, 
                                     left_top_alignment)
-
         advanced_panel_layout.setColumnStretch(0, 0)
         advanced_panel_layout.setColumnStretch(1, 0)
         advanced_panel_layout.setColumnStretch(2, 10)
@@ -635,7 +666,12 @@ class LayoutDesigner(QtGui.QWidget):
         advanced_panel_layout.setRowStretch(row, 10)
         advanced_panel = QtGui.QWidget()
         advanced_panel.setLayout(advanced_panel_layout)
-        return advanced_panel
+        scrollable_widget = QtGui.QScrollArea()
+        scrollable_widget.setWidget(advanced_panel)
+        scrollable_widget.setWidgetResizable(True)
+        scrollable_widget.setFixedHeight(350)
+
+        return scrollable_widget
 
     def mapEvents(self):
         self.background_selection_combobox.currentIndexChanged.connect(self.changeBackground)
@@ -648,6 +684,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.splinter_thread.sendMessage.connect(self.displayActivity)
         self.update_preview_button.clicked.connect(self.runSplinter)
         self.stop_button.clicked.connect(self.stopRunning)
+        self.preview_widget.clicked.connect(self.openImage)
 
     def loadSettingsFromJSON(self):
         open_file_name = QtGui.QFileDialog.getOpenFileName(self, "Load Settings from a JSON",
@@ -787,6 +824,9 @@ class LayoutDesigner(QtGui.QWidget):
             font = os.path.join("essentials", "RionaSans-Medium.ttf")
         return font
 
+    def bypassParentImageCleanup(self):
+        return self.bypass_parent_image_cleanup.isChecked()
+
 
     def getCurrentSettings(self):
         """Returns a dictionary that summarizes all the current settings."""
@@ -816,6 +856,7 @@ class LayoutDesigner(QtGui.QWidget):
         use_category_specific_backgrounds = self.useCategorySpecificBackgrounds()
         background_image = self.current_background
         icon_font_size = self.getIconFontSize()
+        bypass_parent_image_cleanup = self.bypassParentImageCleanup()
 
 
         settings = {
@@ -844,6 +885,7 @@ class LayoutDesigner(QtGui.QWidget):
                     "Preserve Icon Colors": preserve_icon_colors,
                     "Use Category Specific Backgrounds": use_category_specific_backgrounds,
                     "Background Image": background_image,
-                    "Icon Font Size": icon_font_size
+                    "Icon Font Size": icon_font_size,
+                    "Bypass Parent Image Cleanup": bypass_parent_image_cleanup
                 }
         return settings
