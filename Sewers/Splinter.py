@@ -354,7 +354,8 @@ class Splinter(QtCore.QThread):
                     coords[label] = [0,0]
             self.sendCoords.emit(coords)
         else:
-            print "Using Enforced coordinates!"
+            message =  "Using Enforced coordinates for %s!"%fsn
+            self.sendMessage.emit(message, self.last_eta, self.thread_index)
             parent_image_coords = tuple([int(pos) for pos in self.enforced_coords["Parent"]])
             icon_data = primary_attributes_and_icons_data + secondary_attribute_data
             icons_and_coordinates = []
@@ -377,9 +378,6 @@ class Splinter(QtCore.QThread):
         for icon in icons_and_coordinates:
             try:
                 position = tuple([int(pos) for  pos in  icon["Position"]])
-                if self.use_enforced_coords:
-                    #print position
-                    #print icon
                 base_image.paste(icon["Icon"], position, icon["Icon"])
             except:
                 if icon["Position"] is None:
