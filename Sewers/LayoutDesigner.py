@@ -205,7 +205,7 @@ class LayoutDesigner(QtGui.QWidget):
         buttons_layout.addWidget(self.stop_button)
 
         self.preview_widget = QtGui.QPushButton()
-        self.preview_widget.setToolTip("Preview Goes Here.")
+        self.preview_widget.setToolTip("Preview Goes Here. Click to open externally.")
         size_modifier = 2.7
         self.preview_widget.setFixedSize(90*size_modifier, 140*size_modifier)
         preview_widget_style_sheet = """

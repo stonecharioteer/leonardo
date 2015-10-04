@@ -174,7 +174,7 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
     working_average_icon_height = (max_icon_height + mean_icon_height)/2
 
     #Split the operation based on whether the ordering is separate or alternate.
-    print parent_image_positioning
+    #print parent_image_positioning
     if ordering == "Separate":
         #Primary and secondary icon lines and arrangement is to be kept separate.
         #Determine the kind of parent_image_alignment, based on the original parameter.
