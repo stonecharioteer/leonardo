@@ -70,11 +70,17 @@ class LayoutDesigner(QtGui.QWidget):
         
         #Set the Palette selection method.
         icon_colors_value = settings_from_json["Icon Palette"]
-        counter = 0
-        for button in self.palette_selection_buttons:
-            button.setColors(icon_colors_value[counter])
-            counter += 1
-
+        try:
+            if len(icon_colors_value) == len(self.palette_selection_buttons):
+                counter = 0
+                for button in self.palette_selection_buttons:
+                    button.setColors(icon_colors_value[counter])
+                    counter += 1
+            else:
+                for button in self.palette_selection_buttons:
+                    button.setColors(icon_colors_value[0])
+        except:
+            pass
         #Set the Image margin percentage.
         margin_value = 100*settings_from_json["Margin"]
         self.image_margin_spinbox.setValue(margin_value)
@@ -443,6 +449,8 @@ class LayoutDesigner(QtGui.QWidget):
         #Widget for controlling icon color.
         self.palette_selection_label = QtGui.QLabel("Icon Palette:")
         self.palette_selection_buttons = [QColorPanel() for i in range(10)]
+        self.palette_reset_button = QtGui.QPushButton("Copy First Row's colors to all rows.")
+
 
 
         font_panel_layout = QtGui.QGridLayout()
@@ -463,6 +471,8 @@ class LayoutDesigner(QtGui.QWidget):
         font_panel_layout.addWidget(self.palette_selection_label, 2, 0, 1, 1,
                                     QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         row = 2
+        font_panel_layout.addWidget(self.palette_reset_button, row, 4, 1, 1,
+                                    QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         for button in self.palette_selection_buttons:
             font_panel_layout.addWidget(button, row, 1, 2, 1)
             row+=1
@@ -473,7 +483,10 @@ class LayoutDesigner(QtGui.QWidget):
         font_panel_layout.setColumnStretch(0,0)
         font_panel_layout.setColumnStretch(1,0)
         font_panel_layout.setColumnStretch(2,0)
-        font_panel_layout.setColumnStretch(3,10)
+        font_panel_layout.setColumnStretch(3,0)
+        font_panel_layout.setColumnStretch(4,0)
+        font_panel_layout.setColumnStretch(5,0)
+        font_panel_layout.setColumnStretch(6,10)
         font_panel_layout.setColumnStretch(0,0)
         font_panel_layout.setColumnStretch(0,0)
         for i in range(2):
@@ -679,6 +692,12 @@ class LayoutDesigner(QtGui.QWidget):
         self.update_preview_button.clicked.connect(self.runSplinter)
         self.stop_button.clicked.connect(self.stopRunning)
         self.preview_widget.clicked.connect(self.openImage)
+        self.palette_reset_button.clicked.connect(self.resetPalette)
+
+    def resetPalette(self):
+        palette = self.getIconPalette()[0]
+        for button in self.palette_selection_buttons:
+            button.setColors(palette)
 
     def loadSettingsFromJSON(self):
         open_file_name = QtGui.QFileDialog.getOpenFileName(self, "Load Settings from a JSON",
