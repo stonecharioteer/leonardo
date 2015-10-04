@@ -162,7 +162,6 @@ if __name__ == "__main__":
                                                     os.getcwd(), 
                                                     QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks)
                                                 )
-        print repo_path
         if repo_path:
             Katana.recordRepository(repo_path)
             repository_exists = Katana.checkRepository()
@@ -177,7 +176,6 @@ if __name__ == "__main__":
     #If the user hits cancel, then quit.
     if repository_exists:
         repo_path = Katana.getRepoPath()
-        print repo_path
         splash = showSplashScreen()
         leo = Leonardo(repo_path)
         QtGui.QApplication.processEvents()
