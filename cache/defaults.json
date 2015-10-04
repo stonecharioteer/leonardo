@@ -300,7 +300,7 @@
     ], 
     "Parent Image Resize Factor": 0.39, 
     "Parent Image Resize Reference": "Smart Fit", 
-    "Preserve Icon Colors": false, 
+    "Preserve Icon Colors": true, 
     "Primary Attribute Relative Size": 10, 
     "Secondary Attribute Relative Size": 10, 
     "Use Category Specific Backgrounds": false, 

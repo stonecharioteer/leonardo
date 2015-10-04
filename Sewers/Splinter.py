@@ -16,6 +16,7 @@ import Katana
 class Splinter(QtCore.QThread):
     progress = QtCore.pyqtSignal(str, int, datetime.datetime, bool, list, int)
     sendMessage = QtCore.pyqtSignal(str, datetime.datetime, int)
+    sendCoords = QtCore.pyqtSignal(dict)
 
     def __init__(self, thread_index=None, repo_path=None):
         super(Splinter, self).__init__()
@@ -340,6 +341,20 @@ class Splinter(QtCore.QThread):
                                             "Separate", 
                                             parent_image_positioning
                                             )
+        coords = {"Parent": parent_image_coords}
+        counter = 1
+        for icon in icons_and_coordinates:
+            label = "USP-%d"%counter
+            print label
+            coords[label] = icon["Position"]
+            counter+=1
+        if len(icons_and_coordinates)<10:
+            for i in range(10-len(icons_and_coordinates)):
+                label = "USP-%d"%(i+1+len(icons_and_coordinates))
+                print label
+                coords[label] = [0,0]
+
+        self.sendCoords.emit(coords)
         #Paste the FK and Brand Icon
         message = "Getting the merged Flipkart and Brand Logo for %s."%(fsn)
         self.sendMessage.emit(message, self.last_eta, self.thread_index)

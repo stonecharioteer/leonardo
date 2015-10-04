@@ -11,7 +11,7 @@ from QColorPanel import QColorPanel
 from ProgressBar import ProgressBar
 from Splinter import Splinter
 from ParentImageSelectorWidget import ParentImageSelectorWidget
-
+from PositionWidget import PositionWidget
 class LayoutDesigner(QtGui.QWidget):
     def __init__(self, repo_path):
         super(LayoutDesigner,self).__init__()
@@ -319,12 +319,14 @@ class LayoutDesigner(QtGui.QWidget):
         self.layout_panel = self.getLayoutPanel()
         self.font_panel = self.getFontPanel()
         self.advanced_panel = self.getAdvancedPanel()
+        self.position_widget = PositionWidget()
         self.parent_image_selector = self.getParentImageSelector()
 
         self.settings_tool_box.addTab(self.layout_panel, "Layout and Icon Positions")
         self.settings_tool_box.addTab(self.font_panel, "Icon Text Font Settings")
         self.settings_tool_box.addTab(self.parent_image_selector, "Parent Image Selector")
         self.settings_tool_box.addTab(self.advanced_panel, "Advanced Settings")
+        self.settings_tool_box.addTab(self.position_widget, "Position Control")
 
         
         self.save_settings_button = QtGui.QPushButton("Save Current\nSettings")
@@ -689,6 +691,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.load_settings_from_file_button.clicked.connect(self.loadSettingsFromJSON)
         self.splinter_thread.progress.connect(self.displayProgress)
         self.splinter_thread.sendMessage.connect(self.displayActivity)
+        self.splinter_thread.sendCoords.connect(self.position_widget.setCoords)
         self.update_preview_button.clicked.connect(self.runSplinter)
         self.stop_button.clicked.connect(self.stopRunning)
         self.preview_widget.clicked.connect(self.openImage)
