@@ -116,7 +116,7 @@ class USPImage:
         else:
             preserve_icon_colors = False
         
-        parent_image_position = [0.5, 0.5]
+        parent_image_position_factor = [0.5, 0.5]
         icon_layout = 0
         margin = 0.05
         icon_groups = 2
@@ -152,8 +152,8 @@ class USPImage:
                 icon_text_inside_shape = kwargs["icon_text_font_type"]
             if "icon_font_size" in kwargs.keys():
                 icon_font_size = kwargs["icon_font_size"]
-            if "parent_image_position" in kwargs.keys():
-                parent_image_position = kwargs["parent_image_position"]
+            if "parent_image_position_factor" in kwargs.keys():
+                parent_image_position_factor = kwargs["parent_image_position_factor"]
             if "icon_layout" in kwargs.keys():
                 icon_layout = kwargs["icon_layout"]
             if "margin" in kwargs.keys():
@@ -171,6 +171,7 @@ class USPImage:
 
 
         self.prepareCanvas(aspect_ratio, image_width)
+        self.preparePositionMatrix()
         self.loadBackgroundImage(background_image_path)
         self.prepareProductImage(resize_reference, resize_factor, color_strip_algorithm)
         self.prepareIcons(
@@ -186,9 +187,13 @@ class USPImage:
                     use_icon_group_colors)
 
         self.prepareFSNBrandLogo(brand_name)
-        self.resizeAllObjects(icon_sizes, parent_image_size)
+        self.resizeAllObjects(
+                            icon_sizes,
+                            icon_groups,
+                            icon_group_sizes,
+                            parent_image_size)
         self.calculatePositions(
-                            parent_image_position, 
+                            parent_image_position_factor, 
                             icon_layout, 
                             icon_text_padding, 
                             icon_padding,
@@ -205,6 +210,19 @@ class USPImage:
         image_height = math.ceil(image_width*aspect_ratio[1]/aspect_ratio[0])
         canvas_size = (int(image_width), int(image_height))
         self.canvas = Image.new("RGBA", canvas_size, (255,255,255,255))
+
+    def preparePositionMatrix():
+        """
+        Prepares a dataframe of zeroes indicating each pixel of the image.
+        I'll use this to determine if there's anything occupying any particular space before pasting.
+        This will help prevent overlaps.
+        """
+        width, height = self.canvas.size
+        #Width corresponds to the number of columns.
+        #Height corresponds to the number of rows.
+        #In a Pandas dataframe, the index attribute is indicative of rows.
+        self.position_matrix = pd.DataFrame(index=range(height), columns =range(width)).fillna(0)
+        #position matrix is instantiated as a height x width matrix, where each pixel is represented by a zero.
         
     def loadBackgroundImage(self, background_path, use_category_specific_backgrounds):
         """Opens the background image."""
@@ -283,11 +301,33 @@ class USPImage:
 
     def calculatePositions(
                         self, 
-                        parent_image_position, 
+                        parent_image_position_factor, 
                         icon_layout, 
                         icon_text_padding, 
                         icon_padding):
-        pass
+        """
+        1. Checks if all the cells in the position matrix hold only zeroes. 
+            (Should I just go ahead and instantiate the matrix here instead?)
+        2. Measures the size of the branding space, and allocates "Brand" value to those cells in the matrix.
+        3. 
+        """
+        canvas_width,canvas_height = self.canvas.size
+        #Allocate space for the brand logo.
+        brand_width, brand_height = self.brand_logo.size
+        self.brand_position = [
+                                self.margin,
+                                self.margin
+                            ]
+        self.position_matrix.loc[
+                                (self.brand_position[0]:(self.brand_position[0]+brand_height)), 
+                                (self.brand_position[1]:(self.brand_position[1]+brand_width))
+                            ] = "Brand Logo"
+        #Allocate space for the parent image.
+        parent_image_width, parent_image_height = self.parent_image.size
+        self.parent_image_position = [
+                                        int((base_width-parent_width)*parent_image_position_factor[0]), 
+                                        int((base_height-parent_height)*parent_image_position_factor[1])
+                                    ]
         
     def detectOverlaps(self):
         """
@@ -296,6 +336,31 @@ class USPImage:
         Returns False if there's none.
         """
         pass
+
+    def pasteLayer(self, layer, position, base):
+        """
+        Use this to paste any layer onto the base.
+        It'll check a the position_matrix DataFrame that is equal to the size of the numpy array holding the image data.
+        Then, I can mark the positions that contain data with a meaningful name.
+        The positions which don't hold data can be denoted by 0.
+        """
+
+        x, y = position
+        layer_width, layer_height = layer.size
+        #Width corresonds to columns in a matrix, while height, obviously, corresponds to rows.
+        base_width, base_height = base.size
+        if (x >= self.margin) and ((layer_width+x)<(base_width-self.margin)):
+            #Continue only if the x position is within the canvas, minus the margin on both sides.
+            if (y>=(self.margin+self.branding_space_margin)) and ((y+layer_height) > (base_height-self.margin)):
+                #Continue only if the y position is within the canvas, minus the margin and the branding space.
+                if (False not in (self.position_matrix.loc[x:(x+layer_width), y:(y+layer_height)]==0).values):
+                    #If all the pixels in the requested space are unoccupied,
+                    paste()
+                else:
+                    result = base
+                    success = False
+                    
+        return result, success
 
     def applyLayout(self):
         pass
