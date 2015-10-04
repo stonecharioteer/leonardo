@@ -370,7 +370,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.background_selection_combobox = QtGui.QComboBox()
         self.background_selection_combobox.setToolTip("Choose a background to use for all the FSNs.\nIf you need to add more backgrounds to this list, just add them to the Images\\Backgrounds folder.\nEnsure that the first word of the image is Background, with an uppercase B.\nFormat doesn't matter. Please use images of 9:16 aspect ratio.\nYes, portrait mode only.")
         self.background_selection_combobox.setMaximumWidth(200)
-        self.backgrounds = ["Random"] + [os.path.basename(file_path) for file_path in glob.glob(os.path.join(os.path.join(os.path.join(os.getcwd(),"Images"),"Backgrounds"),"*.*"))]
+        self.backgrounds = ["Random"] + [os.path.basename(file_path) for file_path in glob.glob(os.path.join(self.repo_path,"Backgrounds","*.*"))]
         self.background_selection_combobox.addItems(self.backgrounds)
 
         #Create icon positions toggle buttons. Set default to circular.

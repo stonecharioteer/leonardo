@@ -40,23 +40,23 @@ def getFinalBaseImage(base_image):
     from PIL import Image
     return Image.new("RGBA", (base_image.size[0], base_image.size[1]+200), (0,0,0,0))    
 
-def getBackgroundImage(background_path, use_category_specific_backgrounds, category, fsn=None):
+def getBackgroundImage(background_path, use_category_specific_backgrounds, category, repo_path, fsn=None):
     import random, os
     from PIL import Image
     import PIL
     if use_category_specific_backgrounds:
-        search_string = os.path.join(os.getcwd(),"Images","Backgrounds","*%s*%s.*"%(category.replace(" ","*"),fsn[:3].replace(" ","*")))
+        search_string = os.path.join(repo_path,"Backgrounds","*%s*%s.*"%(category.replace(" ","*"),fsn[:3].replace(" ","*")))
         backgrounds = glob.glob(search_string)
         if len(backgrounds) == 0:
             print search_string
             print "No vertical level."
-            backgrounds = glob.glob(os.path.join(os.getcwd(), "Images", "Backgrounds", "*%s.*"%category.replace(" ","*")))
+            backgrounds = glob.glob(os.path.join(repo_path, "Backgrounds", "*%s.*"%category.replace(" ","*")))
         else:
             print "Vertical level!"
         background_path =  backgrounds[0]
     else:
         if background_path == "Random":
-            backgrounds = glob.glob(os.path.join(os.getcwd(), "Images", "Backgrounds", "Background*.*"))
+            backgrounds = glob.glob(os.path.join(repo_path, "Backgrounds", "Background*.*"))
             background_path = random.choice(backgrounds)
     return Image.open(background_path).convert("RGBA").resize((1800,2800), resample=PIL.Image.ANTIALIAS)
 
@@ -66,25 +66,23 @@ def getFlipkartIconImage():
     fk_logo_path = os.path.join("essentials","fk_logo.png")
     return Image.open(fk_logo_path).convert("RGBA")
 
-def getBrandImage(fsn):
-    from PIL import Image
-    brand_image_path = fsn+".png"
-    return Image.open(brand_image_path).convert("RGBA")
-
-def getBrandImage_new(brand):
+def getBrandImage(brand):
     import os, glob
     image_path = os.path.join("Images","Brands",brand.replace(" ","_")+"*.*")
     brand_image_path = glob.glob(image_path)[0]
+
     return Image.open(brand_image_path).convert("RGBA")
 
-def getMergedFlipkartBrandImage(brand=None):
+def getMergedFlipkartBrandImage(brand=None, repo_path=None):
     flipkart_image = getFlipkartIconImage()
     padding_factor = 0.05
     final_image = flipkart_image
+    if repo_path is None:
+        repo_path = os.path.join(os.getcwd(),"Images")
     if (brand is not None):
-        if len(glob.glob(os.path.join("Images","Brands",brand.replace(" ","_")+"*.*"))) >0:
+        if len(glob.glob(os.path.join(repo_path,"Brands",brand+".*"))) >0:
             #Open the brand image.
-            original_brand_image = getBrandImage_new(brand)
+            original_brand_image = getBrandImage(brand)
             #Scale the brand image respective to the flipkart image's height.
             brand_image = getResizedImage(original_brand_image,1,"Height",flipkart_image.size)
             
@@ -903,14 +901,14 @@ def getRandomParentImagePlacementPoints():
     #return (random.choice([0.0,1.0]), random.choice([0.0,1.0]))
     return (random.choice([0.0,0.5,1.0]), random.choice([0.0,0.5,1.0]))
 
-def getParentImage(fsn):
+def getParentImage(fsn,repo_path):
     try:
-        parent_image_path = glob.glob(os.path.join(os.getcwd(),"Images","Parent Images","%s*.*"%fsn))[0]
+        parent_image_path = glob.glob(os.path.join(repo_path,"Parent Images","%s*.*"%fsn))[0]
     except:
         parent_image_path = os.path.join("essentials","na_parent_image.png")
     return parent_image_path
 
-def getIcons(attribute_data, category, icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_original_colors=None, font=None, font_color=None, use_icon_color_for_font_color=None, icon_font_size=None, multiprocess=None, manager_return_handle=None, manager_return_dict=None):
+def getIcons(attribute_data, category, icon_relative_size, base_image_size, colors_list, bounding_box, fix_icon_text_case, repo_path, preserve_icon_original_colors=None, font=None, font_color=None, use_icon_color_for_font_color=None, icon_font_size=None, multiprocess=None, manager_return_handle=None, manager_return_dict=None):
     #print attribute_data, category
     if multiprocess is None:
         multiprocess = False

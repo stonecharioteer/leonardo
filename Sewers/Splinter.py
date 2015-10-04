@@ -221,14 +221,14 @@ class Splinter(QtCore.QThread):
             icons at similar positions as well.
         """
         #Multiprocessing.
-        manager = Manager()
-        return_dict = manager.dict()
+        #manager = Manager()
+        #return_dict = manager.dict()
         #Get the base empty canvas.
         base_image = Katana.getBaseImage()
         #Get the primary image path
         message = "Getting parent image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
-        parent_image_path = Katana.getParentImage(fsn)
+        parent_image_path = Katana.getParentImage(fsn, self.repo_path)
         #Ready the parent image.
         message = "Resizing parent image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
@@ -286,7 +286,7 @@ class Splinter(QtCore.QThread):
         message = "Getting background image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
         background_image = Katana.getBackgroundImage(background_image_path,
-                                            self.use_category_specific_backgrounds, category, fsn)
+                                            self.use_category_specific_backgrounds, category, fsn, self.repo_path)
         #Get the primary and secondary attribute icons.
         
         #primary_attributes_process = Process(target=Katana.getIcons, args=(primary_attribute_data, category, primary_attribute_relative_size, base_image.size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_colors, font, font_color, use_icon_color_for_font_color, icon_font_size, True, "Primary", return_dict))
@@ -301,6 +301,7 @@ class Splinter(QtCore.QThread):
                                                     colors_list, 
                                                     bounding_box, 
                                                     fix_icon_text_case, 
+                                                    self.repo_path,
                                                     preserve_icon_colors, 
                                                     font, 
                                                     font_color, 
@@ -318,7 +319,8 @@ class Splinter(QtCore.QThread):
                                                     base_image.size, 
                                                     colors_list, 
                                                     bounding_box, 
-                                                    fix_icon_text_case, 
+                                                    fix_icon_text_case,
+                                                    self.repo_path,
                                                     preserve_icon_colors, 
                                                     font, 
                                                     font_color, 
@@ -356,7 +358,7 @@ class Splinter(QtCore.QThread):
         #Paste the FK and Brand Icon
         message = "Getting the merged Flipkart and Brand Logo for %s."%(fsn)
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
-        fk_brand_icon = Katana.getMergedFlipkartBrandImage(brand)
+        fk_brand_icon = Katana.getMergedFlipkartBrandImage(brand, self.repo_path)
         #message = "Waiting for the parent image strip process to complete for %s."%(fsn)
         #self.sendMessage.emit(message, self.last_eta, self.thread_index)
         #Waiting for the parent image strip process to complete so that we can retrieve the parent image.
