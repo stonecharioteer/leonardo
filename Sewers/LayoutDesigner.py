@@ -185,7 +185,7 @@ class LayoutDesigner(QtGui.QWidget):
         if "Bypass Parent Image Cleanup" in settings_from_json.keys():
             bypass_parent_image_cleanup = settings_from_json["Bypass Parent Image Cleanup"]
             self.bypass_parent_image_cleanup.setChecked(bypass_parent_image_cleanup)
-            
+
     def createUI(self):        
         self.preview_group_box = self.createPreviewWidget()
         self.settings_group_box = self.createSettingsWidget()
@@ -313,6 +313,7 @@ class LayoutDesigner(QtGui.QWidget):
             self.splinter_thread.use_icon_color_for_font_color = self.useIconColorForFontColor()
             self.splinter_thread.icon_font_size = self.getIconFontSize()
             self.splinter_thread.bypass_parent_image_cleanup = self.bypassParentImageCleanup()
+            self.splinter_thread.parent_image_paths = self.getParentImagePaths()
             
             self.splinter_thread.allow_run = True
 
@@ -837,6 +838,8 @@ class LayoutDesigner(QtGui.QWidget):
     def bypassParentImageCleanup(self):
         return self.bypass_parent_image_cleanup.isChecked()
 
+    def getParentImagePaths(self):
+        return self.parent_image_selector.getParentImagesData()
 
     def getCurrentSettings(self):
         """Returns a dictionary that summarizes all the current settings."""

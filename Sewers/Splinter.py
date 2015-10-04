@@ -57,6 +57,7 @@ class Splinter(QtCore.QThread):
         self.icon_font_size = 38
         self.use_icon_color_for_font_color = True
         self.bypass_parent_image_cleanup = False
+        self.parent_image_paths = None
 
         if not self.isRunning():
             self.start(QtCore.QThread.LowPriority)
@@ -227,7 +228,10 @@ class Splinter(QtCore.QThread):
         #Get the primary image path
         message = "Getting parent image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
-        parent_image_path = Katana.getParentImage(fsn, self.repo_path)
+        if fsn not in self.parent_image_paths.keys():
+            parent_image_path = Katana.getParentImage(fsn, self.repo_path)
+        else:
+            parent_image_path = self.parent_image_paths[fsn]
         #Ready the parent image.
         message = "Resizing parent image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta, self.thread_index)

@@ -37,7 +37,12 @@ class ImageButtonLine(QtGui.QWidget):
         self.setLayout(self.layout)
     
     def getChosenParentImagePath(self):
-        return self.images_list[self.logic_group.checkedId()]
+        counter = 0
+        for button in self.buttons:
+            if button.isChecked():
+                index = counter
+            counter += 1
+        return self.images_list[index]
 
 
 

@@ -59,3 +59,4 @@ class ParentImageSelectorWidget(QtGui.QWidget):
         fsn_parent_image_paths = {}
         for fsn in self.fsn_data_dict.keys():
             fsn_parent_image_paths[fsn] = self.fsn_data_dict[fsn]["Buttons"].getChosenParentImagePath()
+        return fsn_parent_image_paths
