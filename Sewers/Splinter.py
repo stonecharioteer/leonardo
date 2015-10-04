@@ -378,8 +378,8 @@ class Splinter(QtCore.QThread):
             try:
                 position = tuple([int(pos) for  pos in  icon["Position"]])
                 if self.use_enforced_coords:
-                    print position
-                    print icon
+                    #print position
+                    #print icon
                 base_image.paste(icon["Icon"], position, icon["Icon"])
             except:
                 if icon["Position"] is None:

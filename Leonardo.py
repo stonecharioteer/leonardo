@@ -97,10 +97,11 @@ class Leonardo(Turtle):
     
     def allowDesign(self):
         self.alertMessage("Delay Imminent","Click OK to go to the Designer page. Please note that this will take a few minutes to open. Please be patient. Rome wasn't built in a day.")
+        start_time = datetime.datetime.now()
         self.page_changer.item(1).setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
         self.page_changer.setCurrentRow(1)
         self.layout_designer_widget.setFSNs(self.data_selector_widget.data)
-        self.alertMessage("Gracias","See, good things come to those who wait.")
+        self.alertMessage("Gracias","Thanks for waiting for %r seconds."%((datetime.datetime.now()-start_time).seconds))
     def runSplinter(self):
         entry_count = len(self.data_selector_widget.data)
         step_size = int(math.ceil((entry_count/self.threads)))

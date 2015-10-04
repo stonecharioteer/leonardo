@@ -27,13 +27,11 @@ class ParentImageSelectorWidget(QtGui.QWidget):
 
 
     def setFSNs(self, fsn_list):
-        import datetime
         self.fsn_data_dict = {}
         self.fsn_icon_table.setRowCount(0)
         row_counter = 0
         fsn_list.sort()
         self.fsn_icon_table.setRowCount(0)
-        start_time = datetime.datetime.now()
         for fsn in fsn_list:
             #get a list of all possible parent images in the repo\Parent Images\ folder.
             parent_images_paths_list = Katana.getParentImagesList(fsn, self.repo_path)
@@ -53,7 +51,6 @@ class ParentImageSelectorWidget(QtGui.QWidget):
             self.fsn_icon_table.resizeRowsToContents()
 
             row_counter+=1
-        print "Took %r seconds."%(datetime.datetime.now()-start_time).seconds
     
     def getParentImagesData(self):
         fsn_parent_image_paths = {}
