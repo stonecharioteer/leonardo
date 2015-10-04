@@ -182,7 +182,9 @@ class LayoutDesigner(QtGui.QWidget):
 
         icon_font_size = settings_from_json["Icon Font Size"]
         self.font_size_spinbox.setValue(icon_font_size)
-
+        if "Bypass Parent Image Cleanup" in settings_from_json.keys():
+            bypass_parent_image_cleanup = settings_from_json["Bypass Parent Image Cleanup"]
+            self.bypass_parent_image_cleanup.setChecked(bypass_parent_image_cleanup)
     def createUI(self):        
         self.preview_group_box = self.createPreviewWidget()
         self.settings_group_box = self.createSettingsWidget()
@@ -190,14 +192,15 @@ class LayoutDesigner(QtGui.QWidget):
         self.validate_button.setToolTip("Validate and Proceed")
         self.fsn_list_box = QtGui.QListWidget()
         self.fsn_list_box.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+        self.fsn_list_box.setFixedWidth(170)
 
         final_ui_layout = QtGui.QGridLayout()
         final_ui_layout.addWidget(self.fsn_list_box,0,0,10,1)
-        final_ui_layout.addWidget(self.settings_group_box,0, 1, 10, 4)
-        final_ui_layout.addWidget(self.preview_group_box,0, 5, 10, 4, 
-                                QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
-        final_ui_layout.addWidget(self.validate_button,10, 5, 1, 1, 
-                                QtCore.Qt.AlignLeft | QtCore.Qt.AlignBottom)
+        final_ui_layout.addWidget(self.settings_group_box,0, 1, 10, 6)
+        final_ui_layout.addWidget(self.preview_group_box,0, 7, 10, 4, 
+                                QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
+        final_ui_layout.addWidget(self.validate_button,10, 11, 1, 1, 
+                                QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom)
         
         self.over_all_group_box = QtGui.QGroupBox("Design")
         self.over_all_group_box.setLayout(final_ui_layout)
@@ -217,7 +220,7 @@ class LayoutDesigner(QtGui.QWidget):
 
         self.preview_widget = QtGui.QPushButton()
         self.preview_widget.setToolTip("Preview Goes Here.")
-        size_modifier = 2.5
+        size_modifier = 2.7
         self.preview_widget.setFixedSize(90*size_modifier, 140*size_modifier)
         preview_widget_style_sheet = """
                                 QLabel {
@@ -229,12 +232,13 @@ class LayoutDesigner(QtGui.QWidget):
         self.progress_bar = ProgressBar()
         self.progress_status = QtGui.QLabel("Humpty Dumpty sat on a wall.")
         self.progress_status.setWordWrap(True)
+        self.progress_status.setFixedHeight(80)
 
         preview_layout = QtGui.QVBoxLayout()
         preview_layout.addLayout(buttons_layout, 0)
         preview_layout.addWidget(self.preview_widget, 3, QtCore.Qt.AlignHCenter)
-        preview_layout.addWidget(self.progress_bar, 1, QtCore.Qt.AlignHCenter)
-        preview_layout.addWidget(self.progress_status, 1, QtCore.Qt.AlignHCenter)
+        preview_layout.addWidget(self.progress_bar, 1, QtCore.Qt.AlignTop)
+        preview_layout.addWidget(self.progress_status, 1, QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
         preview_group_box = QtGui.QGroupBox("Preview")
         preview_group_box.setLayout(preview_layout)
         return preview_group_box
@@ -267,9 +271,14 @@ class LayoutDesigner(QtGui.QWidget):
         self.splinter_thread.allow_run = False
         self.update_preview_button.setEnabled(True)
 
+    def alertMessage(self, title, message):
+        QtGui.QMessageBox.about(self, title, message)
+    
     def runSplinter(self):
         required_fsns = [str(fsn_item.text()) for fsn_item in self.fsn_list_box.selectedItems()]
-        if len(required_fsns) >0:
+        if len(required_fsns) <= 0:
+            self.alertMessage("Select at least 1 FSN.","If you're trying to run Leo FSN-by-FSN, you'll need to select at least one FSN in the list to the left.")
+        else:
             self.progress_bar.setValue(0)
             self.update_preview_button.setEnabled(False)
 

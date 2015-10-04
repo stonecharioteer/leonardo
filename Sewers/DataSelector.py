@@ -93,6 +93,11 @@ class DataSelector(QtGui.QWidget):
         fsn_mode_layout.addWidget(self.fsn_mode_data_options,2,1,5,7, QtCore.Qt.AlignTop)
         self.fsn_mode_widget.setLayout(fsn_mode_layout)
 
+        self.fsn_mode_scroll_view = QtGui.QScrollArea()
+        self.fsn_mode_scroll_view.setWidget(self.fsn_mode_widget)
+        self.fsn_mode_scroll_view.setWidgetResizable(True)
+        self.fsn_mode_scroll_view.setFixedHeight(400)
+
         #CSV Mode Widget
         self.csv_mode_widget = QtGui.QWidget()
         self.input_data_set_button = IconButton(os.path.join("essentials","csv_file.png"))
@@ -107,7 +112,7 @@ class DataSelector(QtGui.QWidget):
         self.csv_mode_widget.setLayout(csv_mode_layout)
 
         self.fsn_or_csv_stacked_widget = QtGui.QStackedWidget()
-        self.fsn_or_csv_stacked_widget.addWidget(self.fsn_mode_widget)
+        self.fsn_or_csv_stacked_widget.addWidget(self.fsn_mode_scroll_view)
         self.fsn_or_csv_stacked_widget.addWidget(self.csv_mode_widget)
 
         self.validate_button  = IconButton(os.path.join("essentials","validate.png"))

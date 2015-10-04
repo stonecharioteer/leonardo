@@ -3,6 +3,7 @@
     "Allow Icons Without Text": false, 
     "Background Color Threshold Value": 8, 
     "Background Image": "Background FPR.jpg", 
+    "Bypass Parent Image Cleanup": true, 
     "Fix Icon Text Case": true, 
     "Icon Arrangement": "Circular", 
     "Icon Bounding Box": "Circle_dot", 
@@ -53,8 +54,8 @@
         0.5
     ], 
     "Parent Image Resize Factor": 0.39, 
-    "Parent Image Resize Reference": "Height", 
-    "Preserve Icon Colors": false, 
+    "Parent Image Resize Reference": "Smart Fit", 
+    "Preserve Icon Colors": true, 
     "Primary Attribute Relative Size": 10, 
     "Secondary Attribute Relative Size": 10, 
     "Use Category Specific Backgrounds": false, 
