@@ -59,6 +59,7 @@ class Splinter(QtCore.QThread):
         self.use_icon_color_for_font_color = True
         self.bypass_parent_image_cleanup = False
         self.parent_image_paths = None
+        self.use_enforced_coords = False
 
         if not self.isRunning():
             self.start(QtCore.QThread.LowPriority)
@@ -324,37 +325,44 @@ class Splinter(QtCore.QThread):
                                                     use_icon_color_for_font_color, 
                                                     icon_font_size)
         #Based on the input control parameters, get the coordinates for the parent image.
-        message = "Getting parent image coordinates corresponding to %s for %s."%(parent_image_positioning, fsn)
-        self.sendMessage.emit(message, self.last_eta, self.thread_index)
-        if parent_image_positioning == "Random":
-            parent_image_positioning = Katana.getRandomParentImagePlacementPoints()
-        parent_image_coords = Katana.getParentImageCoords(base_image.size,parent_image_size, parent_image_positioning)
-
-        counter = 0
-        icons_and_coordinates = Katana.getIconsAndCoordinates(
-                                            base_image, 
-                                            parent_image_size, 
-                                            parent_image_coords, 
-                                            primary_attributes_and_icons_data, 
-                                            secondary_attributes_and_icons_data, 
-                                            icon_positioning,
-                                            "Separate", 
-                                            parent_image_positioning
-                                            )
-        coords = {"Parent": parent_image_coords}
-        counter = 1
-        for icon in icons_and_coordinates:
-            label = "USP-%d"%counter
-            print label
-            coords[label] = icon["Position"]
-            counter+=1
-        if len(icons_and_coordinates)<10:
-            for i in range(10-len(icons_and_coordinates)):
-                label = "USP-%d"%(i+1+len(icons_and_coordinates))
+        if not self.use_enforced_coords:
+            message = "Getting parent image coordinates corresponding to %s for %s."%(parent_image_positioning, fsn)
+            self.sendMessage.emit(message, self.last_eta, self.thread_index)
+            if parent_image_positioning == "Random":
+                parent_image_positioning = Katana.getRandomParentImagePlacementPoints()
+            parent_image_coords = Katana.getParentImageCoords(base_image.size,parent_image_size, parent_image_positioning)
+            counter = 0
+            icons_and_coordinates = Katana.getIconsAndCoordinates(
+                                                base_image, 
+                                                parent_image_size, 
+                                                parent_image_coords, 
+                                                primary_attributes_and_icons_data, 
+                                                secondary_attributes_and_icons_data, 
+                                                icon_positioning,
+                                                "Separate", 
+                                                parent_image_positioning
+                                                )
+            coords = {"Parent": parent_image_coords}
+            counter = 1
+            for icon in icons_and_coordinates:
+                label = "USP-%d"%counter
                 print label
-                coords[label] = [0,0]
-
-        self.sendCoords.emit(coords)
+                coords[label] = icon["Position"]
+                counter+=1
+            if len(icons_and_coordinates)<10:
+                for i in range(10-len(icons_and_coordinates)):
+                    label = "USP-%d"%(i+1+len(icons_and_coordinates))
+                    print label
+                    coords[label] = [0,0]
+            self.sendCoords.emit(coords)
+        else:
+            parent_image_coords = self.enforced_coords["Parent"]
+            icon_data = primary_attributes_and_icons_data + secondary_attribute_data
+            icons_and_coordinates = []
+            counter=1
+            for icon in icon_data:
+                icons_and_coordinates.append({"Icon": icon, "Position": self.enforced_coords["USP-%d"counter]})
+                counter+=1
         #Paste the FK and Brand Icon
         message = "Getting the merged Flipkart and Brand Logo for %s."%(fsn)
         self.sendMessage.emit(message, self.last_eta, self.thread_index)

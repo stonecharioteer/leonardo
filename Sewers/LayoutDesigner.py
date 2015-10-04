@@ -299,7 +299,8 @@ class LayoutDesigner(QtGui.QWidget):
             self.splinter_thread.icon_font_size = self.getIconFontSize()
             self.splinter_thread.bypass_parent_image_cleanup = self.bypassParentImageCleanup()
             self.splinter_thread.parent_image_paths = self.getParentImagePaths()
-            
+            self.splinter_thread.use_enforced_coords = self.useEnforcedCoordinates()
+            self.splinter_thread.enforced_coords = self.getCoords()
             self.splinter_thread.allow_run = True
 
     def setFSNs(self, fsn_data):
@@ -762,6 +763,9 @@ class LayoutDesigner(QtGui.QWidget):
     def getIconPalette(self):
         return [palette_selection_button.getColors() for palette_selection_button in self.palette_selection_buttons]
     
+    def getCoords(self):
+        return self.position_widget.getCoords()
+    
     def getOverlap(self):
         return self.allow_overlap_checkbox.isChecked()
 
@@ -845,7 +849,10 @@ class LayoutDesigner(QtGui.QWidget):
 
     def getParentImagePaths(self):
         return self.parent_image_selector.getParentImagesData()
-
+    
+    def useEnforcedCoordinates(self):
+        return self.position_widget.useEnforcedCoordinates()
+    
     def getCurrentSettings(self):
         """Returns a dictionary that summarizes all the current settings."""
         parent_image_resize_factor = self.getParentImageResizeFactor()

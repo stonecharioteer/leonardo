@@ -10,6 +10,7 @@ class PositionWidget(QtGui.QWidget):
         self.changedCoords = False
 
     def createUI(self):
+        self.use_enforced_coordinates = QtGui.QCheckBox("Use the coordinates here for building the USP Image")
         self.position_table = QtGui.QTableWidget()
         self.position_table.setRowCount(11)
         self.position_table.setColumnCount(3)
@@ -31,7 +32,8 @@ class PositionWidget(QtGui.QWidget):
             self.x_y_widgets[label] = [x,y]
 
         self.position_table.setHorizontalHeaderLabels(["Feature","X","Y"])
-        self.layout = QtGui.QHBoxLayout()
+        self.layout = QtGui.QVBoxLayout()
+        self.layout.addWidget(self.use_enforced_coordinates)
         self.layout.addWidget(self.position_table)
         for label in self.x_y_widgets.keys():
             limit  = 100000
@@ -47,13 +49,13 @@ class PositionWidget(QtGui.QWidget):
             self.x_y_widgets[label][1].setValue(coords[label][1])
 
     def getCoords(self):
-        if self.changed_coords:
-            coords = {}
-            for label in self.x_y_widgets.keys():
-                coords[label] = [self.x_y_widgets[label][0].value, self.x_y_widgets[label][1].value]
-            return coords
-        else:
-            return False
-            
+        coords = {}
+        for label in self.x_y_widgets.keys():
+            coords[label] = [self.x_y_widgets[label][0].value, self.x_y_widgets[label][1].value]
+        return coords
+
     def changeCoords(self):
         self.changed_coords = True
+
+    def useEnforcedCoordinates(self):
+        return self.use_enforced_coordinates.isChecked()
