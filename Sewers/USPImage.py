@@ -324,10 +324,16 @@ class USPImage:
                             ] = "Brand Logo"
         #Allocate space for the parent image.
         parent_image_width, parent_image_height = self.parent_image.size
+        #Note that to prevent the parent image from being placed beyond the canvas, the resizing should be done accordingly.
         self.parent_image_position = [
                                         int((base_width-parent_width)*parent_image_position_factor[0]), 
                                         int((base_height-parent_height)*parent_image_position_factor[1])
                                     ]
+        self.position_matrix.loc[
+                                    (self.parent_image_position[0]:(self.parent_image_position[0]+parent_image_width)),
+                                    (self.parent_image_position[1]:(self.parent_image_position[1]+parent_image_height))
+
+                                ] == "Parent Image"
         
     def detectOverlaps(self):
         """
@@ -389,3 +395,28 @@ class USPImage:
         Returns the USP Image as a PyQt4.QtGui.QImage.
         """
         return ImageQt.ImageQt(self.getPILImage())
+
+
+    def getIconPath(self, attribute, description_text, category):
+        """
+        Given an attribute name,this function looks for an exact match.
+        Since I'm using Google Drive for the storage and synchronization of files,
+        I'll need to also match files with ([1-9]) as suffixes.
+        Example:
+        When searching for LED in a Mobile folder.
+        If LED.png isn't available, LED (1).png is also a permissable match.
+        """
+        import os
+        import glob
+        import re
+        icons_path = os.path.join(self.image_repository_path)
+        category_icon_path = os.path.join(icons_path, category)
+        general_search_string = os.path.join(category_icon_path, "%s.*"%attribute)
+
+        icons_list = glob.glob(general_search_string)
+        if len(icons_list) == 0:
+            icons_list = [file_name for file_name in os.listdir(category_icon_path) if re.search("%s \(\d+\).*"%attribute, file_name, flags=re.IGNORECASE)]
+
+        return icons_list[0] #Return the first matching file.
+
+
