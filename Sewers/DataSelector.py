@@ -17,7 +17,7 @@ class DataSelector(QtGui.QWidget):
         self.repo_path = repo_path
         self.data_from_fk = None
         self.createUI()
-        self.fk_retriever = FKRetriever()
+        self.fk_retriever = FKRetriever(self.repo_path)
         self.mapEvents()
         self.data_is_ready = False
         self.data = None

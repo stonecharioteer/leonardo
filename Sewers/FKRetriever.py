@@ -18,11 +18,12 @@ class FKRetriever(QtCore.QThread):
     sendData = QtCore.pyqtSignal(str, dict, int, bool, datetime.datetime) 
     #error_msg
     sendException = QtCore.pyqtSignal(str)
-    def __init__(self,*args,**kwargs):
+    def __init__(self,repo_path,*args,**kwargs):
         super(FKRetriever,self).__init__(*args, **kwargs)
+        self.repo_path = repo_path
         self.allow_run = False
         self.fsn_list = None
-        self.image_location = os.path.join("Images","Parent Images")
+        self.image_location = os.path.join(self.repo_path,"Parent Images")
         self.data_list = None
         self.mutex = QtCore.QMutex()
         self.condition = QtCore.QWaitCondition()
@@ -136,7 +137,7 @@ class FKRetriever(QtCore.QThread):
         return item_id
 
     def imagesNotAvailable(self, fsn):
-        images_path = os.path.join("Images","Parent Images")
+        images_path = self.image_location
         images_list = glob.glob(os.path.join(images_path,"*.jpeg"))
         valid_image_counter = 0
         for image_name in images_list:
@@ -238,10 +239,10 @@ class FKRetriever(QtCore.QThread):
         counter = 0
         delimiter = "_"
         image_extension = ".jpeg"
-        current_save_location = os.path.join("Images","Parent Images")
+        current_save_location = self.image_location
         if not(os.path.exists(current_save_location)):
             os.makedirs(current_save_location)
-        image_save_name = os.path.join(current_save_location,image_name)
+        image_save_name = os.path.join(current_save_location, image_name)
         image_counter = 0
         for image_url in image_urls:
             image_counter += 1
