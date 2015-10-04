@@ -66,12 +66,15 @@ def getFlipkartIconImage():
     fk_logo_path = os.path.join("essentials","fk_logo.png")
     return Image.open(fk_logo_path).convert("RGBA")
 
-def getBrandImage(brand):
-    import os, glob
-    image_path = os.path.join("Images","Brands",brand.replace(" ","_")+"*.*")
-    brand_image_path = glob.glob(image_path)[0]
-
-    return Image.open(brand_image_path).convert("RGBA")
+def getBrandImagePaths(brand, repo_path):
+    import os, glob, re
+    brand_folder_path = os.path.join(repo_path, "Brands")
+    image_search_string = os.path.join(brand_folder_path,brand+".*")
+    brand_image_paths = glob.glob(image_search_string)
+    if len(brand_image_paths) == 0:
+        regex_search_string = "%s \(\d+\).png"%attribute
+        brand_image_paths = [file_name for file_name in os.listdir(brand_folder_path) if re.search(regex_search_string, file_name, flags=re.IGNORECASE)]
+    return brand_image_paths
 
 def getMergedFlipkartBrandImage(brand=None, repo_path=None):
     flipkart_image = getFlipkartIconImage()
@@ -80,9 +83,10 @@ def getMergedFlipkartBrandImage(brand=None, repo_path=None):
     if repo_path is None:
         repo_path = os.path.join(os.getcwd(),"Images")
     if (brand is not None):
-        if len(glob.glob(os.path.join(repo_path,"Brands",brand+".*"))) >0:
+        brand_image_paths = getBrandImagePaths(brand, repo_path)
+        if len(brand_image_paths) >0:
             #Open the brand image.
-            original_brand_image = getBrandImage(brand)
+            original_brand_image = Image.open(brand_image_paths[0]).convert("RGBA")
             #Scale the brand image respective to the flipkart image's height.
             brand_image = getResizedImage(original_brand_image,1,"Height",flipkart_image.size)
             
@@ -109,7 +113,7 @@ def getMergedFlipkartBrandImage(brand=None, repo_path=None):
             line_path = [line_top, line_bottom]
             line_thickness = int(padding_factor/15*(flipkart_image.size[0]+brand_image.size[0]))
             final_image_drawing_handle.line(line_path, (0,0,0,200), line_thickness)        
-            final_image.save(os.path.join("cache","FK_"+brand+".png"),dpi=(300,300))
+            final_image.save(os.path.join("cache","FK_"+brand+".png"),dpi=(300,300), quality=100)
     return final_image
 
 def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, icon_arrangement, ordering, parent_image_positioning):
