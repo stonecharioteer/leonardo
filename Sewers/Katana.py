@@ -976,10 +976,14 @@ def checkIcon(attribute, category, repository_path=None, description_text=None):
     else:
         images_path = repository_path
     icon_name = "%s.png"%attribute
+    regex_expression = "%s \(\d+\).png"%attribute
     category_folder_path = os.path.join(images_path, category)
     search_string = os.path.join(category_folder_path,icon_name)
     try:
         possible_icons_list = glob.glob(search_string)
+        try:
+            if len(possible_icons_list) == 0:
+                possible_icons_list = [file_name for file_name in os.listdir(category_folder_path) if re.search(regex_expression, file_name, flags=re.IGNORECASE)]
     except:
         print search_string
         raise
@@ -996,6 +1000,8 @@ def checkIcon(attribute, category, repository_path=None, description_text=None):
             raise
         for folder in list_of_folders:
             possible_icons_list = glob.glob(os.path.join(folder,icon_name))
+            if len(possible_icons_list) == 0:
+                possible_icons_list = [file_name for file_name in os.listdir(folder) if re.search(regex_expression, file_name, flags=re.IGNORECASE)]
             if len(possible_icons_list) >0:
                 folders_with_icons.append(os.path.basename(os.path.normpath(folder)))
         if len(folders_with_icons) >0:
