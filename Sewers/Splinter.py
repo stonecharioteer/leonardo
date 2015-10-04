@@ -346,22 +346,24 @@ class Splinter(QtCore.QThread):
             counter = 1
             for icon in icons_and_coordinates:
                 label = "USP-%d"%counter
-                print label
                 coords[label] = icon["Position"]
                 counter+=1
             if len(icons_and_coordinates)<10:
                 for i in range(10-len(icons_and_coordinates)):
                     label = "USP-%d"%(i+1+len(icons_and_coordinates))
-                    print label
                     coords[label] = [0,0]
             self.sendCoords.emit(coords)
         else:
-            parent_image_coords = self.enforced_coords["Parent"]
+            print "Using Enforced coordinates!"
+            parent_image_coords = tuple([int(pos) for pos in self.enforced_coords["Parent"]])
             icon_data = primary_attributes_and_icons_data + secondary_attribute_data
             icons_and_coordinates = []
             counter=1
             for icon in icon_data:
-                icons_and_coordinates.append({"Icon": icon, "Position": self.enforced_coords["USP-%d"counter]})
+                icons_and_coordinates.append({
+                                        "Icon": icon["Icon"], 
+                                        "Position": tuple([int(coord) for coord in self.enforced_coords["USP-%d"%counter]])
+                                            })
                 counter+=1
         #Paste the FK and Brand Icon
         message = "Getting the merged Flipkart and Brand Logo for %s."%(fsn)
@@ -375,11 +377,15 @@ class Splinter(QtCore.QThread):
         for icon in icons_and_coordinates:
             try:
                 position = tuple([int(pos) for  pos in  icon["Position"]])
+                if self.use_enforced_coords:
+                    print position
+                    print icon
                 base_image.paste(icon["Icon"], position, icon["Icon"])
             except:
                 if icon["Position"] is None:
                     message = "Icon position cannot be None for %s." %(fsn)                    
                 else:
+                    print icon["Position"], "is not a valid position!"
                     message = "Encountered a problem while pasting the icon on base image at %s for %s." %(icon["Position"],fsn)
                 self.sendMessage.emit(message, self.last_eta, self.thread_index)
                 raise

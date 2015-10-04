@@ -1,5 +1,7 @@
 from __future__ import division
 import math
+import json
+import os
 from PyQt4 import QtGui, QtCore
 
 class PositionWidget(QtGui.QWidget):
@@ -11,6 +13,10 @@ class PositionWidget(QtGui.QWidget):
 
     def createUI(self):
         self.use_enforced_coordinates = QtGui.QCheckBox("Use the coordinates here for building the USP Image")
+        self.export_coordinates_button = QtGui.QPushButton("Export Coordinates to JSON")
+        self.export_coordinates_button.clicked.connect(self.exportCoordinates)
+        self.load_coordinates_button = QtGui.QPushButton("Load Coordinates from JSON")
+        self.load_coordinates_button.clicked.connect(self.loadCoordinates)
         self.position_table = QtGui.QTableWidget()
         self.position_table.setRowCount(11)
         self.position_table.setColumnCount(3)
@@ -34,6 +40,8 @@ class PositionWidget(QtGui.QWidget):
         self.position_table.setHorizontalHeaderLabels(["Feature","X","Y"])
         self.layout = QtGui.QVBoxLayout()
         self.layout.addWidget(self.use_enforced_coordinates)
+        self.layout.addWidget(self.export_coordinates_button)
+        self.layout.addWidget(self.load_coordinates_button)
         self.layout.addWidget(self.position_table)
         for label in self.x_y_widgets.keys():
             limit  = 100000
@@ -51,7 +59,7 @@ class PositionWidget(QtGui.QWidget):
     def getCoords(self):
         coords = {}
         for label in self.x_y_widgets.keys():
-            coords[label] = [self.x_y_widgets[label][0].value, self.x_y_widgets[label][1].value]
+            coords[label] = [self.x_y_widgets[label][0].value(), self.x_y_widgets[label][1].value()]
         return coords
 
     def changeCoords(self):
@@ -59,3 +67,22 @@ class PositionWidget(QtGui.QWidget):
 
     def useEnforcedCoordinates(self):
         return self.use_enforced_coordinates.isChecked()
+
+    def exportCoordinates(self):
+        save_file_name = QtGui.QFileDialog.getSaveFileName(self, "Save Settings To a JSON",
+                                                        os.getcwd(), ("JSON files (*.json)")
+                                                        )
+        if save_file_name:
+            coords = self.getCoords()
+            with open(save_file_name,"w") as json_file_handler:
+                json.dump(coords,json_file_handler,indent=4,sort_keys=True)
+
+    def loadCoordinates(self):
+        open_file_name = QtGui.QFileDialog.getOpenFileName(self, "Load Settings from a JSON",
+                                                        os.getcwd(), ("JSON files (*.json)")
+                                                        )
+        if open_file_name:
+            if os.path.isfile(open_file_name):
+                with open(open_file_name) as json_file_handler:
+                    coords = json.load(json_file_handler)
+                self.setCoords(coords)
