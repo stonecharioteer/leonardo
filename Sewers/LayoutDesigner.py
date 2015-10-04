@@ -68,7 +68,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.secondary_attr_icon_size_spin_box.setValue(secondary_attr_icon_size_value)
         #Set the Parent Image position y and x.
         parent_image_position_value = settings_from_json["Parent Image Position"]
-        if type(parent_image_position_value) != str:
+        if type(parent_image_position_value) == list:
             x, y = parent_image_position_value
             self.parent_image_position_position_radiobuttons[int(2*y)][int(2*x)].setChecked(True)
         else:
@@ -185,6 +185,7 @@ class LayoutDesigner(QtGui.QWidget):
         if "Bypass Parent Image Cleanup" in settings_from_json.keys():
             bypass_parent_image_cleanup = settings_from_json["Bypass Parent Image Cleanup"]
             self.bypass_parent_image_cleanup.setChecked(bypass_parent_image_cleanup)
+            
     def createUI(self):        
         self.preview_group_box = self.createPreviewWidget()
         self.settings_group_box = self.createSettingsWidget()

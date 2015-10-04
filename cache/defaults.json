@@ -2,7 +2,7 @@
     "Allow Icons Overlap": false, 
     "Allow Icons Without Text": false, 
     "Background Color Threshold Value": 8, 
-    "Background Image": "Background FPR.jpg", 
+    "Background Image": "Random", 
     "Bypass Parent Image Cleanup": true, 
     "Fix Icon Text Case": true, 
     "Icon Arrangement": "Circular", 
@@ -49,10 +49,7 @@
     ], 
     "Load Icon Colors From Background": false, 
     "Margin": 0.06, 
-    "Parent Image Position": [
-        0.5, 
-        0.5
-    ], 
+    "Parent Image Position": "Random", 
     "Parent Image Resize Factor": 0.39, 
     "Parent Image Resize Reference": "Smart Fit", 
     "Preserve Icon Colors": true, 

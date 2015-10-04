@@ -13,6 +13,9 @@ from PyQt4 import QtGui, QtCore
 def printLine():
     print "*"*10
 
+def getParentImagesList(fsn, repo_path):
+    return glob.glob(os.path.join(repo_path, "Parent Images", "%s*.*"%fsn))
+
 def getFilePathsFromGoogleDriveFolder(file_name, extension, folder_path):
     """
     Given a file, its extension and a folder name, this function looks for an exact match.

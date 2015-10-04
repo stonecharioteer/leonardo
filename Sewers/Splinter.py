@@ -288,7 +288,7 @@ class Splinter(QtCore.QThread):
         message = "Getting background image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
         background_image = Katana.getBackgroundImage(background_image_path,
-                                            self.use_category_specific_backgrounds, category, fsn, self.repo_path)
+                                            self.use_category_specific_backgrounds, category, self.repo_path)
         #Get the primary and secondary attribute icons.
         
         #primary_attributes_process = Process(target=Katana.getIcons, args=(primary_attribute_data, category, primary_attribute_relative_size, base_image.size, colors_list, bounding_box, fix_icon_text_case, preserve_icon_colors, font, font_color, use_icon_color_for_font_color, icon_font_size, True, "Primary", return_dict))
