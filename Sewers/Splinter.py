@@ -16,12 +16,17 @@ class Splinter(QtCore.QThread):
     progress = QtCore.pyqtSignal(str, int, datetime.datetime, bool, list, int)
     sendMessage = QtCore.pyqtSignal(str, datetime.datetime, int)
 
-    def __init__(self, thread_index=None):
+    def __init__(self, thread_index=None, repo_path=None):
         super(Splinter, self).__init__()
         if thread_index is None:
             self.thread_index = 0
         else:
             self.thread_index = thread_index
+        if repo_path is not None:
+            self.repo_path = repo_path 
+        else:
+            self.repo_path = os.path.join(os.getcwd(),"Images")
+
         self.mutex = QtCore.QMutex()
         self.condition = QtCore.QWaitCondition()
         self.allow_run = False

@@ -967,6 +967,27 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size, colo
     else:
         return attribute_data
 
+def recordRepository(repository_path):
+    with open(os.path.join(os.getcwd(),"cache","repository.txt"),"w") as repo_file:
+        repo_file.write(repository_path)
+
+def checkRepository():
+    repo_file_path = os.path.join(os.getcwd(),"cache","repository.txt")
+    if os.path.exists(repo_file_path):
+        repo_path = getRepoPath()
+        if os.path.exists(repo_path):
+            repo_exists = True
+        else:
+            repo_exists = False
+            print repo_path
+    else:
+        repo_exists = False
+    return repo_exists
+
+def getRepoPath():
+    repo_file_path = os.path.join(os.getcwd(),"cache","repository.txt")
+    return open(repo_file_path,"r").read()
+
 def checkIcon(attribute, category, repository_path=None, description_text=None):
     import glob
     import os
@@ -981,9 +1002,9 @@ def checkIcon(attribute, category, repository_path=None, description_text=None):
     search_string = os.path.join(category_folder_path,icon_name)
     try:
         possible_icons_list = glob.glob(search_string)
-        try:
-            if len(possible_icons_list) == 0:
-                possible_icons_list = [file_name for file_name in os.listdir(category_folder_path) if re.search(regex_expression, file_name, flags=re.IGNORECASE)]
+        if len(possible_icons_list) == 0:
+            possible_icons_list = [file_name for file_name in os.listdir(category_folder_path) if re.search(regex_expression, file_name, flags=re.IGNORECASE)]
+
     except:
         print search_string
         raise

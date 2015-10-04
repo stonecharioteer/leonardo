@@ -11,8 +11,10 @@ from Katana import getETA, checkIcon, getCategoryFolderNames
 from ProgressBar import ProgressBar
 
 class DataSelector(QtGui.QWidget):
-    def __init__(self):
+    def __init__(self, repo_path):
+
         super(DataSelector,self).__init__()
+        self.repo_path = repo_path
         self.data_from_fk = None
         self.createUI()
         self.fk_retriever = FKRetriever()

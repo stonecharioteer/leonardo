@@ -12,8 +12,9 @@ from ProgressBar import ProgressBar
 from Splinter import Splinter
 
 class LayoutDesigner(QtGui.QWidget):
-    def __init__(self):
+    def __init__(self, repo_path):
         super(LayoutDesigner,self).__init__()
+        self.repo_path = repo_path
         defaults = {
                     "Parent Image Resize Factor": 42, 
                     "Icon Font Italics": True, 

@@ -4,8 +4,9 @@ from ImageViewerWidget import ImageViewerWidget
 from ProgressBar import ProgressBar
 
 class PreviewRunWidget(QtGui.QGroupBox):
-    def __init__(self, title, thread_count):
+    def __init__(self, title, thread_count, repo_path):
         super(PreviewRunWidget, self).__init__()
+        self.repo_path = repo_path
         self.setTitle(title)
         self.createUI()
     

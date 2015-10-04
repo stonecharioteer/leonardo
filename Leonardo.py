@@ -15,14 +15,16 @@ from Sewers.DataSelector import DataSelector
 from Sewers.LayoutDesigner import LayoutDesigner
 from Sewers.PreviewRunWidget import PreviewRunWidget
 from Sewers.ShellShocked import showSplashScreen, setWindowTheme
+from Sewers import Katana
 #from Sewers.April import April
  
 class Leonardo(Turtle):
-    def __init__(self):
+    def __init__(self, repo_path):
         super(Leonardo, self).__init__()
         self.threads = 1
+        self.repo_path = repo_path 
         self.createUI()
-        self.radical_rats = [Splinter(i) for i in range(self.threads)]
+        self.radical_rats = [Splinter(i, self.repo_path) for i in range(self.threads)]
         self.mapEvents()
 
     def createUI(self):
@@ -53,9 +55,9 @@ class Leonardo(Turtle):
         #self.page_changer.item(3).setFlags(QtCore.Qt.NoItemFlags)
 
         #Initialize the individual widget pages
-        self.data_selector_widget = DataSelector()
-        self.layout_designer_widget = LayoutDesigner()
-        self.preview_and_run_widget = PreviewRunWidget("Preview and Run",self.threads)
+        self.data_selector_widget = DataSelector(self.repo_path)
+        self.layout_designer_widget = LayoutDesigner(self.repo_path)
+        self.preview_and_run_widget = PreviewRunWidget("Preview and Run",self.threads, self.repo_path)
 
         self.pages = QtGui.QStackedWidget()
         self.pages.addWidget(self.data_selector_widget)
@@ -148,8 +150,31 @@ class Leonardo(Turtle):
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     setWindowTheme()
-    splash = showSplashScreen()
-    leo = Leonardo()
-    QtGui.QApplication.processEvents()
-    splash.finish(leo)
+    repository_exists = Katana.checkRepository()
+    while not repository_exists:
+        temp_widget = QtGui.QWidget()
+        QtGui.QMessageBox.about(temp_widget, "Leonardo Images Repository Not Found", "Leonardo needs the folder with all the background images, icons, shapes and parent images to function properly. Without those, it won't launch. Please select one now.")
+        repo_path = str(QtGui.QFileDialog.getExistingDirectory(
+                                                    temp_widget, 
+                                                    "Select the Leonardo Repository Folder.", 
+                                                    os.getcwd(), 
+                                                    QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks)
+                                                )
+        if repo_path is not None:
+            Katana.recordRepository(repo_path)
+            repository_exists = Katana.checkRepository()
+        else:
+            break
+    if repository_exists:
+        repo_path = Katana.getRepoPath()
+        splash = showSplashScreen()
+        leo = Leonardo(repo_path)
+        QtGui.QApplication.processEvents()
+        splash.finish(leo)
+
+    #If the repository exists, run the program.
+    #If it doesn't, then ask for a repository.
+    #If the user hits cancel, then quit.
+
     sys.exit(app.exec_())
+    print "Successful exit from Leonardo."

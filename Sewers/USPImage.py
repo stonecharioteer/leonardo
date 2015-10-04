@@ -416,7 +416,6 @@ class USPImage:
         icons_list = glob.glob(general_search_string)
         if len(icons_list) == 0:
             icons_list = [file_name for file_name in os.listdir(category_icon_path) if re.search("%s \(\d+\).*"%attribute, file_name, flags=re.IGNORECASE)]
-
         return icons_list[0] #Return the first matching file.
 
 
