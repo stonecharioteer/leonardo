@@ -151,30 +151,35 @@ if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     setWindowTheme()
     repository_exists = Katana.checkRepository()
-    while not repository_exists:
+    if not repository_exists:
         temp_widget = QtGui.QWidget()
         QtGui.QMessageBox.about(temp_widget, "Leonardo Images Repository Not Found", "Leonardo needs the folder with all the background images, icons, shapes and parent images to function properly. Without those, it won't launch. Please select one now.")
+        
+    while not repository_exists:
         repo_path = str(QtGui.QFileDialog.getExistingDirectory(
                                                     temp_widget, 
                                                     "Select the Leonardo Repository Folder.", 
                                                     os.getcwd(), 
                                                     QtGui.QFileDialog.ShowDirsOnly | QtGui.QFileDialog.DontResolveSymlinks)
                                                 )
-        if repo_path is not None:
+        print repo_path
+        if repo_path:
             Katana.recordRepository(repo_path)
             repository_exists = Katana.checkRepository()
+            if not repository_exists:
+                QtGui.QMessageBox.about(temp_widget, "Invalid Repository", "That repository folder is invalid. Ensure that the folder you select contains sub-folders for Backgrounds, Brands, Icons, Parent Images and Shapes.")
         else:
+            print "Invalid?"
             break
+
+    #If the repository exists, run the program.
+    #If it doesn't, then ask for a repository.
+    #If the user hits cancel, then quit.
     if repository_exists:
         repo_path = Katana.getRepoPath()
         splash = showSplashScreen()
         leo = Leonardo(repo_path)
         QtGui.QApplication.processEvents()
         splash.finish(leo)
+        sys.exit(app.exec_())
 
-    #If the repository exists, run the program.
-    #If it doesn't, then ask for a repository.
-    #If the user hits cancel, then quit.
-
-    sys.exit(app.exec_())
-    print "Successful exit from Leonardo."

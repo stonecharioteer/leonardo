@@ -968,15 +968,21 @@ def getIcons(attribute_data, category, icon_relative_size, base_image_size, colo
         return attribute_data
 
 def recordRepository(repository_path):
+    import os
     with open(os.path.join(os.getcwd(),"cache","repository.txt"),"w") as repo_file:
         repo_file.write(repository_path)
 
 def checkRepository():
+    import os, glob
     repo_file_path = os.path.join(os.getcwd(),"cache","repository.txt")
     if os.path.exists(repo_file_path):
         repo_path = getRepoPath()
         if os.path.exists(repo_path):
+            folder_list = glob.glob(os.path.join(repo_path,""))
+            essential_folders = ["Backgrounds","Brands","Icons","Parent Images","Shapes"]
             repo_exists = True
+            for folder_name in essential_folders:
+                repo_exists = repo_exists and os.path.exists(os.path.join(repo_path,folder_name))
         else:
             repo_exists = False
             print repo_path
