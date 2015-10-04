@@ -17,30 +17,6 @@ class LayoutDesigner(QtGui.QWidget):
         super(LayoutDesigner,self).__init__()
         self.repo_path = repo_path
         self.current_image = None
-        defaults = {
-                    "Parent Image Resize Factor": 42, 
-                    "Icon Font Italics": True, 
-                    "Image Aspect Ratio": [9, 14], 
-                    "Icon Arrangement": "Circular", 
-                    "Use Simple Color Replacement": True, 
-                    "Icon Font Underline": False, 
-                    "Allow Icons Overlap": False, 
-                    "Allow Icons Without Text": False, 
-                    "Parent Image Resize Reference": "Width", 
-                    "Icon Palette": [0, 0, 0], 
-                    "Background Color Threshold Value": 15, 
-                    "Secondary Attribute Relative Size": 8, 
-                    "Load Icon Colors From Background": False, 
-                    "Primary Attribute Relative Size": 8, 
-                    "Icon Font Color": [0, 0, 0], 
-                    "Use Icon Color For Font Color": True, 
-                    "Parent Image Position": [1, 1], 
-                    "Icon Font Size": 30, 
-                    "Margin": 5.0, 
-                    "Icon Font Bold": False
-                }
-        #with open(os.path.join("cache","defaults.json"),"w") as json_file_handler:
-        #    json.dump(defaults,json_file_handler, indent=4, sort_keys=True)
         self.splinter_thread = Splinter(0, self.repo_path)
         self.createUI()
         self.mapEvents()
@@ -94,8 +70,11 @@ class LayoutDesigner(QtGui.QWidget):
         
         #Set the Palette selection method.
         icon_colors_value = settings_from_json["Icon Palette"]
-        self.palette_selection_button.setColors(icon_colors_value)
-        
+        counter = 0
+        for button in self.palette_selection_buttons:
+            button.setColors(icon_colors_value[counter])
+            counter += 1
+
         #Set the Image margin percentage.
         margin_value = 100*settings_from_json["Margin"]
         self.image_margin_spinbox.setValue(margin_value)
@@ -461,6 +440,10 @@ class LayoutDesigner(QtGui.QWidget):
         self.font_color_label = QtGui.QLabel("Font Color:")
         self.font_color_picker = QColorButton()
         self.font_color_picker.setStyleSheet("Click to select a font color. You can override this color in the advanced panel,\nusing the primary icon color as the font color.")
+        #Widget for controlling icon color.
+        self.palette_selection_label = QtGui.QLabel("Icon Palette:")
+        self.palette_selection_buttons = [QColorPanel() for i in range(10)]
+
 
         font_panel_layout = QtGui.QGridLayout()
         font_panel_layout.addWidget(self.bold_button, 0, 0, 1, 1,
@@ -470,22 +453,35 @@ class LayoutDesigner(QtGui.QWidget):
         font_panel_layout.addWidget(self.underline_button, 0, 2, 1, 1, 
                                     QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         font_panel_layout.addWidget(self.font_size_label, 1, 0, 1, 1, 
-                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
+                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         font_panel_layout.addWidget(self.font_size_spinbox,1, 1, 1, 1, 
-                                    QtCore.Qt.AlignRight | QtCore.Qt.AlignTop)
+                                    QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         font_panel_layout.addWidget(self.font_color_label, 1, 2, 1, 1, 
-                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
-        font_panel_layout.addWidget(self.font_color_picker,1, 3, 1, 1, 
-                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
+                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        font_panel_layout.addWidget(self.font_color_picker, 1, 3, 1, 1, 
+                                    QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        font_panel_layout.addWidget(self.palette_selection_label, 2, 0, 1, 1,
+                                    QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        row = 2
+        for button in self.palette_selection_buttons:
+            font_panel_layout.addWidget(button, row, 1, 2, 1)
+            row+=1
+        font_panel_layout.addWidget(QtGui.QWidget(), row, 0, 1, 1)
+
+
+
         font_panel_layout.setColumnStretch(0,0)
         font_panel_layout.setColumnStretch(1,0)
         font_panel_layout.setColumnStretch(2,0)
         font_panel_layout.setColumnStretch(3,10)
         font_panel_layout.setColumnStretch(0,0)
         font_panel_layout.setColumnStretch(0,0)
-        font_panel_layout.setRowStretch(0,0)
-        font_panel_layout.setRowStretch(1,0)
-        font_panel_layout.setRowStretch(2,10)
+        for i in range(2):
+            font_panel_layout.setRowStretch(i,0)
+        for i in range(row+2)[2:]:
+            font_panel_layout.setRowStretch(i,2)
+        font_panel_layout.setRowStretch(row+2,10)
+        
 
         font_panel = QtGui.QWidget()
         font_panel.setLayout(font_panel_layout)
@@ -502,13 +498,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.product_image_scale_spinbox.setToolTip("Choose a scaling factor for the parent image.\nIdeally, 42% is the right answer.")
         self.product_image_scale_spinbox.setRange(10,100)
         self.product_image_scale_spinbox.setSuffix("%")
-        #Widget for controlling icon color.
-        self.palette_selection_label = QtGui.QLabel("Icon Palette:")
-        self.palette_selection_button = QColorPanel()
-        palette_layout = QtGui.QHBoxLayout()
-        #palette_layout.addWidget(self.palette_selection_combobox,0,QtCore.Qt.AlignRight)
-        palette_layout.addWidget(self.palette_selection_button,0,QtCore.Qt.AlignLeft)
-        palette_layout.addStretch(10)
+
         #Widget for controlling primary and secondary attribute icon sizes.
         self.primary_attr_icon_size_label = QtGui.QLabel("Set Primary Attribute Icon\nRelative Size:")
         self.primary_attr_icon_size_spin_box = QtGui.QSpinBox()
@@ -625,13 +615,6 @@ class LayoutDesigner(QtGui.QWidget):
                                     left_center_alignment)
         column += 1
         advanced_panel_layout.addWidget(self.background_color_threshold_spinbox, row, column, 
-                                    left_center_alignment)
-        row += 1
-        column = 0
-        advanced_panel_layout.addWidget(self.palette_selection_label, row, column, 
-                                    left_center_alignment)
-        column += 1
-        advanced_panel_layout.addLayout(palette_layout, row, column, 
                                     left_center_alignment)
         row += 1
         column = 0
@@ -755,8 +738,8 @@ class LayoutDesigner(QtGui.QWidget):
         return position
 
     def getIconPalette(self):
-        return self.palette_selection_button.getColors()
-
+        return [palette_selection_button.getColors() for palette_selection_button in self.palette_selection_buttons]
+    
     def getOverlap(self):
         return self.allow_overlap_checkbox.isChecked()
 

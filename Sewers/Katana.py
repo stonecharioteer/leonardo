@@ -973,6 +973,7 @@ def getIcons(
     #print look_in_path,"\n",image_search_path
     #print images_in_look_in_path
     attributes_without_icons = []
+    counter = 0
     for attribute in attribute_data:
         found_icon = False
         #Look for image files in the folder.
@@ -985,7 +986,7 @@ def getIcons(
                                     attribute["Description Text"], 
                                     icon_relative_size, 
                                     base_image_size, 
-                                    colors_list,bounding_box, 
+                                    colors_list[counter],bounding_box, 
                                     fix_icon_text_case,
                                     repo_path,
                                     preserve_icon_original_colors, 
@@ -1002,7 +1003,7 @@ def getIcons(
                                     attribute["Description Text"], 
                                     icon_relative_size, 
                                     base_image_size, 
-                                    colors_list, 
+                                    colors_list[counter], 
                                     bounding_box, 
                                     fix_icon_text_case, 
                                     repo_path,
@@ -1014,6 +1015,7 @@ def getIcons(
 
             attribute.update({"Icon": icon_with_text})
             attributes_without_icons.append(attribute["Attribute"])
+        counter += 1
     #if (len(attributes_without_icons) > 0):
     #    print "The following %s attributes don't have icons. Recommend making them before progressing." %category
     #    print attributes_without_icons
