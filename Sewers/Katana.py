@@ -10,6 +10,9 @@ from PIL import ImageDraw
 import PIL
 from PyQt4 import QtGui, QtCore
 
+def printLine():
+    print "*"*10
+
 def getFilePathsFromGoogleDriveFolder(file_name, extension, folder_path):
     """
     Given a file, its extension and a folder name, this function looks for an exact match.
@@ -21,9 +24,20 @@ def getFilePathsFromGoogleDriveFolder(file_name, extension, folder_path):
     usage = getFilePathsFromGoogleDriveFolder(file_name="LED",extension="png",folder_path=os.getcwd())
     """
     import os, re, glob
+
     search_string = os.path.join(folder_path, file_name+"."+extension)
     regex_search_string = "%s \(\d+\).%s"%(file_name, extension)
-    possible_file_list = glob.glob(image_search_string) + [file_name for file_name in os.listdir(folder_path) if re.search(regex_search_string, file_name, flags=re.IGNORECASE)]
+    possible_file_list = glob.glob(search_string)
+    if len(possible_file_list) == 0: 
+        try:
+            possible_file_list = [file_name for file_name in os.listdir(folder_path) if re.search(regex_search_string, file_name, flags=re.IGNORECASE)]
+        except:
+            printLine()
+            print "Nothing found in the regular name. Using regex."
+            print file_name, extension, folder_path
+            print os.listdir(folder_path.replace("\\","/"))
+            printLine()
+            raise
     return possible_file_list
 
 def getTitleCase(sentence):
@@ -106,7 +120,7 @@ def getMergedFlipkartBrandImage(brand=None, repo_path=None):
             canvas_height = flipkart_image.size[1]
 
             canvas_size = (int(canvas_width), int(canvas_height))
-            final_image = Image.new("RGBA",canvas_size,(255,255,255,0))
+            final_image = Image.new("RGBA",canvas_size,(255,255,255,255))
             #Paste the fk logo onto the left.
             flipkart_image_position = (0,0)
             final_image.paste(flipkart_image, flipkart_image_position, flipkart_image)
@@ -950,7 +964,7 @@ def getIcons(
         if manager_return_handle is None:
             print "No key was provided for the dictionary. Defaulting to 0."
             manager_return_handle = 0
-    look_in_path = os.path.join(os.getcwd(),"Images","Repository",category)
+    look_in_path = os.path.join(repo_path,"Icons",category)
     image_search_path = os.path.join(look_in_path, "*.*")
     images_in_look_in_path = glob.glob(image_search_path)
     #print look_in_path,"\n",image_search_path
@@ -959,31 +973,26 @@ def getIcons(
     for attribute in attribute_data:
         found_icon = False
         #Look for image files in the folder.
-        for icon in images_in_look_in_path:
-            #If it hasn't yet found an icon, or in first run.
-            if not found_icon:
-                if attribute["Attribute"].lower().strip() == os.path.basename(icon.lower().strip())[:os.path.basename(icon.lower().strip()).find(".")]:
-                    #print attribute["Attribute"].lower().strip(), icon.lower().strip()
-                    icon_with_text = getIconImage(
-                                            icon, 
-                                            attribute["Description Text"], 
-                                            icon_relative_size, 
-                                            base_image_size, 
-                                            colors_list,bounding_box, 
-                                            fix_icon_text_case,
-                                            repo_path,
-                                            preserve_icon_original_colors, 
-                                            font, font_color, 
-                                            use_icon_color_for_font_color, 
-                                            icon_font_size)
+        icon_name = attribute["Attribute"].lower().strip()
+        icon_paths = getFilePathsFromGoogleDriveFolder(file_name=icon_name, extension="*", folder_path=look_in_path)
+        found_icon = (len(icon_paths)>0) #Found an icon?
+        if found_icon:
+            icon_with_text = getIconImage(
+                                    icon_paths[0], 
+                                    attribute["Description Text"], 
+                                    icon_relative_size, 
+                                    base_image_size, 
+                                    colors_list,bounding_box, 
+                                    fix_icon_text_case,
+                                    repo_path,
+                                    preserve_icon_original_colors, 
+                                    font, font_color, 
+                                    use_icon_color_for_font_color, 
+                                    icon_font_size)
 
-                    attribute.update({"Icon": icon_with_text})
-                    found_icon = True
-                    #attribute.update({"Icon": None})
-            else:
-                #If it has already found an icon, do nothing.
-                break
-        if not found_icon:
+            attribute.update({"Icon": icon_with_text})
+        else:
+            print "Didn't find icon for %s:%s."%(category, icon_name)
             na_icon_path = os.path.join("essentials","icon_na.png")
             icon_with_text = getIconImage(
                                     na_icon_path, 
@@ -1307,7 +1316,7 @@ def getETA(start_time, counter, total):
 
 def getCategoryFolderNames():
     import os, glob
-    path_to_repo = os.path.join(os.getcwd(),"Images","Repository")
+    path_to_repo = os.path.join(os.getcwd(),"Images","Icons")
     path_and_folders_list = glob.glob(os.path.join(path_to_repo,"*"))
 
     return [os.path.basename(path_and_folder_name) for path_and_folder_name in path_and_folders_list]

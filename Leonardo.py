@@ -132,7 +132,7 @@ class Leonardo(Turtle):
             self.radical_rats[i].allow_textless_icons = self.layout_designer_widget.allowTextlessIcons()
             self.radical_rats[i].margin = self.layout_designer_widget.getMargin()
             self.radical_rats[i].use_category_specific_backgrounds = self.layout_designer_widget.useCategorySpecificBackgrounds()
-            self.radical_rats[i].output_location = os.getcwd()
+            self.radical_rats[i].output_location = self.repo_path
             self.radical_rats[i].colors_list = self.layout_designer_widget.getIconPalette()
             self.radical_rats[i].preserve_icon_colors = self.layout_designer_widget.preserveIconColors()
             self.radical_rats[i].fix_icon_text_case = self.layout_designer_widget.fixIconTextCase()

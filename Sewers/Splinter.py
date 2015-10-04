@@ -2,6 +2,7 @@ from __future__ import division
 from multiprocessing import Manager, Process, Pool, Queue, Lock
 import datetime
 import os
+import getpass
 import glob
 import time
 import math
@@ -22,10 +23,7 @@ class Splinter(QtCore.QThread):
             self.thread_index = 0
         else:
             self.thread_index = thread_index
-        if repo_path is not None:
-            self.repo_path = repo_path 
-        else:
-            self.repo_path = os.path.join(os.getcwd(),"Images")
+        self.repo_path = repo_path 
 
         self.mutex = QtCore.QMutex()
         self.condition = QtCore.QWaitCondition()
@@ -82,7 +80,7 @@ class Splinter(QtCore.QThread):
                         if "Brand" in row.keys():
                             brand = row["Brand"]
                         else:
-                            print "No brand for %s (%s)."%(fsn,category)
+                            #print "No brand for %s (%s)."%(fsn,category)
                             brand = None
                         category = row["Category"]
                         primary_attribute_data = []
@@ -293,6 +291,8 @@ class Splinter(QtCore.QThread):
         #primary_attributes_process.start()
         message = "Getting primary attribute data image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
+
+
         primary_attributes_and_icons_data = Katana.getIcons(
                                                     primary_attribute_data, 
                                                     category, 
@@ -421,10 +421,11 @@ class Splinter(QtCore.QThread):
         final_image = final_image.convert("RGB")
         message = "Saving the image for %s."%(fsn)
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
-        output_path = os.path.join("Output",category)
+        #Saving to the output folder with username and date subfolders.
+        output_path = os.path.join(self.output_location, "Output", getpass.getuser(),datetime.datetime.now().strftime("%y%m%d"),category)
         if not os.path.exists(output_path):
             os.makedirs(output_path)
-        image_path = os.path.join(output_path,fsn+"_app_image_%s.png"%datetime.datetime.now().strftime("%y%m%d%H%M%S"))
+        image_path = os.path.join(output_path,fsn+"_app_image_%s.png"%datetime.datetime.now().strftime("%H%M%S"))
         final_image.save(image_path,dpi=(300,300), quality=100)
         return image_path
 

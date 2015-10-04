@@ -5,7 +5,7 @@
     "Background Image": "Background FPR.jpg", 
     "Fix Icon Text Case": true, 
     "Icon Arrangement": "Circular", 
-    "Icon Bounding Box": "Octagon Straight", 
+    "Icon Bounding Box": "Circle_dot", 
     "Icon Font Bold": false, 
     "Icon Font Color": [
         0, 

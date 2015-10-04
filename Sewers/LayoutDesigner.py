@@ -39,7 +39,7 @@ class LayoutDesigner(QtGui.QWidget):
                 }
         #with open(os.path.join("cache","defaults.json"),"w") as json_file_handler:
         #    json.dump(defaults,json_file_handler, indent=4, sort_keys=True)
-        self.splinter_thread = Splinter(0)
+        self.splinter_thread = Splinter(0, self.repo_path)
         self.createUI()
         self.mapEvents()
         #Load values from the default file.
@@ -279,7 +279,7 @@ class LayoutDesigner(QtGui.QWidget):
             self.splinter_thread.allow_textless_icons = self.allowTextlessIcons()
             self.splinter_thread.margin = self.getMargin()
             self.splinter_thread.use_category_specific_backgrounds = self.useCategorySpecificBackgrounds()
-            self.splinter_thread.output_location = os.getcwd()
+            self.splinter_thread.output_location = self.repo_path
             self.splinter_thread.colors_list = self.getIconPalette()
             self.splinter_thread.preserve_icon_colors = self.preserveIconColors()
             self.splinter_thread.fix_icon_text_case = self.fixIconTextCase()
@@ -391,8 +391,8 @@ class LayoutDesigner(QtGui.QWidget):
         self.icon_bounding_box_label = QtGui.QLabel("Icon Bounding Box Shape:")
         self.icon_bounding_box_combobox = QtGui.QComboBox()
         self.icon_bounding_box_combobox.addItem("None")
-        icon_shape_paths = glob.glob(os.path.join(os.getcwd(),"Images","Shapes","*.png"))
-        icon_names = [os.path.splitext(os.path.basename(icon_path))[0].replace("_"," ") for icon_path in icon_shape_paths]
+        icon_shape_paths = glob.glob(os.path.join(self.repo_path,"Shapes","*.png"))
+        icon_names = [os.path.splitext(os.path.basename(icon_path))[0] for icon_path in icon_shape_paths]
         for counter in range(len(icon_shape_paths)):
             self.icon_bounding_box_combobox.addItem(QtGui.QIcon(icon_shape_paths[counter]),icon_names[counter])
         self.icon_bounding_box_combobox.setIconSize(QtCore.QSize(35,35))
