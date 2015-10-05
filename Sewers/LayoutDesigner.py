@@ -301,6 +301,7 @@ class LayoutDesigner(QtGui.QWidget):
             self.splinter_thread.parent_image_paths = self.getParentImagePaths()
             self.splinter_thread.use_enforced_coords = self.useEnforcedCoordinates()
             self.splinter_thread.enforced_coords = self.getCoords()
+            self.splinter_thread.show_position_markers = self.showPositionMarkers()
             self.splinter_thread.allow_run = True
 
     def setFSNs(self, fsn_data):
@@ -829,6 +830,9 @@ class LayoutDesigner(QtGui.QWidget):
 
     def fixIconTextCase(self):
         return self.fix_icon_text_case.isChecked()
+
+    def showPositionMarkers(self):
+        return self.position_widget.showPositionMarkers()
 
     def getFont(self):
         import os

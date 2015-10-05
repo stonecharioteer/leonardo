@@ -953,7 +953,8 @@ def getIcons(
             font=None, 
             font_color=None, 
             use_icon_color_for_font_color=None, 
-            icon_font_size=None, 
+            icon_font_size=None,
+            position_markers=None,
             multiprocess=None, 
             manager_return_handle=None, 
             manager_return_dict=None):
@@ -981,9 +982,14 @@ def getIcons(
         icon_paths = getFilePathsFromGoogleDriveFolder(file_name=icon_name, extension="*", folder_path=look_in_path)
         found_icon = (len(icon_paths)>0) #Found an icon?
         if found_icon:
+            if position_markers is not None:
+                print position_markers
+                attribute_text = "USP-%s "%position_markers[counter] + attribute["Description Text"]
+            else:
+                attribute_text = attribute["Description Text"]
             icon_with_text = getIconImage(
                                     icon_paths[0], 
-                                    attribute["Description Text"], 
+                                    attribute_text, 
                                     icon_relative_size, 
                                     base_image_size, 
                                     colors_list[counter],bounding_box, 

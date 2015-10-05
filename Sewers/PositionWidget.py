@@ -13,6 +13,7 @@ class PositionWidget(QtGui.QWidget):
 
     def createUI(self):
         self.use_enforced_coordinates = QtGui.QCheckBox("Use the coordinates here for building the USP Image")
+        self.show_position_markers = QtGui.QCheckBox("Show Position Markers for USPs")
         self.export_coordinates_button = QtGui.QPushButton("Export Coordinates to JSON")
         self.export_coordinates_button.clicked.connect(self.exportCoordinates)
         self.load_coordinates_button = QtGui.QPushButton("Load Coordinates from JSON")
@@ -40,6 +41,7 @@ class PositionWidget(QtGui.QWidget):
         self.position_table.setHorizontalHeaderLabels(["Feature","X","Y"])
         self.layout = QtGui.QVBoxLayout()
         self.layout.addWidget(self.use_enforced_coordinates)
+        self.layout.addWidget(self.show_position_markers)
         self.layout.addWidget(self.export_coordinates_button)
         self.layout.addWidget(self.load_coordinates_button)
         self.layout.addWidget(self.position_table)
@@ -65,6 +67,9 @@ class PositionWidget(QtGui.QWidget):
     def changeCoords(self):
         self.changed_coords = True
 
+    def showPositionMarkers(self):
+        return self.show_position_markers.isChecked()
+
     def useEnforcedCoordinates(self):
         return self.use_enforced_coordinates.isChecked()
 
@@ -86,3 +91,4 @@ class PositionWidget(QtGui.QWidget):
                 with open(open_file_name) as json_file_handler:
                     coords = json.load(json_file_handler)
                 self.setCoords(coords)
+                self.use_enforced_coordinates.setChecked(True)

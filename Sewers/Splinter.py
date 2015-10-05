@@ -60,6 +60,7 @@ class Splinter(QtCore.QThread):
         self.bypass_parent_image_cleanup = False
         self.parent_image_paths = None
         self.use_enforced_coords = False
+        self.show_position_markers = False
 
         if not self.isRunning():
             self.start(QtCore.QThread.LowPriority)
@@ -95,8 +96,8 @@ class Splinter(QtCore.QThread):
                                 primary_attributes.append(key)
                             elif "Secondary USP" in key:
                                 secondary_attributes.append(key)
-                        self.sendMessage.emit("Seggregated primary and secondary attributes for %d of %d FSNs."%(counter,total), self.last_eta, self.thread_index)
 
+                        self.sendMessage.emit("Seggregated primary and secondary attributes for %d of %d FSNs."%(counter,total), self.last_eta, self.thread_index)
                         primary_attributes_count = len(primary_attributes)/2
                         primary_attribute_data = [] 
                         #print primary_attributes_count
@@ -292,7 +293,15 @@ class Splinter(QtCore.QThread):
         message = "Getting primary attribute data image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
 
-
+        if self.show_position_markers:
+            position_markers = [i+1 for i in range(len(primary_attribute_data + secondary_attribute_data))]
+            print position_markers 
+            primary_position_markers = position_markers[:len(primary_attribute_data)]
+            secondary_position_markers = position_markers[len(primary_attribute_data):]
+            print primary_position_markers, secondary_position_markers
+        else:
+            primary_position_markers = None
+            secondary_position_markers = None
         primary_attributes_and_icons_data = Katana.getIcons(
                                                     primary_attribute_data, 
                                                     category, 
@@ -306,7 +315,8 @@ class Splinter(QtCore.QThread):
                                                     font, 
                                                     font_color, 
                                                     use_icon_color_for_font_color, 
-                                                    icon_font_size)
+                                                    icon_font_size,
+                                                    primary_position_markers)
 
         message = "Getting secondary attribute data image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
@@ -323,7 +333,8 @@ class Splinter(QtCore.QThread):
                                                     font, 
                                                     font_color, 
                                                     use_icon_color_for_font_color, 
-                                                    icon_font_size)
+                                                    icon_font_size,
+                                                    secondary_position_markers)
         #Based on the input control parameters, get the coordinates for the parent image.
         if not self.use_enforced_coords:
             message = "Getting parent image coordinates corresponding to %s for %s."%(parent_image_positioning, fsn)
