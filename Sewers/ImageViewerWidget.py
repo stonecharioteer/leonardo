@@ -10,13 +10,13 @@ class ImageViewerWidget(QtGui.QWidget):
         self.mapEvents()
 
     def createUI(self):
-        self.left_button = QtGui.QPushButton("<")
+        self.left_button = QtGui.QPushButton("&<")
         self.left_button.setFixedSize(50,50)
         self.left_empty = QtGui.QWidget()
         self.left = QtGui.QStackedWidget()
         self.left.addWidget(self.left_empty)
         self.left.addWidget(self.left_button)
-        self.right_button = QtGui.QPushButton(">")
+        self.right_button = QtGui.QPushButton("&>")
         self.right_button.setFixedSize(50,50)
         self.right_empty = QtGui.QWidget()
         self.right = QtGui.QStackedWidget()

@@ -332,7 +332,7 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                 secondary_plot_points_required = len(secondary_icons)
                 icons_required = (primary_plot_points_required + secondary_plot_points_required)
                 half_icons_required = math.ceil(icons_required/2)
-                print icons_required, "icons required."
+                #print icons_required, "icons required."
                 if icons_required == 7:
                     half_icons_required = 5
                 other_half_icons_required = icons_required - half_icons_required

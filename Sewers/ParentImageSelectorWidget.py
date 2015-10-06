@@ -21,7 +21,7 @@ class ParentImageSelectorWidget(QtGui.QWidget):
         self.fsn_icon_table.setToolTip("Select parent images from this list.")
         self.fsn_icon_table.setVerticalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
         self.fsn_icon_table.setHorizontalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
-        layout = QtGui.QHBoxLayout()
+        layout = QtGui.QVBoxLayout()
         layout.addWidget(self.fsn_icon_table)
         self.setLayout(layout)
 

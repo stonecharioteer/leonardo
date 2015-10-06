@@ -12,6 +12,7 @@ from ProgressBar import ProgressBar
 from Splinter import Splinter
 from ParentImageSelectorWidget import ParentImageSelectorWidget
 from PositionWidget import PositionWidget
+
 class LayoutDesigner(QtGui.QWidget):
     def __init__(self, repo_path):
         super(LayoutDesigner,self).__init__()
@@ -31,7 +32,8 @@ class LayoutDesigner(QtGui.QWidget):
             self.setValues(default_file)
 
     def setValues(self, file_path):
-        """Sets the defaults for the settings, loading from a JSON file.
+        """
+        Sets the defaults for the settings, loading from a JSON file.
         """
         with open(file_path) as json_file_handler:
             settings_from_json = json.load(json_file_handler)
@@ -185,29 +187,54 @@ class LayoutDesigner(QtGui.QWidget):
         final_ui_layout.addWidget(self.settings_group_box,0, 1, 10, 6)
         final_ui_layout.addWidget(self.preview_group_box,0, 7, 10, 4, 
                                 QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
-        final_ui_layout.addWidget(self.validate_button,10, 11, 1, 1, 
+        final_ui_layout.addWidget(self.validate_button,10, 10, 1, 1, 
                                 QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom)
         
         self.over_all_group_box = QtGui.QGroupBox("Design")
         self.over_all_group_box.setLayout(final_ui_layout)
-        
         over_all_layout_wrapper = QtGui.QHBoxLayout()
         over_all_layout_wrapper.addWidget(self.over_all_group_box)
-        
         self.setLayout(over_all_layout_wrapper)
 
     def createPreviewWidget(self):
         #Creates the preview pane.
         self.update_preview_button = QtGui.QPushButton("Update")
+        self.update_preview_button.setToolTip("Click to build the USP image for the selected image with the chosen settings.")
         self.stop_button = QtGui.QPushButton("Stop")
+        self.stop_button.setToolTip("Click to stop after building the on-going image.")
+        self.open_destination_folder = QtGui.QPushButton("Locate File")
+        self.open_destination_folder.setToolTip("Click to open the destination folder in Explorer.")
+        self.stop_button.setEnabled(False)
+
         buttons_layout = QtGui.QHBoxLayout()
-        buttons_layout.addWidget(self.update_preview_button)
-        buttons_layout.addWidget(self.stop_button)
+        buttons_layout.addWidget(self.update_preview_button,0)
+        buttons_layout.addWidget(self.stop_button,0)
+        buttons_layout.addWidget(self.open_destination_folder,0)
+        self.file_name_label = QtGui.QLabel("Current File:")
+        self.file_name_line_edit = QtGui.QLineEdit()
+
+        self.file_name_line_edit.setReadOnly(True)
+
+
+        line_layout = QtGui.QHBoxLayout()
+        line_layout.addWidget(self.file_name_label)
+        line_layout.addWidget(self.file_name_line_edit)
+
 
         self.preview_widget = QtGui.QPushButton()
-        self.preview_widget.setToolTip("Preview Goes Here. Click to open externally.")
+        self.preview_widget.setToolTip("USP Image Preview. Click to open externally.")
         size_modifier = 2.7
         self.preview_widget.setFixedSize(90*size_modifier, 140*size_modifier)
+        self.left_button = QtGui.QPushButton("&<")
+        self.left_button.setEnabled(False)
+        self.left_button.setFixedSize(15, 140*size_modifier)
+        self.left_button.setToolTip("Click to show the previous image.")
+        
+        self.right_button = QtGui.QPushButton("&>")
+        self.right_button.setEnabled(False)
+        self.right_button.setFixedSize(15, 140*size_modifier)
+        self.right_button.setToolTip("Click to show the next image.")
+
         preview_widget_style_sheet = """
                                 QLabel {
                                     background-color: grey;
@@ -218,13 +245,19 @@ class LayoutDesigner(QtGui.QWidget):
         self.progress_bar = ProgressBar()
         self.progress_status = QtGui.QLabel("Humpty Dumpty sat on a wall.")
         self.progress_status.setWordWrap(True)
-        self.progress_status.setFixedHeight(80)
+        self.progress_status.setFixedHeight(50)
+
+        preview_buttons_image_layout = QtGui.QHBoxLayout()
+        preview_buttons_image_layout.addWidget(self.left_button,0, QtCore.Qt.AlignLeft)
+        preview_buttons_image_layout.addWidget(self.preview_widget,2, QtCore.Qt.AlignHCenter)
+        preview_buttons_image_layout.addWidget(self.right_button,0, QtCore.Qt.AlignRight)
 
         preview_layout = QtGui.QVBoxLayout()
         preview_layout.addLayout(buttons_layout, 0)
-        preview_layout.addWidget(self.preview_widget, 3, QtCore.Qt.AlignHCenter)
-        preview_layout.addWidget(self.progress_bar, 1, QtCore.Qt.AlignTop)
-        preview_layout.addWidget(self.progress_status, 1, QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
+        preview_layout.addLayout(line_layout, 0)
+        preview_layout.addLayout(preview_buttons_image_layout, 3)
+        preview_layout.addWidget(self.progress_bar, 0, QtCore.Qt.AlignTop)
+        preview_layout.addWidget(self.progress_status, 0, QtCore.Qt.AlignTop | QtCore.Qt.AlignLeft)
         preview_group_box = QtGui.QGroupBox("Preview")
         preview_group_box.setLayout(preview_layout)
         return preview_group_box
@@ -233,22 +266,52 @@ class LayoutDesigner(QtGui.QWidget):
         if self.current_image is not None:
             os.startfile(self.current_image,"open")
 
-
     def displayProgress(self,status, progress_value, eta, completion_status, images_list, thread_index):
         self.progress_bar.setValue(progress_value)
         self.progress_status.setText(status)
-        self.current_image = images_list[-1]
-        image_pixmap = QtGui.QPixmap(self.current_image)
-        image_pixmap = image_pixmap.scaled(
-                                        self.preview_widget.size(),
-                                        QtCore.Qt.IgnoreAspectRatio, 
-                                        QtCore.Qt.SmoothTransformation)
-        icon = QtGui.QIcon(image_pixmap)
-        self.preview_widget.setIcon(icon)
-        self.preview_widget.setIconSize(image_pixmap.rect().size())
-        self.preview_widget.setStyleSheet("QLabel {background-color: grey; border: 1px solid black;}")
+        self.setImage(images_list)
         if completion_status:
             self.update_preview_button.setEnabled(True)
+            self.stop_button.setEnabled(False)
+
+    def setImage(self, images_list):
+        self.images_list = images_list
+        self.current_index = len(self.images_list)-1
+        self.changeIndex(self.current_index)
+    
+    def changeIndex(self, image_index):
+        if (0 <= image_index <= (len(self.images_list)-1)):
+            self.current_image = self.images_list[image_index]
+            self.file_name_line_edit.setText(os.path.splitext(os.path.basename(self.current_image))[0])
+            image_pixmap = QtGui.QPixmap(self.current_image)
+            image_pixmap = image_pixmap.scaled(
+                                            self.preview_widget.size(),
+                                            QtCore.Qt.IgnoreAspectRatio, 
+                                            QtCore.Qt.SmoothTransformation)
+            icon = QtGui.QIcon(image_pixmap)
+            self.preview_widget.setIcon(icon)
+            self.preview_widget.setIconSize(image_pixmap.rect().size())
+            self.preview_widget.setStyleSheet("QPushButton {background-color: grey; border: 1px solid black;}")
+            if image_index == 0:
+                self.left_button.setEnabled(False)
+            else:
+                self.left_button.setEnabled(True)
+            
+            if image_index == (len(self.images_list)-1):
+                self.right_button.setEnabled(False)
+            else:
+                if len(self.images_list)>1:
+                    self.right_button.setEnabled(True)
+
+    def showNextImage(self):
+        self.current_index += 1
+        self.changeIndex(self.current_index)
+
+    def showPreviousImage(self):
+        self.current_index -= 1
+        self.changeIndex(self.current_index)
+
+
 
     def displayActivity(self, status, eta, thread_index):
         self.progress_status.setText(status)
@@ -268,6 +331,7 @@ class LayoutDesigner(QtGui.QWidget):
         else:
             self.progress_bar.setValue(0)
             self.update_preview_button.setEnabled(False)
+            self.stop_button.setEnabled(True)
 
             requested_data = []
             for fsn in required_fsns:
@@ -342,11 +406,11 @@ class LayoutDesigner(QtGui.QWidget):
         self.position_widget = PositionWidget()
         self.parent_image_selector = self.getParentImageSelector()
 
-        self.settings_tool_box.addTab(self.layout_panel, "Layout and Icon Positions")
-        self.settings_tool_box.addTab(self.font_panel, "Icon Text Font Settings")
-        self.settings_tool_box.addTab(self.parent_image_selector, "Parent Image Selector")
-        self.settings_tool_box.addTab(self.advanced_panel, "Advanced Settings")
-        self.settings_tool_box.addTab(self.position_widget, "Position Control")
+        self.settings_tool_box.addTab(self.layout_panel, "Layout")
+        self.settings_tool_box.addTab(self.position_widget, "Positions")
+        self.settings_tool_box.addTab(self.parent_image_selector, "Parent Images")
+        self.settings_tool_box.addTab(self.font_panel, "Icon and Font")
+        self.settings_tool_box.addTab(self.advanced_panel, "Advanced")
 
         
         self.save_settings_button = QtGui.QPushButton("Save Current\nSettings")
@@ -471,7 +535,7 @@ class LayoutDesigner(QtGui.QWidget):
         #Widget for controlling icon color.
         self.palette_selection_label = QtGui.QLabel("Icon Palette:")
         self.palette_selection_buttons = [QColorPanel() for i in range(10)]
-        self.palette_reset_button = QtGui.QPushButton("Copy First Row's colors to all rows.")
+        self.palette_reset_button = QtGui.QPushButton("Copy First Row's\ncolors to all rows.")
 
 
 
@@ -716,6 +780,14 @@ class LayoutDesigner(QtGui.QWidget):
         self.stop_button.clicked.connect(self.stopRunning)
         self.preview_widget.clicked.connect(self.openImage)
         self.palette_reset_button.clicked.connect(self.resetPalette)
+        self.left_button.clicked.connect(self.showPreviousImage)
+        self.right_button.clicked.connect(self.showNextImage)
+        self.open_destination_folder.clicked.connect(self.openDestinationFolder)
+
+    def openDestinationFolder(self):
+        import subprocess
+        if self.current_image is not None:
+            subprocess.call('explorer /select,"%s"'%self.current_image, shell=True)
 
     def resetPalette(self):
         palette = self.getIconPalette()[0]
