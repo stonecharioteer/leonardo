@@ -418,14 +418,22 @@ class DataSelector(QtGui.QWidget):
                     self.sendAlert("Wrong Data set.", "%s column is required!"%header)
                     break
             if data_is_valid:
-                self.validate_button.setEnabled(True)
-                self.validate_button.setStyleSheet("QPushButton{background-color: #458B00} QPushButton:hover{background-color: #78AB46};")
                 data_file_handler.seek(0)
                 next(data_file_handler) #0 has the header, so go to row 1.
                 self.data = []
                 for row in data_file_as_csv:
-                    self.data.append(row)
-                self.data_is_ready = True
+                    if len(row["FSN"].strip()) > 0:
+                        self.data.append(row)
+                if len(self.data)>0:
+                    self.data_is_ready = True
+                    self.sendAlert("Success", "%d FSNs have been uploaded from the provided dataset"%len(self.data))
+                    self.validate_button.setEnabled(True)
+                    self.validate_button.setStyleSheet("QPushButton{background-color: #458B00} QPushButton:hover{background-color: #78AB46};")
+                else:
+                    self.data_is_ready = False
+                    self.sendAlert("No FSNs in the data set", "The Data set has the right columns but it appears to not have any rows with data.")
+                    self.validate_button.setStyleSheet("background-color: #B22222")
+                    self.validate_button.setStyleSheet("background-color: #B22222")
             else:
                 self.validate_button.setStyleSheet("background-color: #B22222")
                 self.validate_button.setEnabled(False)

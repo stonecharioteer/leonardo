@@ -32,8 +32,10 @@ class ParentImageSelectorWidget(QtGui.QWidget):
         row_counter = 0
         fsn_list.sort()
         self.fsn_icon_table.setRowCount(0)
-        for fsn in fsn_list:
+        for fsn_string in fsn_list:
             #get a list of all possible parent images in the repo\Parent Images\ folder.
+            fsn = fsn_string[fsn_string.rfind(" ")+1:].strip()
+
             parent_images_paths_list = Katana.getParentImagesList(fsn, self.repo_path)
             self.fsn_data_dict[fsn] = {
                             "Paths": parent_images_paths_list,
@@ -42,7 +44,7 @@ class ParentImageSelectorWidget(QtGui.QWidget):
             #Add a row in the QTable. The first cell is the FSN.
             self.fsn_icon_table.insertRow(row_counter)
             fsn_column_index = 0
-            self.fsn_icon_table.setItem(row_counter, fsn_column_index, QtGui.QTableWidgetItem(str(fsn)))
+            self.fsn_icon_table.setItem(row_counter, fsn_column_index, QtGui.QTableWidgetItem(str(fsn_string)))
             buttons_column_index = 1
             #The second cell is a buttons group which contains an image button for each possible image.
             self.fsn_icon_table.setCellWidget(row_counter, buttons_column_index, self.fsn_data_dict[fsn]["Buttons"])

@@ -178,7 +178,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.validate_button.setToolTip("Validate and Proceed")
         self.fsn_list_box = QtGui.QListWidget()
         self.fsn_list_box.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
-        self.fsn_list_box.setFixedWidth(170)
+        self.fsn_list_box.setFixedWidth(250)
 
         final_ui_layout = QtGui.QGridLayout()
         final_ui_layout.addWidget(self.fsn_list_box,0,0,10,1)
@@ -261,7 +261,8 @@ class LayoutDesigner(QtGui.QWidget):
         QtGui.QMessageBox.about(self, title, message)
     
     def runSplinter(self):
-        required_fsns = [str(fsn_item.text()) for fsn_item in self.fsn_list_box.selectedItems()]
+        required_fsns = [str(str(fsn_item.text())[(str(fsn_item.text()).rfind(" ")+1):]) for fsn_item in self.fsn_list_box.selectedItems()]
+
         if len(required_fsns) <= 0:
             self.alertMessage("Select at least 1 FSN.","If you're trying to run Leo FSN-by-FSN, you'll need to select at least one FSN in the list to the left.")
         else:
@@ -273,41 +274,58 @@ class LayoutDesigner(QtGui.QWidget):
                 for fsn_row in self.fsn_data:
                     if fsn_row["FSN"] == fsn:
                         requested_data.append(fsn_row)
-            self.splinter_thread.data = requested_data
-            self.splinter_thread.parent_image_position = self.getParentImageCoords()
-            self.splinter_thread.icon_positioning = self.getIconPosition()
-            self.splinter_thread.icon_palette = self.getIconPalette() #Enable this later.
-            self.splinter_thread.allow_overlap = self.getOverlap()
-            self.splinter_thread.background_image_path = self.getBackgroundImage()
-            self.splinter_thread.primary_attribute_relative_size = self.getPrimaryAttrRelativeSize()
-            self.splinter_thread.secondary_attribute_relative_size = self.getSecondaryAttrRelativeSize()
-            self.splinter_thread.bounding_box = self.getIconBoundingBox()
-            self.splinter_thread.use_simple_bg_color_strip = self.useSimpleColorStripAlgorithm()
-            self.splinter_thread.bg_color_strip_threshold = self.getColorStripThreshold()
-            self.splinter_thread.parent_image_resize_reference = self.getParentImageResizeReference()
-            self.splinter_thread.parent_image_resize_factor = self.getParentImageResizeFactor()
-            self.splinter_thread.allow_textless_icons = self.allowTextlessIcons()
-            self.splinter_thread.margin = self.getMargin()
-            self.splinter_thread.use_category_specific_backgrounds = self.useCategorySpecificBackgrounds()
-            self.splinter_thread.output_location = self.repo_path
-            self.splinter_thread.colors_list = self.getIconPalette()
-            self.splinter_thread.preserve_icon_colors = self.preserveIconColors()
-            self.splinter_thread.fix_icon_text_case = self.fixIconTextCase()
-            self.splinter_thread.font = self.getFont()
-            self.splinter_thread.font_color = self.getIconFontColor()
-            self.splinter_thread.use_icon_color_for_font_color = self.useIconColorForFontColor()
-            self.splinter_thread.icon_font_size = self.getIconFontSize()
-            self.splinter_thread.bypass_parent_image_cleanup = self.bypassParentImageCleanup()
-            self.splinter_thread.parent_image_paths = self.getParentImagePaths()
-            self.splinter_thread.use_enforced_coords = self.useEnforcedCoordinates()
-            self.splinter_thread.enforced_coords = self.getCoords()
-            self.splinter_thread.show_position_markers = self.showPositionMarkers()
-            self.splinter_thread.allow_run = True
+
+            if len(requested_data) == 0:
+                self.alertMessage("Zero FSNs Selected!", "Although you've selected some FSNs, there doesn't seem to be a match with the loaded data. This is a scenario which shouldn't happen. The code is at fault.")
+                print required_fsns
+            else:
+                self.splinter_thread.data = requested_data
+                self.splinter_thread.parent_image_position = self.getParentImageCoords()
+                self.splinter_thread.icon_positioning = self.getIconPosition()
+                self.splinter_thread.icon_palette = self.getIconPalette() #Enable this later.
+                self.splinter_thread.allow_overlap = self.getOverlap()
+                self.splinter_thread.background_image_path = self.getBackgroundImage()
+                self.splinter_thread.primary_attribute_relative_size = self.getPrimaryAttrRelativeSize()
+                self.splinter_thread.secondary_attribute_relative_size = self.getSecondaryAttrRelativeSize()
+                self.splinter_thread.bounding_box = self.getIconBoundingBox()
+                self.splinter_thread.use_simple_bg_color_strip = self.useSimpleColorStripAlgorithm()
+                self.splinter_thread.bg_color_strip_threshold = self.getColorStripThreshold()
+                self.splinter_thread.parent_image_resize_reference = self.getParentImageResizeReference()
+                self.splinter_thread.parent_image_resize_factor = self.getParentImageResizeFactor()
+                self.splinter_thread.allow_textless_icons = self.allowTextlessIcons()
+                self.splinter_thread.margin = self.getMargin()
+                self.splinter_thread.use_category_specific_backgrounds = self.useCategorySpecificBackgrounds()
+                self.splinter_thread.output_location = self.repo_path
+                self.splinter_thread.colors_list = self.getIconPalette()
+                self.splinter_thread.preserve_icon_colors = self.preserveIconColors()
+                self.splinter_thread.fix_icon_text_case = self.fixIconTextCase()
+                self.splinter_thread.font = self.getFont()
+                self.splinter_thread.font_color = self.getIconFontColor()
+                self.splinter_thread.use_icon_color_for_font_color = self.useIconColorForFontColor()
+                self.splinter_thread.icon_font_size = self.getIconFontSize()
+                self.splinter_thread.bypass_parent_image_cleanup = self.bypassParentImageCleanup()
+                self.splinter_thread.parent_image_paths = self.getParentImagePaths()
+                self.splinter_thread.use_enforced_coords = self.useEnforcedCoordinates()
+                self.splinter_thread.enforced_coords = self.getCoords()
+                self.splinter_thread.show_position_markers = self.showPositionMarkers()
+                self.splinter_thread.allow_run = True
 
     def setFSNs(self, fsn_data):
         self.fsn_data = fsn_data
         self.update_preview_button.setEnabled(True)
-        fsns = list(set([fsn_row["FSN"] for fsn_row in fsn_data]))
+        fsns = []
+        for fsn_row in fsn_data:
+            fsn = fsn_row["FSN"]
+            category = fsn_row["Category"]
+            usp_count = 0
+            fsn_row.keys()
+            for key in fsn_row.keys():
+                if "Attribute" in key:
+                    if len(fsn_row[key].strip()) > 0:
+                        usp_count +=1
+            fsn_label = "%s - %d USPs - %s"%(category, usp_count, fsn)
+            if fsn_label not in fsns:
+                fsns.append(fsn_label)
         fsns.sort()
         self.fsn_list_box.clear()
         self.fsn_list_box.addItems(fsns)

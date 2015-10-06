@@ -230,6 +230,7 @@ class Splinter(QtCore.QThread):
         #Ready the parent image.
         message = "Resizing parent image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
+        print parent_image_path
         original_parent_image = Image.open(parent_image_path).convert("RGBA")
         #Check the resize reference for the smartfit option. Create use a local parent_image_resize_reference value to control this.
         if self.parent_image_resize_reference == "Smart Fit":
@@ -440,7 +441,8 @@ class Splinter(QtCore.QThread):
         output_path = os.path.join(self.output_location, "Output", getpass.getuser(),datetime.datetime.now().strftime("%y%m%d"),category)
         if not os.path.exists(output_path):
             os.makedirs(output_path)
-        image_path = os.path.join(output_path,fsn+"_app_image_%s.png"%datetime.datetime.now().strftime("%H%M%S"))
+        #image_path = os.path.join(output_path,fsn+"_app_image_%s.png"%datetime.datetime.now().strftime("%H%M%S"))
+        image_path = os.path.join(output_path,fsn+"_app_image.png")
         final_image.save(image_path,dpi=(300,300), quality=100)
         return image_path
 

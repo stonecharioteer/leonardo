@@ -23,8 +23,11 @@ class ImageButtonLine(QtGui.QWidget):
     def createUI(self):
         if len(self.images_list) != 0:
             self.buttons = [ImageButton(image_path) for image_path in self.images_list]
+            self.has_image = True
         else:
-            self.buttons = [QtGui.QPushButton("No images supplied")]
+            self.has_image = False
+            na_image = os.path.join("essentials","na_parent_image.png")
+            self.buttons = [ImageButton(na_image)]
         self.layout = QtGui.QHBoxLayout()
         self.logic_group = QtGui.QButtonGroup()
         self.logic_group.setExclusive(True)
@@ -38,11 +41,16 @@ class ImageButtonLine(QtGui.QWidget):
     
     def getChosenParentImagePath(self):
         counter = 0
-        for button in self.buttons:
-            if button.isChecked():
-                index = counter
-            counter += 1
-        return self.images_list[index]
+        if self.has_image:
+            for button in self.buttons:
+                if button.isChecked():
+                    index = counter
+                counter += 1
+            image = self.images_list[index]
+        else:
+            image = os.path.join("essentials","na_parent_image.png")
+        return image
+            
 
 
 
