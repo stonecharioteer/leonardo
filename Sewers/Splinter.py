@@ -401,11 +401,12 @@ class Splinter(QtCore.QThread):
         message = "Final preparations are ongoing for %s."%(fsn)
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
         merged_base_image = Katana.getFinalBaseImage(base_image)
-        merged_base_image.paste(
-                    fk_brand_icon,
-                    (int(fk_brand_icon.size[0]*0.005),0), 
-                    fk_brand_icon
-                )
+#        merged_base_image.paste(
+#                    fk_brand_icon,
+#                    (int(fk_brand_icon.size[0]*0.005),0), 
+#                    fk_brand_icon
+#                )
+        #Paste the base image.
         merged_base_image.paste(
                     base_image, 
                     (int(fk_brand_icon.size[0]*0.05), int(fk_brand_icon.size[1]*1.05)), 
@@ -431,6 +432,9 @@ class Splinter(QtCore.QThread):
         message = "Merging the background and USP image for %s."%(fsn)
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
         final_image.paste(resized_base_image,base_image_coords,resized_base_image)
+        message = "Pasting FK brand logo for %s."%(fsn)
+        self.sendMessage.emit(message, self.last_eta, self.thread_index)
+        final_image.paste(fk_brand_icon,(0,0),fk_brand_icon)
         message = "Converting to RGB for %s."%(fsn)
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
         final_image = final_image.convert("RGB")

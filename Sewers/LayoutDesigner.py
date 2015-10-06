@@ -73,16 +73,19 @@ class LayoutDesigner(QtGui.QWidget):
         #Set the Palette selection method.
         icon_colors_value = settings_from_json["Icon Palette"]
         try:
-            if len(icon_colors_value) == len(self.palette_selection_buttons):
+            icons_accounts_for = len(self.palette_selection_buttons)
+            if len(icon_colors_value) == icons_accounts_for:
                 counter = 0
+                self.position_widget.setColors(icon_colors_value)
                 for button in self.palette_selection_buttons:
                     button.setColors(icon_colors_value[counter])
                     counter += 1
             else:
+                self.position_widget.setColors(icon_colors_value[0] for i in range(icons_accounts_for))
                 for button in self.palette_selection_buttons:
                     button.setColors(icon_colors_value[0])
         except:
-            pass
+            raise
         #Set the Image margin percentage.
         margin_value = 100*settings_from_json["Margin"]
         self.image_margin_spinbox.setValue(margin_value)

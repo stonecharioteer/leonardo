@@ -3,11 +3,12 @@ import math
 import json
 import os
 from PyQt4 import QtGui, QtCore
-
+from QColorPanel import QColorPanel
 class PositionWidget(QtGui.QWidget):
     def __init__(self):
         super(PositionWidget, self).__init__()
-        self.x_y_widgets = {}
+        self.clip = QtGui.QApplication.clipboard()
+        self.row_widgets = {}
         self.createUI()
         self.changedCoords = False
 
@@ -21,47 +22,60 @@ class PositionWidget(QtGui.QWidget):
         self.position_table = QtGui.QTableWidget()
         self.position_table.setRowCount(11)
         self.position_table.setColumnCount(3)
-        label = "Parent"
-        self.position_table.setItem(0, 0, QtGui.QTableWidgetItem(str(label)))
+        self.parent_label = "Parent"
+        self.position_table.setItem(0, 0, QtGui.QTableWidgetItem(str(self.parent_label)))
         x_parent = QtGui.QSpinBox()
         y_parent = QtGui.QSpinBox()
-        self.x_y_widgets[label] = [x_parent, y_parent]
         self.position_table.setCellWidget(0, 1, x_parent)
         self.position_table.setCellWidget(0, 2, y_parent)
+        self.position_table.setItem(0, 3, QtGui.QTableWidgetItem("NA"))
+        self.position_table.setItem(0, 4, QtGui.QTableWidgetItem("NA"))
+        self.row_widgets[self.parent_label] = [x_parent, y_parent, 0, 0]
         
         for row in range(11)[1:]:
             label = "USP-%d"%row
             x = QtGui.QSpinBox()
             y = QtGui.QSpinBox()
+            icon_size = QtGui.QSpinBox()
+            font_panel = QColorPanel()
             self.position_table.setItem(row, 0, QtGui.QTableWidgetItem(str(label)))
             self.position_table.setCellWidget(row, 1, x)
             self.position_table.setCellWidget(row, 2, y)
-            self.x_y_widgets[label] = [x,y]
+            self.position_table.setCellWidget(row, 3, icon_size)
+            self.position_table.setCellWidget(row, 4, font_panel)
 
-        self.position_table.setHorizontalHeaderLabels(["Feature","X","Y"])
+            self.row_widgets[label] = [x, y, icon_size, font_panel]
+        self.position_table.resizeRowsToContents()
+        for column_counter in range(3):
+            self.position_table.setColumnWidth(column_counter, 90)
+
+        self.position_table.setHorizontalHeaderLabels(["Feature","X","Y", "Size\nw.r.t Height", "Colors"])
         self.layout = QtGui.QVBoxLayout()
         self.layout.addWidget(self.use_enforced_coordinates)
         self.layout.addWidget(self.show_position_markers)
         self.layout.addWidget(self.export_coordinates_button)
         self.layout.addWidget(self.load_coordinates_button)
         self.layout.addWidget(self.position_table)
-        for label in self.x_y_widgets.keys():
+        for label in self.row_widgets.keys():
             limit  = 100000
-            self.x_y_widgets[label][0].setRange(-1*limit, limit)
-            self.x_y_widgets[label][0].valueChanged.connect(self.changeCoords)
-            self.x_y_widgets[label][1].setRange(-1*limit, limit)
-            self.x_y_widgets[label][1].valueChanged.connect(self.changeCoords)
+            self.row_widgets[label][0].setRange(-1*limit, limit)
+            self.row_widgets[label][0].valueChanged.connect(self.changeCoords)
+            self.row_widgets[label][1].setRange(-1*limit, limit)
+            self.row_widgets[label][1].valueChanged.connect(self.changeCoords)
+            if label != self.parent_label:
+                self.row_widgets[label][2].setRange(0, 100)
+                self.row_widgets[label][2].setSuffix("%")
         self.setLayout(self.layout)
 
     def setCoords(self, coords):
         for label in coords.keys():
-            self.x_y_widgets[label][0].setValue(coords[label][0])
-            self.x_y_widgets[label][1].setValue(coords[label][1])
+            self.row_widgets[label][0].setValue(coords[label][0])
+            self.row_widgets[label][1].setValue(coords[label][1])
 
     def getCoords(self):
         coords = {}
-        for label in self.x_y_widgets.keys():
-            coords[label] = [self.x_y_widgets[label][0].value(), self.x_y_widgets[label][1].value()]
+        for label in self.row_widgets.keys():
+            coords[label] = [self.row_widgets[label][0].value(), self.row_widgets[label][1].value()]
         return coords
 
     def changeCoords(self):
@@ -92,3 +106,27 @@ class PositionWidget(QtGui.QWidget):
                     coords = json.load(json_file_handler)
                 self.setCoords(coords)
                 self.use_enforced_coordinates.setChecked(True)
+
+
+    def setColors(self, colors_list):
+        for color in colors_list:
+            for label in self.row_widgets.keys():
+                if label != self.parent_label:
+                    self.row_widgets[label][3].setColors(color)
+
+    def keyPressEvent(self, e):
+        if (e.modifiers() & QtCore.Qt.ControlModifier):
+            if e.key() == QtCore.Qt.Key_S:
+                self.say = QtGui.QMessageBox.question(self,"All Animals are created equal.","But some animals are <b>more</b> equal than others.", QtGui.QMessageBox.Ok, QtGui.QMessageBox.Ok)
+            if e.key() == QtCore.Qt.Key_C: #copy
+                selected = self.position_table.selectedRanges()
+                columns = [selected[0].leftColumn(), selected[0].rightColumn()]
+                rows = [selected[0].topRow(), selected[0].bottomRow()]
+                if 3 in columns:
+                    colors_list = []
+                    for row in rows:
+                        if row != 0:
+                            colors_list.append(self.row_widgets[row].getColors())
+                    s = str(Colors)
+                    print s
+                    self.clip.setText(s)
