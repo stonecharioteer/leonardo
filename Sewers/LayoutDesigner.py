@@ -544,7 +544,7 @@ class LayoutDesigner(QtGui.QWidget):
         layout_panel_layout.addWidget(self.icon_arrangement_rectangular, 3, 1, 1, 1, QtCore.Qt.AlignLeft)
         layout_panel_layout.addWidget(self.icon_bounding_box_label, 4, 0, 1, 1, QtCore.Qt.AlignRight)
         layout_panel_layout.addWidget(self.icon_bounding_box_combobox, 4, 1, 1, 1, QtCore.Qt.AlignLeft)
-        layout_panel_layout.addWidget(self.icon_shape_color_label, 5, 1, 1, 1, QtCore.Qt.AlignLeft)
+        layout_panel_layout.addWidget(self.icon_shape_color_label, 5, 0, 1, 1, QtCore.Qt.AlignLeft)
         layout_panel_layout.addWidget(self.icon_shape_color, 5, 1, 1, 1, QtCore.Qt.AlignLeft)
         layout_panel = QtGui.QWidget()
         layout_panel.setLayout(layout_panel_layout)
@@ -831,7 +831,8 @@ class LayoutDesigner(QtGui.QWidget):
                             font: 8pt;
                             }
                     .QPushButton:checked {
-                                font: 8pt bold;
+                                font: 8pt;
+                                font-weight: bold;
                             }
 
                 """

@@ -362,15 +362,14 @@ class Splinter(QtCore.QThread):
         if self.coordinates_mode == 0:
             counter = 0
             icons_and_coordinates = Katana.getIconsAndCoordinates(
-                                                base_image, 
-                                                parent_image_size, 
-                                                parent_image_coords, 
-                                                primary_attributes_and_icons_data, 
-                                                secondary_attributes_and_icons_data, 
-                                                icon_positioning,
-                                                "Separate", 
-                                                parent_image_positioning
-                                                )
+                                                                base_image, 
+                                                                parent_image_size, 
+                                                                parent_image_coords, 
+                                                                primary_attributes_and_icons_data, 
+                                                                secondary_attributes_and_icons_data, 
+                                                                icon_positioning,
+                                                                "Separate", 
+                                                                parent_image_positioning)
             coords = {"Parent": parent_image_coords}
             counter = 1
             for icon in icons_and_coordinates:

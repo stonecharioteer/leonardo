@@ -144,7 +144,15 @@ def getMergedFlipkartBrandImage(brand=None, repo_path=None):
     final_image.save(os.path.join("cache","FK_"+brand+".png"),dpi=(300,300), quality=100)
     return final_image
 
-def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, primary_attributes_and_icons_data, secondary_attributes_and_icons_data, icon_arrangement, ordering, parent_image_positioning):
+def getIconsAndCoordinates(
+                        base_image, 
+                        parent_image_size, 
+                        parent_image_coords, 
+                        primary_attributes_and_icons_data, 
+                        secondary_attributes_and_icons_data, 
+                        icon_arrangement, 
+                        ordering, 
+                        parent_image_positioning):
     #This is the way I'm getting icon positions now.
     import random, os, math
     #print "Parent Image is at: ", parent_image_positioning
@@ -430,7 +438,7 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                                                 primary_theta_range
                                             )
                 
-                if secondary_plot_points_required > 0:
+                if other_half_icons_required > 0:
                     secondary_radius = secondary_radius_multiplier*diagonal_length
                     secondary_icon_positions = getPointsOnArc(secondary_arc_center, 
                                                     secondary_radius, 
@@ -442,6 +450,11 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                 coordinates_and_icons = []
                 icon_positions = primary_icon_positions + secondary_icon_positions
                 icons = primary_icons + secondary_icons
+                #printLine()
+                #print primary_icon_positions, secondary_icon_positions
+                #print (half_icons_required), other_half_icons_required
+                #print len(icons), len(icon_positions)
+                #printLine()
                 counter = 0
                 for icon in icons:
                     try:
@@ -450,7 +463,7 @@ def getIconsAndCoordinates(base_image, parent_image_size, parent_image_coords, p
                             "Position":icon_positions[counter]
                         }
                     except: 
-                        print counter
+                        #print counter
                         icon.save("this.png")
                         raise
                     coordinates_and_icons.append(coord)
