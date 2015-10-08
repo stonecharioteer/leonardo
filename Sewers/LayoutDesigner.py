@@ -39,139 +39,165 @@ class LayoutDesigner(QtGui.QWidget):
             settings_from_json = json.load(json_file_handler)
 
         #Set the primary and secondary icon sizes.
-        primary_attr_icon_size_value = settings_from_json["Primary Attribute Relative Size"]
-        self.primary_attr_icon_size_spin_box.setValue(primary_attr_icon_size_value)
+        if "Primary Attribute Relative Size" in settings_from_json.keys():
+            primary_attr_icon_size_value = settings_from_json["Primary Attribute Relative Size"]
+            self.primary_attr_icon_size_spin_box.setValue(primary_attr_icon_size_value)
         
-        secondary_attr_icon_size_value = settings_from_json["Secondary Attribute Relative Size"]
-        self.secondary_attr_icon_size_spin_box.setValue(secondary_attr_icon_size_value)
+        if "Secondary Attribute Relative Size" in settings_from_json.keys():
+            secondary_attr_icon_size_value = settings_from_json["Secondary Attribute Relative Size"]
+            self.secondary_attr_icon_size_spin_box.setValue(secondary_attr_icon_size_value)
+
         #Set the Parent Image position y and x.
-        parent_image_position_value = settings_from_json["Parent Image Position"]
-        if type(parent_image_position_value) == list:
-            x, y = parent_image_position_value
-            self.parent_image_position_position_radiobuttons[int(2*y)][int(2*x)].setChecked(True)
-        else:
-            self.parent_image_position_position_radiobuttons[1][1].setChecked(True)
-            self.use_random_parent_image_position.setChecked(True)
+        if "Parent Image Position" in settings_from_json.keys():
+            parent_image_position_value = settings_from_json["Parent Image Position"]
+            if type(parent_image_position_value) == list:
+                x, y = parent_image_position_value
+                self.parent_image_position_position_radiobuttons[int(2*y)][int(2*x)].setChecked(True)
+            else:
+                self.parent_image_position_position_radiobuttons[1][1].setChecked(True)
+                self.use_random_parent_image_position.setChecked(True)
 
         #Set the primary image resize reference.
-        parent_image_resize_reference_value = settings_from_json["Parent Image Resize Reference"]
-        resize_reference_combo_index = self.parent_image_resize_reference.findText(parent_image_resize_reference_value)
-        self.parent_image_resize_reference.setCurrentIndex(resize_reference_combo_index)
+        if "Parent Image Resize Reference" in settings_from_json.keys():
+            parent_image_resize_reference_value = settings_from_json["Parent Image Resize Reference"]
+            resize_reference_combo_index = self.parent_image_resize_reference.findText(parent_image_resize_reference_value)
+            self.parent_image_resize_reference.setCurrentIndex(resize_reference_combo_index)
         
         #Set the primary or product image resize percentage value.
-        parent_image_resize_factor_value = 100*settings_from_json["Parent Image Resize Factor"]
-        self.product_image_scale_spinbox.setValue(parent_image_resize_factor_value)
+        if "Parent Image Resize Factor" in settings_from_json.keys():
+            parent_image_resize_factor_value = 100*settings_from_json["Parent Image Resize Factor"]
+            self.product_image_scale_spinbox.setValue(parent_image_resize_factor_value)
         
         #Set the color replacement algorithm
-        use_simple_color_replacement_value = settings_from_json["Use Simple Color Replacement"]
-        self.use_simple_color_replacement.setChecked(use_simple_color_replacement_value)
+        if "Use Simple Color Replacement" in settings_from_json.keys():
+            use_simple_color_replacement_value = settings_from_json["Use Simple Color Replacement"]
+            self.use_simple_color_replacement.setChecked(use_simple_color_replacement_value)
         
         #Set the Color stripping threshold
-        background_color_threshold_value = settings_from_json["Background Color Threshold Value"]
-        self.background_color_threshold_spinbox.setValue(background_color_threshold_value)
+        if "Background Color Threshold Value" in settings_from_json.keys():
+            background_color_threshold_value = settings_from_json["Background Color Threshold Value"]
+            self.background_color_threshold_spinbox.setValue(background_color_threshold_value)
         
         #Set the Palette selection method.
-        icon_colors_value = settings_from_json["Icon Palette"]
-        try:
-            icons_accounts_for = len(self.palette_selection_buttons)
-            if len(icon_colors_value) == icons_accounts_for:
-                counter = 0
-                self.position_widget.setColors(icon_colors_value)
-                for button in self.palette_selection_buttons:
-                    button.setColors(icon_colors_value[counter])
-                    counter += 1
-            else:
-                self.position_widget.setColors(icon_colors_value[0] for i in range(icons_accounts_for))
-                for button in self.palette_selection_buttons:
-                    button.setColors(icon_colors_value[0])
-        except:
-            raise
+        if "Icon Palette" in settings_from_json.keys():
+            icon_colors_value = settings_from_json["Icon Palette"]
+            try:
+                icons_accounts_for = len(self.palette_selection_buttons)
+                if len(icon_colors_value) == icons_accounts_for:
+                    counter = 0
+                    self.position_widget.setColors(icon_colors_value)
+                    for button in self.palette_selection_buttons:
+                        button.setColors(icon_colors_value[counter])
+                        counter += 1
+                else:
+                    self.position_widget.setColors(icon_colors_value[0] for i in range(icons_accounts_for))
+                    for button in self.palette_selection_buttons:
+                        button.setColors(icon_colors_value[0])
+            except:
+                raise
         #Set the Image margin percentage.
-        margin_value = 100*settings_from_json["Margin"]
-        self.image_margin_spinbox.setValue(margin_value)
+        if "Margin" in settings_from_json.keys():
+            margin_value = 100*settings_from_json["Margin"]
+            self.image_margin_spinbox.setValue(margin_value)
         
         #Set the Aspect ratio
-        image_aspect_ratio_value = settings_from_json["Image Aspect Ratio"]
-        aspect_x, aspect_y = image_aspect_ratio_value
-        self.final_image_aspect_ratio_input_box_1.setValue(aspect_x)
-        self.final_image_aspect_ratio_input_box_2.setValue(aspect_y)
+        if "Image Aspect Ratio" in settings_from_json.keys():
+            image_aspect_ratio_value = settings_from_json["Image Aspect Ratio"]
+            aspect_x, aspect_y = image_aspect_ratio_value
+            self.final_image_aspect_ratio_input_box_1.setValue(aspect_x)
+            self.final_image_aspect_ratio_input_box_2.setValue(aspect_y)
         
         #Set the Icon arrangement method.
-        icon_arrangement_value = str(settings_from_json["Icon Arrangement"])
-        if icon_arrangement_value == "Circular":
-            self.icon_arrangement_circular.setChecked(True)
-        else:
-            self.icon_arrangement_rectangular.setChecked(True)
+        if "Icon Arrangement" in settings_from_json.keys():
+            icon_arrangement_value = str(settings_from_json["Icon Arrangement"])
+            if icon_arrangement_value == "Circular":
+                self.icon_arrangement_circular.setChecked(True)
+            else:
+                self.icon_arrangement_rectangular.setChecked(True)
         
         #Set the overlap boolean
-        allow_overlap_value = settings_from_json["Allow Icons Overlap"]
-        if type(allow_overlap_value) != bool:
-            allow_overlap_value = False
-        self.allow_overlap_checkbox.setChecked(allow_overlap_value)
+        if "Allow Icons Overlap" in settings_from_json.keys():
+            allow_overlap_value = settings_from_json["Allow Icons Overlap"]
+            if type(allow_overlap_value) != bool:
+                allow_overlap_value = False
+            self.allow_overlap_checkbox.setChecked(allow_overlap_value)
 
         #Set the boolean to allow icons without text.
-        allow_textless_icons = settings_from_json["Allow Icons Without Text"]
-        if type(allow_textless_icons) != bool:
-            allow_textless_icons = False
-        self.allow_textless_icons_checkbox.setChecked(allow_textless_icons)
+        if "Allow Icons Without Text" in settings_from_json.keys():
+            allow_textless_icons = settings_from_json["Allow Icons Without Text"]
+            if type(allow_textless_icons) != bool:
+                allow_textless_icons = False
+            self.allow_textless_icons_checkbox.setChecked(allow_textless_icons)
 
         #Set Icon Font Bold
-        icon_font_bold = settings_from_json["Icon Font Bold"]
-        if type(icon_font_bold) != bool:
-            icon_font_bold = False
-        self.bold_button.setChecked(icon_font_bold)
+        if "Icon Font Bold" in settings_from_json.keys():
+            icon_font_bold = settings_from_json["Icon Font Bold"]
+            if type(icon_font_bold) != bool:
+                icon_font_bold = False
+            self.bold_button.setChecked(icon_font_bold)
         
         #Set Icon Font Underlined
-        icon_font_underline = settings_from_json["Icon Font Underline"]
-        if type(icon_font_underline) != bool:
-            icon_font_underline = False
-        self.underline_button.setChecked(icon_font_underline)
+        if "Icon Font Underline" in settings_from_json.keys():
+            icon_font_underline = settings_from_json["Icon Font Underline"]
+            if type(icon_font_underline) != bool:
+                icon_font_underline = False
+            self.underline_button.setChecked(icon_font_underline)
         
         #Set Icon Font Italics
-        icon_font_italics = settings_from_json["Icon Font Italics"]
-        if type(icon_font_italics) != bool:
-            icon_font_italics = False
-        self.italics_button.setChecked(icon_font_italics)
+        if "Icon Font Italics" in settings_from_json.keys():
+            icon_font_italics = settings_from_json["Icon Font Italics"]
+            if type(icon_font_italics) != bool:
+                icon_font_italics = False
+            self.italics_button.setChecked(icon_font_italics)
 
         #Set Icon font size
-        icon_font_size = settings_from_json["Icon Font Size"]
+        if "Icon Font Size" in settings_from_json.keys():
+            icon_font_size = settings_from_json["Icon Font Size"]
+            self.font_size_spinbox.setValue(icon_font_size)
 
         #Set the background-appropriate icon color loading behaviour.
-        load_icon_color_from_background = settings_from_json["Load Icon Colors From Background"]
-        if type(load_icon_color_from_background) != bool:
-            load_icon_color_from_background = False
+        if "Load Icon Colors From Background" in settings_from_json.keys():
+            load_icon_color_from_background = settings_from_json["Load Icon Colors From Background"]
+            if type(load_icon_color_from_background) != bool:
+                load_icon_color_from_background = False
 
         #Set the bounding box.
-        icon_bounding_box = settings_from_json["Icon Bounding Box"]
-        self.icon_bounding_box_combobox.setCurrentIndex(self.icon_bounding_box_combobox.findText(icon_bounding_box))
+        if "Icon Bounding Box" in settings_from_json.keys():
+            icon_bounding_box = settings_from_json["Icon Bounding Box"]
+            self.icon_bounding_box_combobox.setCurrentIndex(self.icon_bounding_box_combobox.findText(icon_bounding_box))
 
         #Set the fix icon case checkbox.
-        fix_icon_text_case = settings_from_json["Fix Icon Text Case"]
-        self.fix_icon_text_case.setChecked(fix_icon_text_case)
+        if "Fix Icon Text Case" in settings_from_json.keys():
+            fix_icon_text_case = settings_from_json["Fix Icon Text Case"]
+            self.fix_icon_text_case.setChecked(fix_icon_text_case)
         
         #Set the preserve icon colors checkbox.
-        preserve_icon_colors = settings_from_json["Preserve Icon Colors"]
-        self.preserve_icon_colors.setChecked(preserve_icon_colors)
+        if "Preserve Icon Colors" in settings_from_json.keys():
+            preserve_icon_colors = settings_from_json["Preserve Icon Colors"]
+            self.preserve_icon_colors.setChecked(preserve_icon_colors)
 
-        use_category_specific_backgrounds = settings_from_json["Use Category Specific Backgrounds"]
-        self.use_category_specific_backgrounds.setChecked(use_category_specific_backgrounds)
+        if "Use Category Specific Backgrounds" in settings_from_json.keys():
+            use_category_specific_backgrounds = settings_from_json["Use Category Specific Backgrounds"]
+            self.use_category_specific_backgrounds.setChecked(use_category_specific_backgrounds)
 
-        background_image = settings_from_json["Background Image"]
-        self.background_selection_combobox.setCurrentIndex(self.background_selection_combobox.findText(background_image))
+        if "Background Image" in settings_from_json.keys():
+            background_image = settings_from_json["Background Image"]
+            self.background_selection_combobox.setCurrentIndex(self.background_selection_combobox.findText(background_image))
 
         #Set the icon font color
         #Set the bool to use the icon color for font color.
-        font_color = settings_from_json["Icon Font Color"]
-        self.font_color_picker.setColorFromRGB(font_color)
+        if "Icon Font Color" in settings_from_json.keys():
+            font_color = settings_from_json["Icon Font Color"]
+            self.font_color_picker.setColorFromRGB(font_color)
 
-        use_icon_color_for_font_color = settings_from_json["Use Icon Color For Font Color"]
-        if type(use_icon_color_for_font_color) == bool:
-            self.use_icon_color_for_font_color.setChecked(use_icon_color_for_font_color)
-        else:
-            print "The JSON has a non boolean value for the use_icon_color_for_font_color variable."
+        if "Use Icon Color For Font Color" in settings_from_json.keys():
+            use_icon_color_for_font_color = settings_from_json["Use Icon Color For Font Color"]
+            if type(use_icon_color_for_font_color) == bool:
+                self.use_icon_color_for_font_color.setChecked(use_icon_color_for_font_color)
+            else:
+                print "The JSON has a non boolean value for the use_icon_color_for_font_color variable."
 
-        icon_font_size = settings_from_json["Icon Font Size"]
-        self.font_size_spinbox.setValue(icon_font_size)
+
         if "Bypass Parent Image Cleanup" in settings_from_json.keys():
             bypass_parent_image_cleanup = settings_from_json["Bypass Parent Image Cleanup"]
             self.bypass_parent_image_cleanup.setChecked(bypass_parent_image_cleanup)
@@ -372,7 +398,7 @@ class LayoutDesigner(QtGui.QWidget):
                 self.splinter_thread.icon_font_size = self.getIconFontSize()
                 self.splinter_thread.bypass_parent_image_cleanup = self.bypassParentImageCleanup()
                 self.splinter_thread.parent_image_paths = self.getParentImagePaths()
-                self.splinter_thread.use_enforced_coords = self.useEnforcedCoordinates()
+                self.splinter_thread.coordinates_mode = self.getCoordinatesMode()
                 self.splinter_thread.enforced_coords = self.getCoords()
                 self.splinter_thread.show_position_markers = self.showPositionMarkers()
                 self.splinter_thread.allow_run = True
@@ -947,8 +973,8 @@ class LayoutDesigner(QtGui.QWidget):
     def getParentImagePaths(self):
         return self.parent_image_selector.getParentImagesData()
     
-    def useEnforcedCoordinates(self):
-        return self.position_widget.useEnforcedCoordinates()
+    def getCoordinatesMode(self):
+        return self.position_widget.getCoordinatesMode()
     
     def getCurrentSettings(self):
         """Returns a dictionary that summarizes all the current settings."""

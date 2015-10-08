@@ -4,6 +4,8 @@ import json
 import os
 from PyQt4 import QtGui, QtCore
 from QColorPanel import QColorPanel
+import subprocess
+
 class PositionWidget(QtGui.QWidget):
     def __init__(self):
         super(PositionWidget, self).__init__()
@@ -13,12 +15,41 @@ class PositionWidget(QtGui.QWidget):
         self.changedCoords = False
 
     def createUI(self):
-        self.use_enforced_coordinates = QtGui.QCheckBox("Use the coordinates here for building the USP Image")
+        self.use_enforced_coordinates = QtGui.QPushButton("Enforce All Coordinates")
+        self.use_enforced_USP_coordinates = QtGui.QPushButton("Enforce USP Coordinates")
+        self.use_calculated_coordinates = QtGui.QPushButton("Calculate Coordinates")
+        
+        self.use_enforced_coordinates.setCheckable(True)
+        self.use_enforced_USP_coordinates.setCheckable(True)
+        self.use_calculated_coordinates.setCheckable(True)
+
+        self.use_calculated_coordinates.setChecked(True)
+
+        self.buttons_group = QtGui.QButtonGroup()
+        self.buttons_group.setExclusive(True)
+        self.buttons_group.addButton(self.use_calculated_coordinates)
+        self.buttons_group.addButton(self.use_enforced_USP_coordinates)
+        self.buttons_group.addButton(self.use_enforced_coordinates)
+
+        buttons_layout = QtGui.QHBoxLayout()
+        buttons_layout.addWidget(self.use_calculated_coordinates)
+        buttons_layout.addWidget(self.use_enforced_USP_coordinates)
+        buttons_layout.addWidget(self.use_enforced_coordinates)
+        
+        self.use_enforced_coordinates.setToolTip("Select this option to override all the calculated coordiates with the coordinates shown below.")
+        self.use_enforced_USP_coordinates.setToolTip("Select this option to override only the USP icons' calculated coordiates with the coordinates shown below.\nParent images will be placed depending on your chosen location, in accordance with the dimensions.")
+        self.use_calculated_coordinates.setToolTip("Select this option if you'd like Leonardo to calculate the coordinates of the icon and image positions completely.\nThere is a great chance of an overlap happening due to this option.")
+
+
         self.show_position_markers = QtGui.QCheckBox("Show Position Markers for USPs")
         self.export_coordinates_button = QtGui.QPushButton("Export Coordinates to JSON")
         self.export_coordinates_button.clicked.connect(self.exportCoordinates)
         self.load_coordinates_button = QtGui.QPushButton("Load Coordinates from JSON")
         self.load_coordinates_button.clicked.connect(self.loadCoordinates)
+        more_buttons_layout = QtGui.QHBoxLayout()
+        more_buttons_layout.addWidget(self.export_coordinates_button)
+        more_buttons_layout.addWidget(self.load_coordinates_button)
+
         self.position_table = QtGui.QTableWidget()
         self.position_table.setRowCount(11)
         self.position_table.setColumnCount(3)
@@ -51,10 +82,9 @@ class PositionWidget(QtGui.QWidget):
 
         self.position_table.setHorizontalHeaderLabels(["Feature","X","Y", "Size\nw.r.t Height", "Colors"])
         self.layout = QtGui.QVBoxLayout()
-        self.layout.addWidget(self.use_enforced_coordinates)
+        self.layout.addLayout(buttons_layout)
         self.layout.addWidget(self.show_position_markers)
-        self.layout.addWidget(self.export_coordinates_button)
-        self.layout.addWidget(self.load_coordinates_button)
+        self.layout.addLayout(more_buttons_layout)
         self.layout.addWidget(self.position_table)
         for label in self.row_widgets.keys():
             limit  = 100000
@@ -68,10 +98,16 @@ class PositionWidget(QtGui.QWidget):
         self.setLayout(self.layout)
 
     def setCoords(self, coords):
+        success = True
         for label in coords.keys():
-            self.row_widgets[label][0].setValue(coords[label][0])
-            self.row_widgets[label][1].setValue(coords[label][1])
-
+            accepted_labels = ["Parent"] + ["USP-%d"%(i+1) for i in range(10)]
+            if label in accepted_labels:
+                self.row_widgets[label][0].setValue(coords[label][0])
+                self.row_widgets[label][1].setValue(coords[label][1])
+            else:
+                success = False
+                print "%s is not an acceptable label. Check the JSON."%label
+        return success
     def getCoords(self):
         coords = {}
         for label in self.row_widgets.keys():
@@ -84,8 +120,17 @@ class PositionWidget(QtGui.QWidget):
     def showPositionMarkers(self):
         return self.show_position_markers.isChecked()
 
-    def useEnforcedCoordinates(self):
-        return self.use_enforced_coordinates.isChecked()
+    def getCoordinatesMode(self):
+        if self.use_calculated_coordinates.isChecked():
+            mode = 0
+        elif self.use_enforced_USP_coordinates.isChecked():
+            mode = 1
+        elif self.use_enforced_coordinates.isChecked():
+            mode = 2
+        else:
+            print "Error getting the mode of the coordinates in PositionWidget, none of the buttons seem to be checked."
+            mode = 0
+        return mode
 
     def exportCoordinates(self):
         save_file_name = QtGui.QFileDialog.getSaveFileName(self, "Save Settings To a JSON",
@@ -104,9 +149,13 @@ class PositionWidget(QtGui.QWidget):
             if os.path.isfile(open_file_name):
                 with open(open_file_name) as json_file_handler:
                     coords = json.load(json_file_handler)
-                self.setCoords(coords)
-                self.use_enforced_coordinates.setChecked(True)
-
+                success = self.setCoords(coords)
+                if success:
+                    self.alertMessage("Success","Successfully loaded the coordinates from the JSON.")
+                    self.use_enforced_coordinates.setChecked(True)
+                else:
+                    self.alertMessage("Failure","The JSON doesn't seem to be valid. You must have loaded the settings file instead of the coordinates file!")
+                    subprocess.call('explorer /select,"%s"'%self.open_file_name, shell=True)
 
     def setColors(self, colors_list):
         for color in colors_list:
@@ -130,3 +179,6 @@ class PositionWidget(QtGui.QWidget):
                     s = str(Colors)
                     print s
                     self.clip.setText(s)
+
+    def alertMessage(self, title, message):
+        QtGui.QMessageBox.about(self, title, message)

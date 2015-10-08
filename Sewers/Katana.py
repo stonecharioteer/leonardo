@@ -114,9 +114,13 @@ def getMergedFlipkartBrandImage(brand=None, repo_path=None):
     #Paste the fk logo onto the left.
     flipkart_image_position = (35,int((canvas_size[1]-flipkart_image.size[1])/2))
     final_image.paste(flipkart_image, flipkart_image_position, flipkart_image)
-    if (brand is not None):
+    if (brand is None):
+        print "Brand information not provided."
+    else:
         brand_image_paths = getBrandImagePaths(brand, repo_path)
-        if len(brand_image_paths) >0:
+        if len(brand_image_paths) <= 0:
+            print "No image for %s brand available."%brand
+        else:
             #Open the brand image.
             original_brand_image = Image.open(brand_image_paths[0]).convert("RGBA")
             #Scale the brand image respective to the flipkart image's height.
@@ -979,7 +983,7 @@ def getIcons(
         found_icon = (len(icon_paths)>0) #Found an icon?
         if found_icon:
             if position_markers is not None:
-                print position_markers
+                #print position_markers
                 attribute_text = "USP-%s "%position_markers[counter] + attribute["Description Text"]
             else:
                 attribute_text = attribute["Description Text"]

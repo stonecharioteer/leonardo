@@ -59,7 +59,7 @@ class Splinter(QtCore.QThread):
         self.use_icon_color_for_font_color = True
         self.bypass_parent_image_cleanup = False
         self.parent_image_paths = None
-        self.use_enforced_coords = False
+        self.coordinates_mode = 0
         self.show_position_markers = False
 
         if not self.isRunning():
@@ -295,10 +295,10 @@ class Splinter(QtCore.QThread):
 
         if self.show_position_markers:
             position_markers = [i+1 for i in range(len(primary_attribute_data + secondary_attribute_data))]
-            print position_markers 
+            #print position_markers 
+            #print primary_position_markers, secondary_position_markers
             primary_position_markers = position_markers[:len(primary_attribute_data)]
             secondary_position_markers = position_markers[len(primary_attribute_data):]
-            print primary_position_markers, secondary_position_markers
         else:
             primary_position_markers = None
             secondary_position_markers = None
@@ -335,13 +335,22 @@ class Splinter(QtCore.QThread):
                                                     use_icon_color_for_font_color, 
                                                     icon_font_size,
                                                     secondary_position_markers)
-        #Based on the input control parameters, get the coordinates for the parent image.
-        if not self.use_enforced_coords:
+        if self.coordinates_mode in (0,1):
+            #Based on the input control parameters, get the coordinates for the parent image.
             message = "Getting parent image coordinates corresponding to %s for %s."%(parent_image_positioning, fsn)
             self.sendMessage.emit(message, self.last_eta, self.thread_index)
             if parent_image_positioning == "Random":
                 parent_image_positioning = Katana.getRandomParentImagePlacementPoints()
             parent_image_coords = Katana.getParentImageCoords(base_image.size,parent_image_size, parent_image_positioning)
+            coords = {"Parent": parent_image_coords}
+            self.sendCoords.emit(coords)
+
+        else:
+            message = "Using retrieved parent image coordinates for %s"%(fsn)
+            self.sendMessage.emit(message, self.last_eta, self.thread_index)
+            parent_image_coords = tuple([int(pos) for pos in self.enforced_coords["Parent"]])
+
+        if self.coordinates_mode == 0:
             counter = 0
             icons_and_coordinates = Katana.getIconsAndCoordinates(
                                                 base_image, 
@@ -365,9 +374,11 @@ class Splinter(QtCore.QThread):
                     coords[label] = [0,0]
             self.sendCoords.emit(coords)
         else:
-            message =  "Using Enforced coordinates for %s!"%fsn
+            if self.coordinates_mode == 2:
+                message =  "Using Enforced coordinates for only USPs for %s!"%fsn
+            else:
+                message =  "Using Enforced coordinates for USPs and parent image for %s!"%fsn
             self.sendMessage.emit(message, self.last_eta, self.thread_index)
-            parent_image_coords = tuple([int(pos) for pos in self.enforced_coords["Parent"]])
             icon_data = primary_attributes_and_icons_data + secondary_attribute_data
             icons_and_coordinates = []
             counter=1
@@ -398,18 +409,20 @@ class Splinter(QtCore.QThread):
                     message = "Encountered a problem while pasting the icon on base image at %s for %s." %(icon["Position"],fsn)
                 self.sendMessage.emit(message, self.last_eta, self.thread_index)
                 raise
-        message = "Final preparations are ongoing for %s."%(fsn)
+        message = "Getting the final canvas for %s."%(fsn)
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
+        #Get an empty canvas that can fit the other layers.
         merged_base_image = Katana.getFinalBaseImage(base_image)
 #        merged_base_image.paste(
 #                    fk_brand_icon,
 #                    (int(fk_brand_icon.size[0]*0.005),0), 
 #                    fk_brand_icon
 #                )
-        #Paste the base image.
+        #Paste the layer holding the parent image and the icons here..
+
         merged_base_image.paste(
                     base_image, 
-                    (int(fk_brand_icon.size[0]*0.05), int(fk_brand_icon.size[1]*1.05)), 
+                    (0, int(fk_brand_icon.size[1])), 
                     base_image
                 )
 
@@ -423,6 +436,8 @@ class Splinter(QtCore.QThread):
         message = "Adjusting for the margin for %s."%(fsn)
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
         resized_base_image = merged_base_image.resize(resized_dimensions, resample=PIL.Image.ANTIALIAS)
+        message = "Calculating the position after reducing for the margin for %s."%(fsn)
+        self.sendMessage.emit(message, self.last_eta, self.thread_index)
         base_image_x = (background_image.size[0]-resized_base_image.size[0])/2
         base_image_y = (background_image.size[1]-resized_base_image.size[1])/4
         base_image_coords = (
