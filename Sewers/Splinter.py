@@ -61,6 +61,9 @@ class Splinter(QtCore.QThread):
         self.parent_image_paths = None
         self.coordinates_mode = 0
         self.show_position_markers = False
+        self.icon_shape_color = self.colors_list[0]
+        self.use_icon_color_for_shape_color = True
+        self.preserve_icon_shape_color = False
 
         if not self.isRunning():
             self.start(QtCore.QThread.LowPriority)
@@ -316,7 +319,10 @@ class Splinter(QtCore.QThread):
                                                     font_color, 
                                                     use_icon_color_for_font_color, 
                                                     icon_font_size,
-                                                    primary_position_markers)
+                                                    primary_position_markers,
+                                                    self.icon_shape_color,
+                                                    self.use_icon_color_for_shape_color,
+                                                    self.preserve_icon_shape_color)
 
         message = "Getting secondary attribute data image for %s."%fsn
         self.sendMessage.emit(message, self.last_eta, self.thread_index)
@@ -334,7 +340,10 @@ class Splinter(QtCore.QThread):
                                                     font_color, 
                                                     use_icon_color_for_font_color, 
                                                     icon_font_size,
-                                                    secondary_position_markers)
+                                                    secondary_position_markers,
+                                                    self.icon_shape_color,
+                                                    self.use_icon_color_for_shape_color,
+                                                    self.preserve_icon_shape_color)
         if self.coordinates_mode in (0,1):
             #Based on the input control parameters, get the coordinates for the parent image.
             message = "Getting parent image coordinates corresponding to %s for %s."%(parent_image_positioning, fsn)

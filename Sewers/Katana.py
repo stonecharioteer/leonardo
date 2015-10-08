@@ -955,6 +955,9 @@ def getIcons(
             use_icon_color_for_font_color=None, 
             icon_font_size=None,
             position_markers=None,
+            icon_shape_color=None,
+            use_icon_color_for_shape_color=None,
+            preserve_icon_shape_color=None,
             multiprocess=None, 
             manager_return_handle=None, 
             manager_return_dict=None):
@@ -998,7 +1001,10 @@ def getIcons(
                                     preserve_icon_original_colors, 
                                     font, font_color, 
                                     use_icon_color_for_font_color, 
-                                    icon_font_size)
+                                    icon_font_size,
+                                    icon_shape_color,
+                                    use_icon_color_for_shape_color,
+                                    preserve_icon_shape_color)
 
             attribute.update({"Icon": icon_with_text})
         else:
@@ -1017,7 +1023,10 @@ def getIcons(
                                     font, 
                                     font_color, 
                                     use_icon_color_for_font_color, 
-                                    icon_font_size)
+                                    icon_font_size,
+                                    icon_shape_color,
+                                    use_icon_color_for_shape_color,
+                                    preserve_icon_shape_color)
 
             attribute.update({"Icon": icon_with_text})
             attributes_without_icons.append(attribute["Attribute"])
@@ -1107,7 +1116,10 @@ def getIconImage(
     font_path=None, 
     font_color=None, 
     use_icon_color_for_font_color=None, 
-    icon_font_size=None):
+    icon_font_size=None,
+    icon_shape_color=None,
+    use_icon_color_for_shape_color=None,
+    preserve_icon_shape_color=None):
     """This method generates an image object which contains the icon image 
     as well as the description text."""
     import textwrap

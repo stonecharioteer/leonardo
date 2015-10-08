@@ -120,7 +120,7 @@ class LayoutDesigner(QtGui.QWidget):
             allow_overlap_value = settings_from_json["Allow Icons Overlap"]
             if type(allow_overlap_value) != bool:
                 allow_overlap_value = False
-            self.allow_overlap_checkbox.setChecked(allow_overlap_value)
+            #self.allow_overlap_checkbox.setChecked(allow_overlap_value)
 
         #Set the boolean to allow icons without text.
         if "Allow Icons Without Text" in settings_from_json.keys():
@@ -401,6 +401,10 @@ class LayoutDesigner(QtGui.QWidget):
                 self.splinter_thread.coordinates_mode = self.getCoordinatesMode()
                 self.splinter_thread.enforced_coords = self.getCoords()
                 self.splinter_thread.show_position_markers = self.showPositionMarkers()
+                self.splinter_thread.icon_shape_color = self.getIconBoundingBoxColor()
+                self.splinter_thread.use_icon_color_for_shape_color = self.useIconColorForBoundingBoxColor()
+                self.splinter_thread.preserve_icon_shape_color = self.preserveIconBoundingBoxColor()
+
                 self.splinter_thread.allow_run = True
 
     def setFSNs(self, fsn_data):
@@ -527,6 +531,9 @@ class LayoutDesigner(QtGui.QWidget):
         for counter in range(len(icon_shape_paths)):
             self.icon_bounding_box_combobox.addItem(QtGui.QIcon(icon_shape_paths[counter]),icon_names[counter])
         self.icon_bounding_box_combobox.setIconSize(QtCore.QSize(35,35))
+        self.icon_shape_color_label = QtGui.QLabel("Icon Bounding Box Color:")
+        self.icon_shape_color = QColorButton()
+
         #Create layout and return the overall widget.
         layout_panel_layout = QtGui.QGridLayout()
         layout_panel_layout.addWidget(self.background_selection_label,0, 0)
@@ -537,6 +544,8 @@ class LayoutDesigner(QtGui.QWidget):
         layout_panel_layout.addWidget(self.icon_arrangement_rectangular, 3, 1, 1, 1, QtCore.Qt.AlignLeft)
         layout_panel_layout.addWidget(self.icon_bounding_box_label, 4, 0, 1, 1, QtCore.Qt.AlignRight)
         layout_panel_layout.addWidget(self.icon_bounding_box_combobox, 4, 1, 1, 1, QtCore.Qt.AlignLeft)
+        layout_panel_layout.addWidget(self.icon_shape_color_label, 5, 1, 1, 1, QtCore.Qt.AlignLeft)
+        layout_panel_layout.addWidget(self.icon_shape_color, 5, 1, 1, 1, QtCore.Qt.AlignLeft)
         layout_panel = QtGui.QWidget()
         layout_panel.setLayout(layout_panel_layout)
         self.changeBackground()
@@ -628,28 +637,32 @@ class LayoutDesigner(QtGui.QWidget):
         self.product_image_scale_spinbox.setSuffix("%")
 
         #Widget for controlling primary and secondary attribute icon sizes.
-        self.primary_attr_icon_size_label = QtGui.QLabel("Set Primary Attribute Icon\nRelative Size:")
+        self.primary_attr_icon_size_label = QtGui.QLabel("Set Primary Attr. Icon\nRelative Size:")
         self.primary_attr_icon_size_spin_box = QtGui.QSpinBox()
         self.primary_attr_icon_size_spin_box.setSuffix("%")
         self.primary_attr_icon_size_spin_box.setToolTip("This sets the size of the primary attribute icons, at a percentage relative to the background image.")
         self.primary_attr_icon_size_spin_box.setRange(5,20)
-        self.secondary_attr_icon_size_label = QtGui.QLabel("Set Secondary Attribute Icon\nRelative Size:")
+        self.secondary_attr_icon_size_label = QtGui.QLabel("Set Secondary Attr. Icon\nRelative Size:")
         self.secondary_attr_icon_size_spin_box = QtGui.QSpinBox()
         self.secondary_attr_icon_size_spin_box.setSuffix("%")
         self.secondary_attr_icon_size_spin_box.setToolTip("This sets the size of the secondary attribute icons, at a percentage relative to the background image.")
         self.secondary_attr_icon_size_spin_box.setRange(5,20)
         #For changing color replacement algorithm.
-        self.use_simple_color_replacement = QtGui.QCheckBox("Use a Simple Colour Extraction Method to remove Parent Image Background.")
-        self.use_simple_color_replacement.setToolTip("If selected, the code just finds the likely background color and removes it from the entire message.\nThis method saves a large amount of runtime.\nThis is a risky method if the product image has similar colors, or if the image quality is dodgy.\nExercise with caution.")
+        self.use_simple_color_replacement = QtGui.QPushButton("Use Simple Cleanup.")
+        self.use_simple_color_replacement.setCheckable(True)
+        self.use_simple_color_replacement.setToolTip("If checked, the code just finds the likely background color and removes it from the entire message.\nThis method saves a large amount of runtime.\nThis is a risky method if the product image has similar colors, or if the image quality is dodgy.\nExercise with caution.")
         #For changing background color replacement algorithm's threshold.
-        self.background_color_threshold_label = QtGui.QLabel("Threshold for Background Color Extraction:")
+        self.background_color_threshold_label = QtGui.QLabel("Cleanup Threshold:")
         self.background_color_threshold_spinbox = QtGui.QSpinBox()
         self.background_color_threshold_spinbox.setPrefix(u"\u00B1")
         self.background_color_threshold_spinbox.setRange(0,255)
         self.background_color_threshold_spinbox.setToolTip("Choose a threshold for the background color elimination algorithm.\n Note that setting a very high threshold will remove most of the colours from the image.\nExercise with caution.\nA value around 10-30 is recommended. 20 has been found to be optimum.")
         #To allow icons to overlap the parent image.
-        self.allow_overlap_checkbox = QtGui.QCheckBox("Allow Icons to Overlap the Parent Image")
-        self.allow_overlap_checkbox.setToolTip("This allows the icons to be placed over the parent image.\nIcons themselves will never overlap.\nUse with caution, as icon placement becomes messy when enabled.\nThis is best used for small batches.")
+        #self.allow_overlap_checkbox = QtGui.QPushButton("Allow Overlaps")
+        #self.allow_overlap_checkbox.setCheckable(True)
+        #self.allow_overlap_checkbox.setToolTip("This allows the icons to be placed over the parent image.\nIcons themselves will never overlap.\nUse with caution, as icon placement becomes messy when enabled.\nThis is best used for small batches.")
+        #self.allow_overlap_checkbox.setToolTip("This isn't activated in the backend of the code.")
+
         #Widget to control the overall margin.
         self.image_margin_label = QtGui.QLabel("Margin:")
         self.image_margin_spinbox = QtGui.QDoubleSpinBox()
@@ -658,7 +671,7 @@ class LayoutDesigner(QtGui.QWidget):
         self.image_margin_spinbox.setSuffix("%")
         self.image_margin_spinbox.setToolTip("Select a margin, as a percentage of the background, for the background image.")
         #Parent Image resize factor and reference controls.
-        self.parent_image_resize_reference_instruction = QtGui.QLabel("Resize Parent Image By:")
+        self.parent_image_resize_reference_instruction = QtGui.QLabel("Resize Reference:")
         self.parent_image_resize_reference = QtGui.QComboBox()
         self.parent_image_resize_reference.addItems(["Height","Width","Smart Fit"])
         self.parent_image_resize_reference.setToolTip("Choose whether to resize the product image with respect to the height or the width of the base image.")
@@ -679,36 +692,59 @@ class LayoutDesigner(QtGui.QWidget):
                                             QtCore.Qt.AlignLeft)
         self.aspect_ratio_widget_layout.addStretch(10)
         #Checkbox to allow icons without text.
-        self.allow_textless_icons_checkbox = QtGui.QCheckBox("Allow Icons Without Text")
+        self.allow_textless_icons_checkbox = QtGui.QPushButton("Allow Icons\nWithout Text")
+        self.allow_textless_icons_checkbox.setCheckable(True)
+        self.allow_textless_icons_checkbox.setToolTip("When checked, this will not put the icon name as icon text for those cells where text is absent.")
         #Preserve icon colors
-        self.preserve_icon_colors = QtGui.QCheckBox("Preserve Icon Colors")
+        self.preserve_icon_colors = QtGui.QPushButton("Keep Icon Colors")
+        self.preserve_icon_colors.setCheckable(True)
+        self.preserve_icon_colors.setToolTip("When checked, Leo will not try to change the colors of the icon.\nImproves run speed greatly.")
         #Fix the icon text case.
-        self.fix_icon_text_case = QtGui.QCheckBox("Convert USP Description Text to Title Case")
-        self.fix_icon_text_case.setToolTip("Force the first character of the USP description text to capitals. This could result in possible problems.")
-        #
-        self.use_category_specific_backgrounds = QtGui.QCheckBox("Use Category-Specific Background Images.")
-        #
-        self.use_icon_color_for_font_color = QtGui.QCheckBox("Use the first color from Icon palette as font color.")
+        self.fix_icon_text_case = QtGui.QPushButton("Convert Text\nto Title Case")
+        self.fix_icon_text_case.setCheckable(True)
+        self.fix_icon_text_case.setToolTip("Unless otherwise specified in the code, this will convert the\nfirst letter of each word to Uppercase.")
 
-        self.bypass_parent_image_cleanup = QtGui.QCheckBox("Bypass Parent Image Background Cleanup.")
-        self.bypass_parent_image_cleanup.setToolTip("This method is useful when running trials.\nIt won't attempt to clean the parent image, and it will paste it as-is.\nBe careful when using this.")
+        #
+        self.use_category_specific_backgrounds = QtGui.QPushButton("Use Category-Specific\nBackground Images")
+        self.use_category_specific_backgrounds.setCheckable(True)
+        self.use_category_specific_backgrounds.setToolTip("If checked, this tries to pull category-specific background images.\nNote that there are rules for this. The background image name will have to match this naming pattern:\n'Background CATEGORY PREFIX',\nthe prefix are the first three letters of the FSN, if you'd like vertical-level control.\nThe CATEGORY should match the category name in your dataset. If there's no image with the PREFIX, the algorithm searches for one with the CATEGORY in the name, without any verticals in it.\nSo, you can comfortably use category level, and then vertical level backgrounds.")
+        #
+        self.use_icon_color_for_font_color = QtGui.QPushButton("Use First Icon Colors\nas Font Colors")
+        self.use_icon_color_for_font_color.setCheckable(True)
+        self.use_icon_color_for_font_color.setToolTip("If checked, this will use the first icon color as the font color.\nThat will override the font color you've specified in the Icon and Font Panel.")
+        #
+        self.bypass_parent_image_cleanup = QtGui.QPushButton("Bypass Cleanup")
+        self.bypass_parent_image_cleanup.setCheckable(True)
+        self.bypass_parent_image_cleanup.setToolTip("This method is useful when running trials.\nIt won't attempt to clean the parent image, and it will paste it as-is.\nUse this if your artists have cleaned the image themselves.\nBe careful when using this.")
+
+        #
+        self.use_icon_color_for_shape_color = QtGui.QPushButton("Use First Icon Color\nFor Shape")
+        self.use_icon_color_for_shape_color.setCheckable(True)
+        self.use_icon_color_for_shape_color.setToolTip("When checked, Leonardo will replace the palette\nof the bounding box with the first color of the icon palette.")
+        #
+        self.preserve_icon_shape_color = QtGui.QPushButton("Preserve Icon\nShape Color")
+        self.preserve_icon_shape_color.setCheckable(True)
+        self.preserve_icon_shape_color.setToolTip("When checked, Leonardo will not try to replace the color\nof the bounding box for the USP icons.")
+        
         #Layout
         left_center_alignment = QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter
         left_top_alignment = QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop
         advanced_panel_layout = QtGui.QGridLayout()
+        #New Row
         row, column = 0, 0
         advanced_panel_layout.addWidget(self.image_margin_label, row, column, 
                                     left_center_alignment)
         column += 1
         advanced_panel_layout.addWidget(self.image_margin_spinbox, row, column, 
                                     left_center_alignment)
-        row += 1
-        column = 0
+        #row += 1
+        column +=1
         advanced_panel_layout.addWidget(self.product_image_scale_label, row, column, 
                                     left_center_alignment)
         column += 1
         advanced_panel_layout.addWidget(self.product_image_scale_spinbox, row, column, 
                                     left_center_alignment)
+        #New Row
         row += 1
         column = 0
         advanced_panel_layout.addWidget(self.parent_image_resize_reference_instruction, row, column,
@@ -716,13 +752,14 @@ class LayoutDesigner(QtGui.QWidget):
         column += 1
         advanced_panel_layout.addWidget(self.parent_image_resize_reference, row, column,
                                     left_center_alignment)
-        row += 1
-        column = 0
+        #row += 1
+        column += 1
         advanced_panel_layout.addWidget(self.final_image_aspect_ratio_instruction, row, column, 
                                     left_center_alignment)
         column += 1
         advanced_panel_layout.addLayout(self.aspect_ratio_widget_layout, row, column, 
                                     left_center_alignment)
+        #New Row
         row += 1
         column = 0
         advanced_panel_layout.addWidget(self.primary_attr_icon_size_label, row, column, 
@@ -730,13 +767,14 @@ class LayoutDesigner(QtGui.QWidget):
         column += 1 
         advanced_panel_layout.addWidget(self.primary_attr_icon_size_spin_box, row, column, 
                                     left_center_alignment)
-        row += 1
-        column = 0
+        #row += 1
+        column += 1
         advanced_panel_layout.addWidget(self.secondary_attr_icon_size_label, row, column, 
                                     left_center_alignment)
         column += 1
         advanced_panel_layout.addWidget(self.secondary_attr_icon_size_spin_box, row, column, 
                                     left_center_alignment)
+        #New Row
         row += 1
         column = 0
         advanced_panel_layout.addWidget(self.background_color_threshold_label, row, column, 
@@ -744,42 +782,71 @@ class LayoutDesigner(QtGui.QWidget):
         column += 1
         advanced_panel_layout.addWidget(self.background_color_threshold_spinbox, row, column, 
                                     left_center_alignment)
+        #row += 1
+        column +=1
+        advanced_panel_layout.addWidget(self.use_simple_color_replacement, row, column,1,1, 
+                                    left_center_alignment)
+        
+        #row += 1
+        column +=1
+        advanced_panel_layout.addWidget(self.bypass_parent_image_cleanup, row, column,1,1, 
+                                    left_center_alignment)
+        #New Row
         row += 1
         column = 0
-        advanced_panel_layout.addWidget(self.use_simple_color_replacement, row, column,1,2, 
+        advanced_panel_layout.addWidget(self.preserve_icon_colors, row, column, 1, 1, 
+                                    left_center_alignment)
+        #row += 1
+        column +=1
+        advanced_panel_layout.addWidget(self.use_icon_color_for_font_color, row, column, 1, 1, 
+                                    left_center_alignment)
+        #row += 1
+        #column = 0
+        #advanced_panel_layout.addWidget(self.allow_overlap_checkbox, row, column, 1, 2, 
+        #                            left_center_alignment)
+        #row += 1
+        column += 1
+        advanced_panel_layout.addWidget(self.fix_icon_text_case, row, column, 1, 1, 
+                                    left_center_alignment)
+        #row += 1
+        column +=1
+        advanced_panel_layout.addWidget(self.allow_textless_icons_checkbox, row, column, 1, 1, 
                                     left_center_alignment)
         
         row += 1
-        column = 0
-        advanced_panel_layout.addWidget(self.bypass_parent_image_cleanup, row, column,1,2, 
-                                    left_center_alignment)
-        row += 1
-        column = 0
-        advanced_panel_layout.addWidget(self.preserve_icon_colors, row, column, 1, 2, 
+        column =0
+        advanced_panel_layout.addWidget(self.use_category_specific_backgrounds, row, column, 1, 1, 
                                     left_top_alignment)
-        row += 1
-        column = 0
-        advanced_panel_layout.addWidget(self.allow_overlap_checkbox, row, column, 1, 2, 
-                                    left_center_alignment)
-        row += 1
-        column = 0
-        advanced_panel_layout.addWidget(self.fix_icon_text_case, row, column, 1, 2, 
-                                    left_center_alignment)
-        
-        row += 1
-        column = 0
-        advanced_panel_layout.addWidget(self.use_category_specific_backgrounds, row, column, 1, 2, 
-                                    left_center_alignment)
+        #row += 1
+        column +=1
+        advanced_panel_layout.addWidget(self.preserve_icon_shape_color, row, column, 1, 2, 
+                                    left_top_alignment)
+        #row += 1
+        column +=1
+        advanced_panel_layout.addWidget(self.use_icon_color_for_shape_color, row, column, 1, 2, 
+                                    left_top_alignment)
 
-        row += 1
-        column = 0
-        advanced_panel_layout.addWidget(self.use_icon_color_for_font_color, row, column, 1, 2, 
-                                    left_center_alignment)
+        style_sheet = """
+                   .QPushButton {
+                            font: 8pt;
+                            }
+                    .QPushButton:checked {
+                                font: 8pt bold;
+                            }
+
+                """
+        self.use_simple_color_replacement.setStyleSheet(style_sheet)
+        self.bypass_parent_image_cleanup.setStyleSheet(style_sheet)
+        self.preserve_icon_colors.setStyleSheet(style_sheet)
+        self.use_icon_color_for_font_color.setStyleSheet(style_sheet)
+        #self..setStyleSheet(style_sheet)
+        #self..setStyleSheet(style_sheet)
+        self.fix_icon_text_case.setStyleSheet(style_sheet)
+        self.allow_textless_icons_checkbox.setStyleSheet(style_sheet)
+        self.use_category_specific_backgrounds.setStyleSheet(style_sheet)
+        self.preserve_icon_shape_color.setStyleSheet(style_sheet)
+        self.use_icon_color_for_shape_color.setStyleSheet(style_sheet)
         
-        row += 1
-        column = 0
-        advanced_panel_layout.addWidget(self.allow_textless_icons_checkbox, row, column, 1, 2, 
-                                    left_top_alignment)
         advanced_panel_layout.setColumnStretch(0, 0)
         advanced_panel_layout.setColumnStretch(1, 0)
         advanced_panel_layout.setColumnStretch(2, 10)
@@ -887,7 +954,8 @@ class LayoutDesigner(QtGui.QWidget):
         return self.position_widget.getCoords()
     
     def getOverlap(self):
-        return self.allow_overlap_checkbox.isChecked()
+        #return self.allow_overlap_checkbox.isChecked()
+        return False
 
     def getBackgroundImage(self):
         self.changeBackground()
@@ -895,6 +963,16 @@ class LayoutDesigner(QtGui.QWidget):
 
     def getIconBoundingBox(self):
         return str(self.icon_bounding_box_combobox.currentText())
+
+    def getIconBoundingBoxColor(self):
+        return self.icon_shape_color.getColor()
+
+    def useIconColorForBoundingBoxColor(self):
+        return self.use_icon_color_for_shape_color.isChecked()
+
+    def preserveIconBoundingBoxColor(self):
+        return self.preserve_icon_shape_color.isChecked()
+
 
     def getPrimaryAttrRelativeSize(self):
         return (self.primary_attr_icon_size_spin_box.value()/100)
