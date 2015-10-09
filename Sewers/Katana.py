@@ -928,9 +928,13 @@ def getResizedImage(image_to_resize,resize_factor,resize_by,base_image_size):
         resized_height = resize_factor*base_image_height
         resized_width = image_to_resize_original_width*resized_height/image_to_resize_original_height
     resized_dimensions = (int(resized_width),int(resized_height))
-    #if (resized_height > image_to_resize_original_height) or (resized_width > image_to_resize_original_width):
-    #    print "Requested image is being stretched. Use caution when doing this."
-    resized_image = image_to_resize.resize(resized_dimensions, resample=PIL.Image.ANTIALIAS)
+    if (resized_width < image_to_resize_original_width) or (resized_height <image_to_resize_original_height):
+        resized_image = image_to_resize.resize(resized_dimensions, resample=PIL.Image.ANTIALIAS)
+    elif (resized_width > image_to_resize_original_width) or (resized_height > image_to_resize_original_height):
+        #print "Requested image is being stretched. Use caution when doing this."
+        resized_image = image_to_resize.resize(resized_dimensions, resample=PIL.Image.BICUBIC)
+    else:
+        resized_image = image_to_resize
     return resized_image
 
 def getParentImageCoords(base_image_size, parent_image_size, parent_image_positioning):
