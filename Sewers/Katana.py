@@ -1361,6 +1361,9 @@ def getListAsChunks(list_object, chunk_size):
     n = max(1, chunk_size)
     return [list_object[i:i+chunk_size] for i in range(0, len(list_object), chunk_size)]
 
+def getImageDimensions(image_path):
+    return Image.open(image_path).size
+
 def stripBGInBatches(image_batch, process_lock, process_id, output_path, threshold=None):
     from multiprocessing import Process, Pool, Queue, Lock
     from PIL import Image
