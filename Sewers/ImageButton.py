@@ -9,8 +9,9 @@ class ImageButton(QtGui.QPushButton):
         if height is None:
             height = 75
         if width is None:
-            width = 50
-        image_pixmap = QtGui.QPixmap(image_path)
+            width = 75
+        type = os.path.splitext(os.path.basename(str(image_path)))[1]
+        image_pixmap = QtGui.QPixmap(image_path, type)
         image_pixmap = image_pixmap.scaled(
                                         QtCore.QSize(width, height),
                                         QtCore.Qt.KeepAspectRatio, 

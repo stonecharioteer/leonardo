@@ -25,7 +25,7 @@ class ImageButtonLine(QtGui.QWidget):
         if len(self.images_list) != 0:
             self.buttons = [ImageButton(image_path) for image_path in self.images_list]
             images_dimensions = [Katana.getImageDimensions(image_path) for image_path in self.images_list]
-            self.labels = [QtGui.QLabel("(%d x %d)\n(%s)"%(width, height, os.path.splitext(os.path.basename(image_path))[1])) for ((width, height), image_path) in zip(images_dimensions,self.images_list)]
+            self.labels = [QtGui.QLabel("(%d x %d)\n(%s)"%(width, height, os.path.basename(image_path))) for ((width, height), image_path) in zip(images_dimensions,self.images_list)]
             self.has_image = True
         else:
             self.has_image = False
@@ -40,7 +40,7 @@ class ImageButtonLine(QtGui.QWidget):
         for button, label in zip(self.buttons, self.labels):
             button.setCheckable(True)
             button_label_layouts.append(QtGui.QVBoxLayout())
-            button_label_layouts[-1].addWidget(button,1, QtCore.Qt.AlignTop | QtCore.Qt.AlignHCenter)
+            button_label_layouts[-1].addWidget(button, 1, QtCore.Qt.AlignVCenter | QtCore.Qt.AlignHCenter)
             button_label_layouts[-1].addWidget(label,0, QtCore.Qt.AlignBottom | QtCore.Qt.AlignHCenter)
             self.layout.addLayout(button_label_layouts[-1])
             self.logic_group.addButton(button)
