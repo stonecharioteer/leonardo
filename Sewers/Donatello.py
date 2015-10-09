@@ -43,7 +43,7 @@ class MonaLisa(QtGui.QPushButton):
         image_pixmap = QtGui.QPixmap(image_path, type)
         icon = QtGui.QIcon(image_pixmap)
         self.setIcon(icon)
-        print image_pixmap.rect().size()
+        #print image_pixmap.rect().size()
         pixmap_size = image_pixmap.rect().size()
         self.setIconSize(pixmap_size)
         icon_size = QtCore.QSize(100, 100) if ((pixmap_size.width() < 100) or (pixmap_size.height() < 100)) else image_pixmap.rect().size()
@@ -95,17 +95,26 @@ class Donatello(QtGui.QWidget):
         self.slider.setValue(100)
         self.slider_value_label = QtGui.QLabel("%d%%"%self.slider.value())
         self.slider.valueChanged.connect(self.zoomInOut)
+        self.slider.setTickInterval(10)
+        self.slider.setTickPosition(2)
 
-        slider_layout = QtGui.QHBoxLayout()
-        slider_layout.addWidget(self.slider_label, 0)
-        slider_layout.addWidget(self.slider, 5)
-        slider_layout.addWidget(self.slider_value_label, 0)
+
+        self.clearance_label = QtGui.QLabel("Pixel Clearance:")
+        self.clearance = QtGui.QSpinBox()
+        self.clearance.setRange(0,10000)
 
         settings = QtGui.QHBoxLayout()
-        settings.addWidget(self.strip_type_label)
-        settings.addWidget(self.strip_type_combo_box)
-        settings.addWidget(self.strip_threshold_label)
-        settings.addWidget(self.strip_threshold_spinbox)
+        settings.addWidget(self.strip_type_label,0)
+        settings.addWidget(self.strip_type_combo_box,0)
+        settings.addWidget(self.strip_threshold_label,0)
+        settings.addWidget(self.strip_threshold_spinbox,0)
+        settings.addWidget(self.clearance_label,0)
+        settings.addWidget(self.clearance,0)
+        
+        settings.addWidget(self.slider_label, 0)
+        settings.addWidget(self.slider, 5)
+        settings.addWidget(self.slider_value_label, 0)
+
         limit = 100000
 
         self.start_x.setRange(-limit, limit)
@@ -118,11 +127,20 @@ class Donatello(QtGui.QWidget):
         scrollable_widget = QtGui.QScrollArea()
         scrollable_widget.setWidget(self.mona)
         scrollable_widget.setWidgetResizable(True)
-        scrollable_widget.setFixedHeight(400)
-        scrollable_widget.setFixedWidth(800)
+        scrollable_widget.setMinimumHeight(400)
+        scrollable_widget.setMinimumWidth(400)
+        #scrollable_widget.setFixedWidth(800)
 
         self.progress_bar = ProgressBar()
         self.status = QtGui.QLabel("Cowabunga!")
+        self.chosen_color = QtGui.QPushButton()
+        self.chosen_color.setEnabled(False)
+        self.chosen_color.setFixedSize(15,15)
+        self.chosen_color.setToolTip("Color at the chosen pixel")
+
+        status_bar = QtGui.QHBoxLayout()
+        status_bar.addWidget(self.status,10)
+        status_bar.addWidget(self.chosen_color)
 
         buttons = QtGui.QHBoxLayout()
         buttons.addWidget(self.load_button)
@@ -133,6 +151,7 @@ class Donatello(QtGui.QWidget):
         file_name = QtGui.QHBoxLayout()
         file_name.addWidget(self.file_name_label,0)
         file_name.addWidget(self.file_name_line_edit,1)
+        
         coords = QtGui.QHBoxLayout()
         coords.addWidget(self.start_label)
         coords.addWidget(self.start_x)
@@ -146,10 +165,9 @@ class Donatello(QtGui.QWidget):
         layout.addLayout(file_name,0)
         layout.addLayout(coords,0)
         layout.addLayout(settings, 0)
-        layout.addLayout(slider_layout,0)
-        layout.addWidget(scrollable_widget,2, QtCore.Qt.AlignHCenter)
+        layout.addWidget(scrollable_widget,2)
         layout.addWidget(self.progress_bar,0)
-        layout.addWidget(self.status,0 )
+        layout.addLayout(status_bar,0)
 
         self.setLayout(layout)
 
@@ -193,24 +211,69 @@ class Donatello(QtGui.QWidget):
 
         self.slider_value_label.setText("%d%%"%int(self.slider.value()))
         self.mona.zoomInOut(int(self.slider.value()))
+
     def cleanImage(self):
-        start, stop = self.mona.getCoords()
+        start, end = self.mona.getCoords()
         image_path = self.current_file
         threshold = self.strip_threshold_spinbox.value()
-        self.cleanImageRectangle(image_path, start, stop, threshold)
+        clearance_pixels = self.clearance.value()
+        self.cleanImageRectangle(image_path, start, end, threshold, clearance_pixels)
 
-    def cleanImageRectangle(self, image_path, start, stop, threshold):
-        image_object = Image.open(image_path)
+    def cleanImageRectangle(self, image_path, start, end, threshold, clearance_pixels):
+        image_object = Image.open(image_path).convert("RGBA")
         start_x, start_y = start
+        end_x, end_y = end
         image_array = np.array(image_object)
+        #print image_object.size, image_array.shape
+        
         #Remember: x is columns, y is rows in an array.
         chosen_color = image_array[start_y][start_x]
-        print "Received a request for cleaning %s in an image between "%chosen_color, start, stop
+
+        #print "Received a request for cleaning %s in an image between "%chosen_color, start, end
+        r, g, b, a = chosen_color
+        min_r = r-threshold
+        max_r = r+threshold
+
+        min_g = g-threshold
+        max_g = g+threshold
+        
+        min_b = b-threshold
+        max_b = b+threshold
+
+        self.chosen_color.setStyleSheet("background-color: rgb(%d,%d,%d);"%(r,g,b))
         #print chosen_color
         clean_down = True
         #Along one row, proceed forward in the column
-        image_row_index = start_y
-        image_column_index = start_y
+        min_row = min(start_y,end_y)
+        min_col = min(start_x, end_x)
+        max_row = max(start_y, end_y)
+        max_col = max(start_x, end_x)
+        rows, columns, rgba = image_array.shape
+        if max_row >= rows:
+            max_row = rows-1
+        if max_col >= columns:
+            max_col = columns-1 
+        current_row = min_row 
+        while current_row <= (max_row+clearance_pixels):
+            current_col = min_col
+            while current_col <= (max_col+clearance_pixels):
+                current_r, current_g, current_b, current_a = image_array[current_row][current_col]
+                if min_r <= current_r <= max_r:
+                    if min_g <= current_g <= max_g:
+                        if min_b <= current_b <= max_b:
+                            image_array[current_row][current_col] = [0,0,0,0]
+                current_col +=1
+            current_row += 1
+        print "*"*10
+        print start, end
+
+        print max_row, max_col
+        print current_row, current_col
+        print "*"*10
+        new_image = Image.fromarray(image_array, mode="RGBA")
+        new_image.save("test.png")
+        os.startfile("test.png","open")
+
         #while clean_down:
 
 
