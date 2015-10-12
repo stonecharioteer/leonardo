@@ -68,7 +68,7 @@ class QColorPanel(QWidget):
         #Loop and set the colors and add to the layout.
         counter = 0
         for button in self.buttons_list:
-            button.setFixedSize(button_size)
+            button.setFixedSize(20,20)
             layout.addWidget(button, 0)
             button_style_sheet = """QPushButton {
                                 background-color: rgb(%d,%d,%d);
@@ -80,7 +80,7 @@ class QColorPanel(QWidget):
             button.setStyleSheet(button_style_sheet)
             counter += 1
 
-        self.setMaximumHeight(button_size.height()*1.5)
+        #self.setMaximumHeight(button_size.height()*1.5)
         self.setLayout(layout)
 
     def getColorDiff(self,color_1,color_2):

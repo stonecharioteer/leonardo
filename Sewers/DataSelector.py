@@ -1,9 +1,8 @@
 import os, csv, datetime
 from PyQt4 import QtGui, QtCore
 from FSNTextEdit import FSNTextEdit
-from IconButton import IconButton
+from ImageButton import ImageButton
 from FileLocationWidget import FileLocationWidget
-from PrimaryButton import PrimaryButton
 from QColorButton import QColorButton
 from FKRetriever import FKRetriever
 from IconListBox import IconListBox
@@ -100,7 +99,7 @@ class DataSelector(QtGui.QWidget):
 
         #CSV Mode Widget
         self.csv_mode_widget = QtGui.QWidget()
-        self.input_data_set_button = IconButton(os.path.join("essentials","csv_file.png"))
+        self.input_data_set_button = ImageButton(os.path.join("essentials","csv_file.png"), 50, 50)
         self.input_data_set_button.setToolTip("Click to select a data file if you want manual control.")
         self.check_icons_button = QtGui.QPushButton("Check Icon Availability\nand Export Report")
         csv_mode_layout = QtGui.QHBoxLayout()
@@ -115,7 +114,7 @@ class DataSelector(QtGui.QWidget):
         self.fsn_or_csv_stacked_widget.addWidget(self.fsn_mode_scroll_view)
         self.fsn_or_csv_stacked_widget.addWidget(self.csv_mode_widget)
 
-        self.validate_button  = IconButton(os.path.join("essentials","validate.png"))
+        self.validate_button  = ImageButton(os.path.join("essentials","validate.png"),50,50)
         layout = QtGui.QGridLayout()
         layout.addWidget(self.page_selector,0,0,1,2, QtCore.Qt.AlignHCenter)
         layout.addWidget(self.fsn_or_csv_stacked_widget,1,0,1,2)

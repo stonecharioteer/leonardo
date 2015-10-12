@@ -3,7 +3,7 @@ import os, glob, random
 import json
 from PyQt4 import QtGui, QtCore
 from FSNTextEdit import FSNTextEdit
-from IconButton import IconButton
+from ImageButton import ImageButton
 #from FileLocationWidget import FileLocationWidget
 from PrimaryButton import PrimaryButton
 from QColorButton import QColorButton
@@ -205,8 +205,8 @@ class LayoutDesigner(QtGui.QWidget):
     def createUI(self):        
         self.preview_group_box = self.createPreviewWidget()
         self.settings_group_box = self.createSettingsWidget()
-        self.validate_button  = IconButton(os.path.join("essentials","validate.png"))
-        self.validate_button.setToolTip("Validate and Proceed")
+        #self.validate_button  = ImageButton(os.path.join("essentials","validate.png"), 50, 50)
+        #self.validate_button.setToolTip("Validate and Proceed")
         self.fsn_list_box = QtGui.QListWidget()
         self.fsn_list_box.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
         self.fsn_list_box.setFixedWidth(250)
@@ -216,8 +216,8 @@ class LayoutDesigner(QtGui.QWidget):
         final_ui_layout.addWidget(self.settings_group_box,0, 1, 10, 6)
         final_ui_layout.addWidget(self.preview_group_box,0, 7, 10, 4, 
                                 QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
-        final_ui_layout.addWidget(self.validate_button,10, 10, 1, 1, 
-                                QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom)
+        #final_ui_layout.addWidget(self.validate_button,11, 10, 1, 1, 
+        #                        QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom)
         
         self.over_all_group_box = QtGui.QGroupBox("Design")
         self.over_all_group_box.setLayout(final_ui_layout)
@@ -510,12 +510,10 @@ class LayoutDesigner(QtGui.QWidget):
 
         #Create icon positions toggle buttons. Set default to circular.
         self.icon_arrangement_label = QtGui.QLabel("Icon Arrangement:")
-        self.icon_arrangement_circular = IconButton(os.path.join("essentials","circular_layout.png"))
-        self.icon_arrangement_circular.setSize(48,48)
+        self.icon_arrangement_circular = ImageButton(os.path.join("essentials","circular_layout.png"), 48, 48)
         self.icon_arrangement_circular.setCheckable(True)
         self.icon_arrangement_circular.setToolTip("This layout arranges the icons around the product image in arcs.")
-        self.icon_arrangement_rectangular = IconButton(os.path.join("essentials","rectangular_layout.png"))
-        self.icon_arrangement_rectangular.setSize(48,48)
+        self.icon_arrangement_rectangular = ImageButton(os.path.join("essentials","rectangular_layout.png"), 48, 48)
         self.icon_arrangement_rectangular.setCheckable(True)
         self.icon_arrangement_rectangular.setToolTip("This layout arranges the icons around the product image in linear stacks.")
         self.icon_arrangement_group = QtGui.QButtonGroup()

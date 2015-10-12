@@ -4,18 +4,27 @@ import os
 from PyQt4 import QtGui, QtCore
 from PIL import Image, ImageFilter
 import numpy as np
-
+from QColorButton import QColorButton
 from ProgressBar import ProgressBar
 
 class MonaLisa(QtGui.QPushButton):
     gotStart = QtCore.pyqtSignal(list)
     gotEnd = QtCore.pyqtSignal(list)
-    def __init__(self, *args, **kwargs):
+    def __init__(self, file_path, *args, **kwargs):
         super(MonaLisa, self).__init__(*args, **kwargs)
         self.start_point = QtCore.QPoint(0,0)
         self.end_point = QtCore.QPoint(0,0)
         self.createUI()
+        if file_path is not None:
+            if os.path.exists(file_path):
+                self.current_image = file_path
+            else:
+                self.current_image = os.path.join("essentials","na_parent_image.png")
+        else:
+            self.current_image = os.path.join("essentials","tmnt_cover.jpg")
+
         self.zoom_level = 100
+        self.setImage(self.current_image)
 
     def mousePressEvent(self, QMouseEvent):
         #print "Captured!"
@@ -32,12 +41,12 @@ class MonaLisa(QtGui.QPushButton):
         self.base_size = 350
         self.setFixedSize(self.base_size, self.base_size)
         self.setWindowTitle('MonaLisa')
-        self.show()
         self.setStyleSheet("QPushButton{border: 2px solid black; color: red;}")
 
     def getCoords(self):
-        
-        return [self.start_point.x()/self.zoom_level*100, self.start_point.y()/self.zoom_level*100], [self.end_point.x()/self.zoom_level*100,self.end_point.y()/self.zoom_level*100]
+        start = [self.start_point.x()/self.zoom_level*100, self.start_point.y()/self.zoom_level*100]
+        stop = [self.end_point.x()/self.zoom_level*100,self.end_point.y()/self.zoom_level*100]
+        return start, stop
     
     def setImage(self, image_path, zoom_level=None):
         if zoom_level is None:
@@ -71,7 +80,7 @@ class MonaLisa(QtGui.QPushButton):
 class Donatello(QtGui.QWidget):
     def __init__(self):
         super(Donatello, self).__init__()
-        self.current_file = None
+        self.current_file = os.path.join("essentials","tmnt_cover.jpg")
         self.createUI()
 
     def createUI(self):
@@ -79,7 +88,7 @@ class Donatello(QtGui.QWidget):
         self.revert_button = QtGui.QPushButton("Revert")
         self.clean_button = QtGui.QPushButton("Clean")
         self.save_button = QtGui.QPushButton("Save")
-        self.clean_button.setEnabled(False)
+        self.clean_button.setEnabled(True)
         self.save_button.setEnabled(False)
         self.revert_button.setEnabled(False)    
         
@@ -103,6 +112,7 @@ class Donatello(QtGui.QWidget):
         self.strip_threshold_spinbox = QtGui.QSpinBox()
         self.strip_threshold_spinbox.setPrefix(u"\u00B1")
         self.strip_threshold_spinbox.setRange(0, 255)
+        self.strip_threshold_spinbox.setValue(10)
         self.slider_label = QtGui.QLabel("Zoom:")
         self.slider = QtGui.QSlider(QtCore.Qt.Horizontal)
         self.slider.setRange(0,250)
@@ -118,6 +128,16 @@ class Donatello(QtGui.QWidget):
         self.clearance = QtGui.QSpinBox()
         self.clearance.setRange(0,10000)
 
+        self.replaced_color_label = QtGui.QLabel("Replace Color With:")
+        self.replacement_color_button = QColorButton()
+        self.replacement_color_button.setColorFromRGB([255,255,255])
+        self.alpha_label = QtGui.QLabel("Transparency (Alpha):")
+        self.alpha_spinbox = QtGui.QSpinBox()
+        self.alpha_spinbox.setRange(0,255)
+        self.alpha_spinbox.setValue(0)
+        self.pixel_movement_behaviour_label = QtGui.QLabel("Pixel Movement:")
+        self.pixel_movement_behaviour_combobox = QtGui.QComboBox()
+        self.pixel_movement_behaviour_combobox.addItems(["Forward, then Down", "Forward and Back, then Down", "Forward and Back, then Up and Down"])
         settings = QtGui.QHBoxLayout()
         settings.addWidget(self.strip_type_label,0)
         settings.addWidget(self.strip_type_combo_box,0)
@@ -125,10 +145,17 @@ class Donatello(QtGui.QWidget):
         settings.addWidget(self.strip_threshold_spinbox,0)
         settings.addWidget(self.clearance_label,0)
         settings.addWidget(self.clearance,0)
-        
-        settings.addWidget(self.slider_label, 0)
-        settings.addWidget(self.slider, 5)
-        settings.addWidget(self.slider_value_label, 0)
+        settings.addWidget(self.replaced_color_label,0)
+        settings.addWidget(self.replacement_color_button,0)
+        settings.addWidget(self.alpha_label,0)
+        settings.addWidget(self.alpha_spinbox,0)
+        settings.addWidget(self.pixel_movement_behaviour_label,0)
+        settings.addWidget(self.pixel_movement_behaviour_combobox,0)
+
+        slider_layout = QtGui.QHBoxLayout()
+        slider_layout.addWidget(self.slider_label, 0)
+        slider_layout.addWidget(self.slider, 5)
+        slider_layout.addWidget(self.slider_value_label, 0)
 
         limit = 100000
 
@@ -138,7 +165,7 @@ class Donatello(QtGui.QWidget):
         self.end_x.setRange(-limit, limit)
         self.end_y.setRange(-limit, limit)
 
-        self.mona = MonaLisa()
+        self.mona = MonaLisa(self.current_file)
         scrollable_widget = QtGui.QScrollArea()
         scrollable_widget.setWidget(self.mona)
         scrollable_widget.setWidgetResizable(True)
@@ -181,6 +208,7 @@ class Donatello(QtGui.QWidget):
         layout.addLayout(coords,0)
         layout.addLayout(settings, 0)
         layout.addWidget(scrollable_widget,2)
+        layout.addLayout(slider_layout,0)
         layout.addWidget(self.progress_bar,0)
         layout.addLayout(status_bar,0)
 
@@ -200,6 +228,12 @@ class Donatello(QtGui.QWidget):
     def captureStart(self, coords):
         self.start_x.setValue(coords[0])
         self.start_y.setValue(coords[1])
+        image_object = Image.open(self.current_file).convert("RGBA")
+        start_x, start_y = coords
+        image_array = np.array(image_object)
+        #Remember: x is columns, y is rows in an array.
+        r, g, b, a = image_array[start_y][start_x]
+        self.chosen_color.setStyleSheet("background-color: rgb(%d,%d,%d);"%(r,g,b))
 
     def captureEnd(self, coords):
         self.end_x.setValue(coords[0])
@@ -231,9 +265,11 @@ class Donatello(QtGui.QWidget):
         image_path = self.current_file
         threshold = self.strip_threshold_spinbox.value()
         clearance_pixels = self.clearance.value()
-        self.cleanImageRectangle(image_path, start, end, threshold, clearance_pixels)
+        replacement_color = self.replacement_color_button.getColor()
+        replacement_alpha = int(self.alpha_spinbox.value())
+        self.cleanImageRectangle(image_path, start, end, threshold, clearance_pixels, replacement_color, replacement_alpha)
 
-    def cleanImageRectangle(self, image_path, start, end, threshold, clearance_pixels):
+    def cleanImageRectangle(self, image_path, start, end, threshold, clearance_pixels, replacement_color, replacement_alpha):
         image_object = Image.open(image_path).convert("RGBA")
         start_x, start_y = start
         end_x, end_y = end
@@ -241,7 +277,11 @@ class Donatello(QtGui.QWidget):
         #print image_object.size, image_array.shape
         
         #Remember: x is columns, y is rows in an array.
-        chosen_color = image_array[start_y][start_x]
+        try:
+            chosen_color = image_array[start_y][start_x]
+        except:
+            print start, end
+            raise Exception("Error getting coordinates from the canvas.")
 
         #print "Received a request for cleaning %s in an image between "%chosen_color, start, end
         r, g, b, a = chosen_color
@@ -254,6 +294,7 @@ class Donatello(QtGui.QWidget):
         min_b = b-threshold
         max_b = b+threshold
 
+        replacement_color_rgba = list(replacement_color) + [replacement_alpha]
         self.chosen_color.setStyleSheet("background-color: rgb(%d,%d,%d);"%(r,g,b))
         #print chosen_color
         clean_down = True
@@ -275,7 +316,7 @@ class Donatello(QtGui.QWidget):
                 if min_r <= current_r <= max_r:
                     if min_g <= current_g <= max_g:
                         if min_b <= current_b <= max_b:
-                            image_array[current_row][current_col] = [0,0,0,0]
+                            image_array[current_row][current_col] = replacement_color_rgba
                 current_col +=1
             current_row += 1
         print "*"*10

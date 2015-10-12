@@ -29,13 +29,13 @@ class QColorButton(QWidget):
         icon = QIcon(icon_pixmap)
         
         icon_size = icon_pixmap.rect().size()
-        button_size = QSize(icon_size.width()*1.2,icon_size.height()*1.2)
-        self.color_button.setFixedSize(button_size)
+        button_size = QSize(icon_size.width()*1.2,icon_size.height()*1.1)
+        self.color_button.setFixedSize(20,20)
         self.color_button.setIcon(icon)
         self.color_button.pressed.connect(self.onColorPicker)
         layout = QHBoxLayout()
         layout.addWidget(self.color_button, 0, Qt.AlignTop)
-        self.setMaximumHeight(button_size.height()*1.5)
+        #self.setMaximumHeight(self.color_button.height()*1.5)
         
         self.setLayout(layout)
 
@@ -78,8 +78,7 @@ class QColorButton(QWidget):
         return super(QColorButton, self).mousePressEvent(e)
 
     def resetColor(self):
-        self.setColor(None)    
-        self.color_as_rgb = [255,255,255]
+        self.setColorFromRGB([255,255,255])
 
     def setColorFromRGB(self, rgb_color):
         self.color_as_rgb = rgb_color
