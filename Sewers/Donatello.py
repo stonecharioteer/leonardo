@@ -49,9 +49,7 @@ class MonaLisa(QtGui.QPushButton):
         return start, stop
     
     def setImage(self, image_path, zoom_level=None):
-        if zoom_level is None:
-            self.zoom_level = 100
-        else:
+        if zoom_level is not None:
             self.zoom_level = zoom_level
         self.current_image = str(image_path)
         type = os.path.splitext(os.path.basename(str(image_path)))[1].upper()
@@ -81,6 +79,7 @@ class Donatello(QtGui.QWidget):
     def __init__(self):
         super(Donatello, self).__init__()
         self.current_file = os.path.join("essentials","tmnt_cover.jpg")
+        self.images_record = [self.current_file]
         self.createUI()
 
     def createUI(self):
@@ -240,7 +239,9 @@ class Donatello(QtGui.QWidget):
         self.end_y.setValue(coords[1])
 
     def revertImage(self):
-        print "Reverting to original."
+        #print "Reverting to original."
+        self.current_file = self.images_record[-1]
+        self.mona.setImage(self.current_file)
 
     def loadImage(self):
         open_path = os.getcwd() if self.current_file is None else os.path.dirname(self.current_file)
@@ -251,6 +252,8 @@ class Donatello(QtGui.QWidget):
             self.file_name_line_edit.setText(os.path.splitext(os.path.basename(str(open_file_name)))[0])
             self.mona.setImage(open_file_name)
             self.current_file = str(open_file_name)
+            self.images_record = [self.current_file]
+            self.revert_button.setEnabled(False)
             self.clean_button.setEnabled(True)
         else:
             self.clean_button.setEnabled(False)
@@ -319,18 +322,23 @@ class Donatello(QtGui.QWidget):
                             image_array[current_row][current_col] = replacement_color_rgba
                 current_col +=1
             current_row += 1
-        print "*"*10
-        print start, end
-
-        print max_row, max_col
-        print current_row, current_col
-        print "*"*10
+        #print "*"*10
+        #print start, end
+        self.rememberImage(self.current_file)
+        self.revert_button.setEnabled(True)
+        self.current_file = os.path.join("cache","test.png")
+        #print max_row, max_col
+        #print current_row, current_col
+        #print "*"*10
         new_image = Image.fromarray(image_array, mode="RGBA")
-        new_image.save("test.png")
-        os.startfile("test.png","open")
+        new_image.save(self.current_file)
+
+        self.mona.setImage(self.current_file)
+        #os.startfile("test.png","open")
 
         #while clean_down:
-
+    def rememberImage(self, image_path):
+        self.images_record.append(image_path)
 
 
 def main():
