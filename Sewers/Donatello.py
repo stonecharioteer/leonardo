@@ -20,13 +20,13 @@ class MonaLisa(QtGui.QPushButton):
     def mousePressEvent(self, QMouseEvent):
         #print "Captured!"
         self.start_point = QMouseEvent.pos()
-        self.gotStart.emit([self.start_point.x(), self.start_point.y()])
+        self.gotStart.emit([self.start_point.x()/self.zoom_level*100, self.start_point.y()/self.zoom_level*100])
 
     def mouseReleaseEvent(self, QMouseEvent):
         #print "Captured!"
         cursor = QtGui.QCursor()
         self.end_point = QMouseEvent.pos()
-        self.gotEnd.emit([self.end_point.x(), self.end_point.y()])
+        self.gotEnd.emit([self.end_point.x()/self.zoom_level*100, self.end_point.y()/self.zoom_level*100])
 
     def createUI(self):               
         self.base_size = 350
@@ -36,7 +36,8 @@ class MonaLisa(QtGui.QPushButton):
         self.setStyleSheet("QPushButton{border: 2px solid black; color: red;}")
 
     def getCoords(self):
-        return [self.start_point.x(), self.start_point.y()], [self.end_point.x(),self.end_point.y()]
+        
+        return [self.start_point.x()/self.zoom_level*100, self.start_point.y()/self.zoom_level*100], [self.end_point.x()/self.zoom_level*100,self.end_point.y()/self.zoom_level*100]
     
     def setImage(self, image_path, zoom_level=None):
         if zoom_level is None:
@@ -55,7 +56,7 @@ class MonaLisa(QtGui.QPushButton):
                                         QtCore.Qt.KeepAspectRatio, 
                                         QtCore.Qt.SmoothTransformation)
             pixmap_size = image_pixmap.rect().size()
-            
+
         icon = QtGui.QIcon(image_pixmap)
         self.setIcon(icon)
         self.setIconSize(pixmap_size)
