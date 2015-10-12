@@ -1,3 +1,4 @@
+from __future__ import division
 import sys
 import os
 from PyQt4 import QtGui, QtCore
@@ -14,6 +15,7 @@ class MonaLisa(QtGui.QPushButton):
         self.start_point = QtCore.QPoint(0,0)
         self.end_point = QtCore.QPoint(0,0)
         self.createUI()
+        self.zoom_level = 100
 
     def mousePressEvent(self, QMouseEvent):
         #print "Captured!"
@@ -30,28 +32,40 @@ class MonaLisa(QtGui.QPushButton):
         self.base_size = 350
         self.setFixedSize(self.base_size, self.base_size)
         self.setWindowTitle('MonaLisa')
-#        self.setWindowFlags(self.windowFlags() | QtCore.Qt.FramelessWindowHint)
-        #self.clicked.connect(self.test)
         self.show()
         self.setStyleSheet("QPushButton{border: 2px solid black; color: red;}")
 
     def getCoords(self):
-      return [self.start_point.x(), self.start_point.y()], [self.end_point.x(),self.end_point.y()]
+        return [self.start_point.x(), self.start_point.y()], [self.end_point.x(),self.end_point.y()]
     
-    def setImage(self, image_path):
+    def setImage(self, image_path, zoom_level=None):
+        if zoom_level is None:
+            self.zoom_level = 100
+        else:
+            self.zoom_level = zoom_level
+        self.current_image = str(image_path)
         type = os.path.splitext(os.path.basename(str(image_path)))[1].upper()
         image_pixmap = QtGui.QPixmap(image_path, type)
-        icon = QtGui.QIcon(image_pixmap)
-        self.setIcon(icon)
         #print image_pixmap.rect().size()
         pixmap_size = image_pixmap.rect().size()
+        if self.zoom_level != 100:
+            resized_pixmap_size = QtCore.QSize((self.zoom_level/100)*pixmap_size.width(), (self.zoom_level/100)*pixmap_size.height())
+            image_pixmap = image_pixmap.scaled(
+                                        resized_pixmap_size,
+                                        QtCore.Qt.KeepAspectRatio, 
+                                        QtCore.Qt.SmoothTransformation)
+            pixmap_size = image_pixmap.rect().size()
+            
+        icon = QtGui.QIcon(image_pixmap)
+        self.setIcon(icon)
         self.setIconSize(pixmap_size)
         icon_size = QtCore.QSize(100, 100) if ((pixmap_size.width() < 100) or (pixmap_size.height() < 100)) else image_pixmap.rect().size()
 
         self.setFixedSize(icon_size)
 
     def zoomInOut(self, zoom_level):
-        self.zoom_factor = zoom_level
+        self.setImage(self.current_image, zoom_level)
+
 
 class Donatello(QtGui.QWidget):
     def __init__(self):
@@ -208,7 +222,6 @@ class Donatello(QtGui.QWidget):
             self.save_button.setEnabled(False)
 
     def zoomInOut(self):
-
         self.slider_value_label.setText("%d%%"%int(self.slider.value()))
         self.mona.zoomInOut(int(self.slider.value()))
 
