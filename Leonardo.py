@@ -18,6 +18,7 @@ from Sewers.ShellShocked import showSplashScreen, setWindowTheme
 from Sewers import Katana
 from Sewers.ImageLabel import ImageLabel
 from Sewers.ImageButton import ImageButton
+from Sewers.Donatello import Donatello
 #from Sewers.April import April
  
 class Leonardo(Turtle):
@@ -173,7 +174,9 @@ class Leonardo(Turtle):
 
     def startDonnie(self):
         self.alertMessage("In Development","Cowabunga, dude! Donatello is still WIP.")
-
+        self.donnie = Donatello()
+        self.donnie.show()
+        
     def startMikey(self):
         self.alertMessage("In Development","Cowabunga, dude! Michelangelo is still WIP.")
 
