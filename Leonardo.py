@@ -16,6 +16,8 @@ from Sewers.LayoutDesigner import LayoutDesigner
 from Sewers.PreviewRunWidget import PreviewRunWidget
 from Sewers.ShellShocked import showSplashScreen, setWindowTheme
 from Sewers import Katana
+from Sewers.ImageLabel import ImageLabel
+from Sewers.ImageButton import ImageButton
 #from Sewers.April import April
  
 class Leonardo(Turtle):
@@ -28,6 +30,16 @@ class Leonardo(Turtle):
         self.mapEvents()
 
     def createUI(self):
+        self.leo_icon = ImageLabel(os.path.join("essentials","Leonardo.png"),80,80)
+        self.leo_icon.setToolTip("Leonardo leads!")
+        self.mikey_button = ImageButton(os.path.join("essentials","Michelangelo.png"),50,50)
+        self.mikey_button.setToolTip("Where's my anchovies?")
+        self.donnie_button = ImageButton(os.path.join("essentials","Donatello.png"),50,50)
+        self.donnie_button.setToolTip("Donatello does machines!")
+        self.raph_button = ImageButton(os.path.join("essentials","Raphael.png"),50,50)
+        self.raph_button.setToolTip("Cowabunga!")
+        self.fk_button = ImageButton(os.path.join("essentials","fk_logo_mini.png"),80,80)
+
         self.page_changer = IconListBox()
         page_control_list = [
                     {
@@ -64,8 +76,13 @@ class Leonardo(Turtle):
         self.pages.addWidget(self.layout_designer_widget)
         self.pages.addWidget(self.preview_and_run_widget)
         final_layout = QtGui.QGridLayout()
-        final_layout.addWidget(self.page_changer,0,0,5,1)
-        final_layout.addWidget(self.pages,0,1,5,1)
+        final_layout.addWidget(self.leo_icon,0,0,1,2, QtCore.Qt.AlignHCenter)
+        final_layout.addWidget(self.mikey_button,1,0,1,1, QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        final_layout.addWidget(self.donnie_button,1,1,1,1, QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        final_layout.addWidget(self.raph_button,2,0,1,2, QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        final_layout.addWidget(self.page_changer,3,0,3,2, QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        final_layout.addWidget(self.fk_button, 7, 0, 2, 2, QtCore.Qt.AlignHCenter | QtCore.Qt.AlignVCenter)
+        final_layout.addWidget(self.pages,0,2,8,1)
         main_widget = QtGui.QWidget()
         main_widget.setLayout(final_layout)
         self.setCentralWidget(main_widget)
@@ -84,6 +101,9 @@ class Leonardo(Turtle):
         self.data_selector_widget.validate_button.clicked.connect(self.allowDesign)
         self.layout_designer_widget.validate_button.clicked.connect(self.showPreviewScreen)
         self.preview_and_run_widget.start_progress_button.clicked.connect(self.runSplinter)
+        self.donnie_button.clicked.connect(self.startDonnie)
+        self.mikey_button.clicked.connect(self.startMikey)
+        self.raph_button.clicked.connect(self.startRaph)
         for i in range(self.threads):
             self.radical_rats[i].progress.connect(self.preview_and_run_widget.displayProgress)
             self.radical_rats[i].sendMessage.connect(self.preview_and_run_widget.displayActivity)
@@ -102,6 +122,7 @@ class Leonardo(Turtle):
         self.page_changer.setCurrentRow(1)
         self.layout_designer_widget.setFSNs(self.data_selector_widget.data)
         self.alertMessage("Gracias","Thanks for waiting for %r seconds."%((datetime.datetime.now()-start_time).seconds))
+
     def runSplinter(self):
         entry_count = len(self.data_selector_widget.data)
         step_size = int(math.ceil((entry_count/self.threads)))
@@ -149,6 +170,15 @@ class Leonardo(Turtle):
     
     def alertMessage(self, title, message):
         QtGui.QMessageBox.about(self, title, message)
+
+    def startDonnie(self):
+        self.alertMessage("In Development","Cowabunga, dude! Donatello is still WIP.")
+
+    def startMikey(self):
+        self.alertMessage("In Development","Cowabunga, dude! Michelangelo is still WIP.")
+
+    def startRaph(self):
+        self.alertMessage("In Development","Cowabunga, dude! Raphael is still WIP.")
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
