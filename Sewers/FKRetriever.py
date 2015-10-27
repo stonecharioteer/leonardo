@@ -229,20 +229,12 @@ class FKRetriever(QtCore.QThread):
         image_urls = []
         #First, get the current productImage.
         image_tag = fk_page_soup.findAll("img", {"class":"productImage  current"})
-        image_attributes = image_tag[0].attrs
-        try:
-            image_url = image_attributes["data-zoomimage"]
-        except:
-            error = "Product page doesn't have zoomed-in image. Extracting original from thumbnail."
+        if len(image_tag)==0:
+            success = False
+            error = "Couldn't find the image tags in the HTML for %s. Skipping it for now."%fsn
             self.sendException.emit(error)
-            image_url = image_attributes["data-src"]
-            image_url = image_url.replace("400x400","original")
-        image_urls.append(image_url)
-
-        #Next, get the remaining productImages.
-        image_tags = fk_page_soup.findAll("img", {"class":"productImage "})
-        for image_tag in image_tags:
-            image_attributes = image_tag.attrs
+        else:
+            image_attributes = image_tag[0].attrs
             try:
                 image_url = image_attributes["data-zoomimage"]
             except:
@@ -251,38 +243,51 @@ class FKRetriever(QtCore.QThread):
                 image_url = image_attributes["data-src"]
                 image_url = image_url.replace("400x400","original")
             image_urls.append(image_url)
-        #Prepare save options.
-        image_name = fsn #Save images as FSNGOESHERE_1.jpeg
-        counter = 0
-        delimiter = "_"
-        image_extension = ".jpeg"
-        current_save_location = self.image_location
-        if not(os.path.exists(current_save_location)):
-            os.makedirs(current_save_location)
-        image_save_name = os.path.join(current_save_location, image_name)
-        image_counter = 0
-        for image_url in image_urls:
-            image_counter += 1
-            trial_counter = 0
-            while True:
+
+            #Next, get the remaining productImages.
+            image_tags = fk_page_soup.findAll("img", {"class":"productImage "})
+            for image_tag in image_tags:
+                image_attributes = image_tag.attrs
                 try:
-                    trial_counter += 1
-                    image_save_final_name = image_save_name + delimiter + "%2d"%image_counter + image_extension
-                    urllib.urlretrieve(image_url, image_save_final_name)
-                    if int(os.stat(image_save_final_name).st_size)>1000:
-                        break
-                    else:
-                        error = "Extracted image is less than 1kb. Retrying again."
-                        self.sendException.emit(error)
-                        if trial_counter < 10:
-                            continue
-                        else:
-                            error = "No image available, or obtained image is too small."
-                            self.sendException.emit(error)
-                            success = False
-                            break
-                except urllib.ContentTooShortError:
-                    error = "Failed retrieving the image. Retrying."
+                    image_url = image_attributes["data-zoomimage"]
+                except:
+                    error = "Product page doesn't have zoomed-in image. Extracting original from thumbnail."
                     self.sendException.emit(error)
-                    continue
+                    image_url = image_attributes["data-src"]
+                    image_url = image_url.replace("400x400","original")
+                image_urls.append(image_url)
+            #Prepare save options.
+            image_name = fsn #Save images as FSNGOESHERE_1.jpeg
+            counter = 0
+            delimiter = "_"
+            image_extension = ".jpeg"
+            current_save_location = self.image_location
+            if not(os.path.exists(current_save_location)):
+                os.makedirs(current_save_location)
+            image_save_name = os.path.join(current_save_location, image_name)
+            image_counter = 0
+            for image_url in image_urls:
+                image_counter += 1
+                trial_counter = 0
+                while True:
+                    try:
+                        trial_counter += 1
+                        image_save_final_name = image_save_name + delimiter + "%2d"%image_counter + image_extension
+                        urllib.urlretrieve(image_url, image_save_final_name)
+                        if int(os.stat(image_save_final_name).st_size)>1000:
+                            break
+                        else:
+                            error = "Extracted image is less than 1kb. Retrying again."
+                            self.sendException.emit(error)
+                            if trial_counter < 10:
+                                continue
+                            else:
+                                error = "No image available, or obtained image is too small."
+                                self.sendException.emit(error)
+                                success = False
+                                break
+                    except urllib.ContentTooShortError:
+                        error = "Failed retrieving the image. Retrying."
+                        self.sendException.emit(error)
+                        continue
         return success
