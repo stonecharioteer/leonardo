@@ -447,7 +447,7 @@ class DataSelector(QtGui.QWidget):
             self.fetch_images_attributes_button.setEnabled(True)
             self.sendAlert("Cowabunga!","Completed fetching data and images for the given list.")
         else:
-            self.fetching_progress.setFormat("%d%% (Last Updated at: %s, ETA: %s)"%(progress_value, now_string, eta_string))
+            self.fetching_progress.setFormat("%d%% @(%s)"%(progress_value, now_string))
             message = "%s ETA: %s"%(status, eta_string)
             self.fsn_mode_data_options.setEnabled(False)
         self.fetching_activity.setText(message)
