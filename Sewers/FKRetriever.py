@@ -56,8 +56,8 @@ class FKRetriever(QtCore.QThread):
                             error = "Unable to fetch the right page for %s. (Trial %d)"%(fsn,loop_counter)
                             self.sendException.emit(error)
                             time.sleep(5)
-                        else:
-                            print success
+                        #else:
+                        #    print success
                         if loop_counter >5:
                             error = "Tried fetching the page for %s and failed %d times. Giving up."%(fsn,loop_counter)
                             self.sendException.emit(error)
