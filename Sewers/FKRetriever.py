@@ -18,6 +18,7 @@ class FKRetriever(QtCore.QThread):
     sendData = QtCore.pyqtSignal(str, dict, int, bool, datetime.datetime) 
     #error_msg
     sendException = QtCore.pyqtSignal(str)
+    sendMessage = QtCore.pyqtSignal(str)
     def __init__(self,repo_path,*args,**kwargs):
         super(FKRetriever,self).__init__(*args, **kwargs)
         self.repo_path = repo_path
@@ -34,6 +35,8 @@ class FKRetriever(QtCore.QThread):
         while True:
             if self.allow_run:
                 #process_events
+                error = "Retrieved %d FSNs."%(len(self.fsn_list))
+                self.sendException.emit(error)
                 counter = 0
                 self.data_list = {}
                 total = len(self.fsn_list)
@@ -41,18 +44,26 @@ class FKRetriever(QtCore.QThread):
                 for fsn in self.fsn_list:
                     success = False
                     loop_counter = 0
+                    error = "Processing %s, %d of %d FSNs, started thread at %s."%(fsn, counter+1, len(self.fsn_list), start_time)
+                    self.sendException.emit(error)
                     while not success:
                         loop_counter +=1
-                        fk_page_soup, success = self.getFlipkartPageAsSoupFromFSN(fsn)
+                        fk_page_soup, success = self.getFlipkartPageAsSoupFromFSN(fsn, counter+1, len(self.fsn_list), start_time)
                         if not success:
-                            time.sleep(5)
                             error = "Unable to fetch the right page for %s. (Trial %d)"%(fsn,loop_counter)
                             self.sendException.emit(error)
+                            time.sleep(5)
+                        else:
+                            print success
                         if loop_counter >5:
                             error = "Tried fetching the page for %s and failed %d times. Giving up."%(fsn,loop_counter)
                             self.sendException.emit(error)
                             break
+
+
                     if success:
+                        error = "Retrieved the page for %s, %d of %d FSNs, started thread at %s."%(fsn, counter+1, len(self.fsn_list), start_time)
+                        self.sendException.emit(error)
                         if self.imagesNotAvailable(fsn):
                             self.downloadProductImages(fsn, fk_page_soup)
                         else:
@@ -74,6 +85,9 @@ class FKRetriever(QtCore.QThread):
                         completion_status = False
                         eta = getETA(start_time, counter, total)
                         self.sendData.emit(status, data_set, progress_value, completion_status, eta)
+                    else:
+                        error = "Failed in retrieving the page for %s: %d of %d FSNs, started thread at %s."%(fsn, counter+1, len(self.fsn_list), start_time)
+                        self.sendException.emit(error)
                 completion_status = True
                 progress_value = 100
                 data_set = self.data_list
@@ -87,29 +101,32 @@ class FKRetriever(QtCore.QThread):
         self.mutex.unlock()
         self.wait()
 
-    def getFlipkartPageAsSoupFromFSN(self, fsn):
+    def getFlipkartPageAsSoupFromFSN(self, fsn, counter, total, start_time):
         """Improve this method at a later stage."""
         url = "http://www.flipkart.com/search?q=" + fsn
+        count = 0
         while True:
+            count +=1
             try:
-                html = urllib2.urlopen(url, timeout=120)
+                html = urllib2.urlopen(url, timeout=3)
+                error = "Retrieved the html for %s (%d of %d. Started at %s)." %(fsn, counter, total, start_time)
                 break
             except urllib2.HTTPError:
-                error = "Server response error for %s. Retrying" %fsn
-                self.sendException.emit(error)
-                continue
+                error = "Server response error for %s (%d of %d. Started at %s). Retry #%d" %(fsn, counter, total, start_time, count)
+                pass
             except socket.error:
-                error = "Socket error for %s. Retrying" %fsn
-                self.sendException.emit(error)
-                continue
+                error = "Socket error for %s (%d of %d. Started at %s). Retry #%d" %(fsn, counter, total, start_time, count)
+                pass
             except httplib.BadStatusLine:
-                error = "Bad status line error for %s. Retrying" %fsn
-                self.sendException.emit(error)
-                continue
+                error = "Bad status line error for %s (%d of %d. Started at %s). Retry #%d" %(fsn, counter, total, start_time, count)
+                pass
             except httplib.IncompleteRead:
-                error = "Incomplete Read error for %s. Retrying" %fsn
-                self.sendException.emit(error)
-                continue
+                error = "Incomplete Read error for %s (%d of %d. Started at %s). Retry #%d" %(fsn, counter, total, start_time, count)
+                pass
+            except Exception, e:
+                error = "Encountered [%s] for %s (%d of %d. Started at %s). Retry #%d" %(repr(e), fsn, counter, total, start_time, count)
+                pass
+            self.sendException.emit(error)
         soup = BeautifulSoup(html, "html.parser")
         #validate the soup.
         try:

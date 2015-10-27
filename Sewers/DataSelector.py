@@ -11,7 +11,6 @@ from ProgressBar import ProgressBar
 
 class DataSelector(QtGui.QWidget):
     def __init__(self, repo_path):
-
         super(DataSelector,self).__init__()
         self.repo_path = repo_path
         self.data_from_fk = None
@@ -69,6 +68,7 @@ class DataSelector(QtGui.QWidget):
         self.fetching_progress.setRange(0,100)
         self.fetching_progress.setValue(0)
         self.fetching_activity = QtGui.QLabel("All that is gold does not glitter!")
+        self.fetching_activity.setStyleSheet("QLabel{font: 8px black;}")
         self.fetching_activity.setToolTip("This indicates the current downloader's activity, or some random quote that Vinay thinks is funny.")
         self.fsn_mode_data_options = QtGui.QGroupBox("Data Options")
         fsn_mode_data_options_layout = QtGui.QGridLayout()
@@ -223,7 +223,9 @@ class DataSelector(QtGui.QWidget):
             #dump data into said file.
 
     def postException(self, error_msg):
-        self.fetching_activity.setText("%s @%s"%(error_msg,datetime.datetime.now().strftime("%H:%M:%S")))
+        message = "%s @%s"%(error_msg,datetime.datetime.now().strftime("%H:%M:%S"))
+        print message
+        self.fetching_activity.setText(message)
 
     def pushAttrToPrimary(self):
         self.pushFromTo(self.attributes_list_box,self.primary_attributes_list_box)
