@@ -38,7 +38,6 @@ class DataSelector(QtGui.QWidget):
         self.page_selector.setFixedSize(302,110)
         #FSN Mode Widget
         self.fsn_mode_widget = QtGui.QGroupBox("Data By FSN")
-        self.export_scraped_data_button = QtGui.QPushButton("Export Data")
         self.fsn_text_edit = FSNTextEdit()
         self.fsn_text_edit.setFixedSize(450,400)
         self.category_label = QtGui.QLabel("Category:")
@@ -62,17 +61,88 @@ class DataSelector(QtGui.QWidget):
         self.push_to_secondary_button.setToolTip("Click to move the chosen attribute into the list of secondary attributes.")
         self.remove_from_secondary_button = QtGui.QPushButton("Remove from\nSecondary List")
         self.remove_from_secondary_button.setToolTip("Click to move the chosen attribute out of the list of secondary attributes.")
-        self.fetch_images_attributes_button = QtGui.QPushButton("Download Images\nand Specs.")
+        #downloader
+        self.fetch_images_attributes_button = QtGui.QPushButton("Download")
         self.fetch_images_attributes_button.setToolTip("This will check if parent images are available for all the FSNs and download them if necessary from the FK site. It will also load the spec table.")
+        self.export_scraped_data_button = QtGui.QPushButton("Export Data")
         self.fetching_progress = ProgressBar()
         self.fetching_progress.setRange(0,100)
         self.fetching_progress.setValue(0)
         self.fetching_activity = QtGui.QLabel("All that is gold does not glitter!")
-        self.fetching_activity.setStyleSheet("QLabel{font: 8px black;}")
+        self.fetching_activity.setStyleSheet("QLabel{font: 10px black; border: 1px solid black;}")
         self.fetching_activity.setToolTip("This indicates the current downloader's activity, or some random quote that Vinay thinks is funny.")
+        self.completed_fsns_count_label = QtGui.QLabel("Completed:")
+        self.completed_fsns_count_spinbox = QtGui.QSpinBox()
+        self.completed_fsns_count_spinbox.setEnabled(False)
+        self.eta_label = QtGui.QLabel("ETA:")
+        self.eta_datetimeedit = QtGui.QDateTimeEdit()
+        self.eta_datetimeedit.setEnabled(False)
+        self.eta_datetimeedit.setMinimumDateTime(QtCore.QDateTime(datetime.datetime.now()))
+        self.activity_log_textedit = QtGui.QTextEdit()
+        self.activity_log_textedit.setReadOnly(True)
+        self.pending_fsns_count_label = QtGui.QLabel("Pending:")
+        self.pending_fsns_count_spinbox = QtGui.QSpinBox()
+        self.pending_fsns_count_spinbox.setEnabled(False)
+        self.failed_fsns_label = QtGui.QLabel("Failed:")
+        self.failed_fsns_count_spinbox = QtGui.QSpinBox()
+        self.failed_fsns_count_spinbox.setEnabled(False)
+
+        self.completed_fsns_count_spinbox.setRange(0,99999999)
+        self.pending_fsns_count_spinbox.setRange(0,99999999)
+        self.failed_fsns_count_spinbox.setRange(0,99999999)
+
+        self.pending_fsns_list_text_edit = QtGui.QTextEdit()
+        self.pending_fsns_list_text_edit.setReadOnly(True)
+        self.completed_fsns_list_text_edit = QtGui.QTextEdit()
+        self.completed_fsns_list_text_edit.setReadOnly(True)
+        self.failed_fsns_list_text_edit = QtGui.QTextEdit()
+        self.failed_fsns_list_text_edit.setReadOnly(True)
+
+        buttons_and_progress_bar = QtGui.QHBoxLayout()
+        buttons_and_progress_bar.addWidget(self.fetch_images_attributes_button, 2)
+        buttons_and_progress_bar.addWidget(self.export_scraped_data_button, 1)
+        buttons_and_progress_bar.addWidget(self.fetching_progress, 4)
+
+        completed_tracking = QtGui.QVBoxLayout()
+        completed_tracking.addWidget(self.completed_fsns_count_label)
+        completed_tracking.addWidget(self.completed_fsns_count_spinbox)
+        completed_tracking.addWidget(self.completed_fsns_list_text_edit)
+        
+        eta_layout = QtGui.QHBoxLayout()
+        eta_layout.addWidget(self.eta_label)
+        eta_layout.addWidget(self.eta_datetimeedit)
+        
+        pending_tracking = QtGui.QVBoxLayout()
+        pending_tracking.addWidget(self.pending_fsns_count_label)
+        pending_tracking.addWidget(self.pending_fsns_count_spinbox)
+        pending_tracking.addWidget(self.pending_fsns_list_text_edit)
+        pending_tracking.addLayout(eta_layout)
+
+        failed_tracking = QtGui.QVBoxLayout()
+        failed_tracking.addWidget(self.failed_fsns_label)
+        failed_tracking.addWidget(self.failed_fsns_count_spinbox)
+        failed_tracking.addWidget(self.failed_fsns_list_text_edit)
+
+        fsns_tracking = QtGui.QHBoxLayout()
+        fsns_tracking.addLayout(completed_tracking)
+        fsns_tracking.addLayout(pending_tracking)
+        fsns_tracking.addLayout(failed_tracking)
+
+        downloader_layout = QtGui.QVBoxLayout()
+        downloader_layout.addLayout(buttons_and_progress_bar)
+        downloader_layout.addLayout(fsns_tracking)
+        downloader_layout.addWidget(self.fetching_activity)
+
+        downloader = QtGui.QWidget()
+        downloader.setLayout(downloader_layout)
+
+        downloader_tabs = QtGui.QTabWidget()
+        downloader_tabs.addTab(downloader, "Downloader")
+        downloader_tabs.addTab(self.activity_log_textedit, "Log")
+
         self.fsn_mode_data_options = QtGui.QGroupBox("Data Options")
         fsn_mode_data_options_layout = QtGui.QGridLayout()
-        fsn_mode_data_options_layout.addWidget(self.category_label,0,0,1,2,QtCore.Qt.AlignVCenter)
+        fsn_mode_data_options_layout.addWidget(self.category_label,0,0,1,2, QtCore.Qt.AlignVCenter)
         fsn_mode_data_options_layout.addWidget(self.category_combo_box,0,2,1,2,QtCore.Qt.AlignVCenter)
         fsn_mode_data_options_layout.addWidget(self.attributes_list_box,1,0,4,4, QtCore.Qt.AlignHCenter)
         fsn_mode_data_options_layout.addWidget(self.primary_attributes_list_box,1,5,2,2, QtCore.Qt.AlignHCenter)
@@ -85,10 +155,13 @@ class DataSelector(QtGui.QWidget):
         self.fsn_mode_data_options.setEnabled(False)
         fsn_mode_layout = QtGui.QGridLayout()
         fsn_mode_layout.addWidget(self.fsn_text_edit,0,0,7,1)
-        fsn_mode_layout.addWidget(self.fetch_images_attributes_button,0,1,1,2,  QtCore.Qt.AlignBottom)
-        fsn_mode_layout.addWidget(self.fetching_progress,0,3,1,5, QtCore.Qt.AlignBottom)
-        fsn_mode_layout.addWidget(self.fetching_activity,1,3,1,5, QtCore.Qt.AlignTop)
-        fsn_mode_layout.addWidget(self.export_scraped_data_button,1,1,1,2,  QtCore.Qt.AlignTop)
+        downloader_tabs
+
+        fsn_mode_layout.addWidget(downloader_tabs,0,1,2,5,  QtCore.Qt.AlignBottom)
+        #fsn_mode_layout.addWidget(self.fetch_images_attributes_button,0,1,1,2,  QtCore.Qt.AlignBottom)
+        #fsn_mode_layout.addWidget(self.fetching_progress,0,3,1,5, QtCore.Qt.AlignBottom)
+        #fsn_mode_layout.addWidget(self.fetching_activity,1,3,1,5, QtCore.Qt.AlignTop)
+        #fsn_mode_layout.addWidget(self.export_scraped_data_button,1,1,1,2,  QtCore.Qt.AlignTop)
         fsn_mode_layout.addWidget(self.fsn_mode_data_options,2,1,5,7, QtCore.Qt.AlignTop)
         self.fsn_mode_widget.setLayout(fsn_mode_layout)
 
@@ -224,8 +297,9 @@ class DataSelector(QtGui.QWidget):
 
     def postException(self, error_msg):
         message = "%s @%s"%(error_msg,datetime.datetime.now().strftime("%H:%M:%S"))
-        print message
         self.fetching_activity.setText(message)
+        self.activity_log_textedit.append(message)
+
 
     def pushAttrToPrimary(self):
         self.pushFromTo(self.attributes_list_box,self.primary_attributes_list_box)
@@ -339,25 +413,45 @@ class DataSelector(QtGui.QWidget):
     def downloadFromFK(self):
         """Triggers FKRetriever."""
         fsns = self.fsn_text_edit.getFSNs()
+        self.fetch_images_attributes_button.setEnabled(False)
         if len(fsns) >=1:
             self.fetching_activity.setText("Preparing to download images and specifications off the Flipkart website!")
             self.fk_retriever.fsn_list = fsns
             self.fk_retriever.allow_run = True
         else:
-            print "No FSNS?"
+            print "No FSNS to process."
 
-    def prepareDataRetrievedFromFK(self, status, data_set, progress_value, completion_status, eta):
+    def prepareDataRetrievedFromFK(self, status, data_set, progress_value, fsn_lists, completion_status, eta):
         """Gets data from FK from the thread's signal and prepares it."""
         self.fetching_progress.setValue(progress_value)
+        eta_string = eta.strftime("%a (%d-%b), %H:%M:%S")
         self.putAttributes(data_set)
         self.data_from_fk = data_set
+        now_string = datetime.datetime.now().strftime("(%d-%b), %H:%M:%S")
+        completed_fsns = fsn_lists[0]
+        pending_fsns = fsn_lists[1]
+        failed_fsns = fsn_lists[2]
+        self.completed_fsns_count_spinbox.setValue(len(completed_fsns))
+        self.pending_fsns_count_spinbox.setValue(len(pending_fsns))
+        self.failed_fsns_count_spinbox.setValue(len(failed_fsns))
+        
+        self.completed_fsns_list_text_edit.setText("\n".join(completed_fsns))
+        self.pending_fsns_list_text_edit.setText("\n".join(pending_fsns))
+        self.failed_fsns_list_text_edit.setText("\n".join(failed_fsns))
+        self.eta_datetimeedit.setDateTime(QtCore.QDateTime(eta))
+
         if completion_status:
-            self.fetching_activity.setText("Fee, fie, fo, fum!")
+            self.fetching_progress.setFormat("%d%% (Completed at %s)"%(progress_value, now_string))
+            message = "Completed at %s."%now_string
             self.fsn_mode_data_options.setEnabled(True)
+            self.fetch_images_attributes_button.setEnabled(True)
             self.sendAlert("Cowabunga!","Completed fetching data and images for the given list.")
         else:
-            self.fetching_activity.setText("%s ETA: %s"%(status,eta.strftime("%a (%d-%b), %H:%M:%S")))
+            self.fetching_progress.setFormat("%d%% (Last Updated at: %s, ETA: %s)"%(progress_value, now_string, eta_string))
+            message = "%s ETA: %s"%(status, eta_string)
             self.fsn_mode_data_options.setEnabled(False)
+        self.fetching_activity.setText(message)
+        self.activity_log_textedit.append(message)
             
     def putAttributes(self, data_set):
         attributes = []

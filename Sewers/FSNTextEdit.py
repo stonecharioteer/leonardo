@@ -28,4 +28,4 @@ class FSNTextEdit(QWidget):
             fsn_list = [fsn for fsn in fsns_string if ((len(fsn) == 16) or (len(fsn) == 13))]
         else:
             fsn_list = fsns_string
-        return fsn_list
+        return list(set(fsn_list))

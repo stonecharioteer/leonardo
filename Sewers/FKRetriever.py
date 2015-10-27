@@ -15,7 +15,7 @@ from PyQt4 import QtCore
 
 class FKRetriever(QtCore.QThread):
     #status, data_set, progress_value, completion_status, eta
-    sendData = QtCore.pyqtSignal(str, dict, int, bool, datetime.datetime) 
+    sendData = QtCore.pyqtSignal(str, dict, int, list, bool, datetime.datetime) 
     #error_msg
     sendException = QtCore.pyqtSignal(str)
     sendMessage = QtCore.pyqtSignal(str)
@@ -41,6 +41,9 @@ class FKRetriever(QtCore.QThread):
                 self.data_list = {}
                 total = len(self.fsn_list)
                 start_time = datetime.datetime.now()
+                completed_fsns = []
+                pending_fsns = []
+                failed_fsns = []
                 for fsn in self.fsn_list:
                     success = False
                     loop_counter = 0
@@ -62,6 +65,8 @@ class FKRetriever(QtCore.QThread):
 
 
                     if success:
+                        completed_fsns.append(fsn)
+                        pending_fsns = [fsn_ for fsn_ in self.fsn_list if fsn_ not in completed_fsns]
                         error = "Retrieved the page for %s, %d of %d FSNs, started thread at %s."%(fsn, counter+1, len(self.fsn_list), start_time)
                         self.sendException.emit(error)
                         if self.imagesNotAvailable(fsn):
@@ -82,17 +87,19 @@ class FKRetriever(QtCore.QThread):
                         status = "Completed %d of %d." % (counter, total)
                         data_set = self.data_list
                         progress_value = int(math.ceil(counter/total*100))
+                        progress_list = [completed_fsns, pending_fsns, failed_fsns]
                         completion_status = False
                         eta = getETA(start_time, counter, total)
-                        self.sendData.emit(status, data_set, progress_value, completion_status, eta)
+                        self.sendData.emit(status, data_set, progress_value, progress_list, completion_status, eta)
                     else:
+                        failed_fsns.append(fsn)
                         error = "Failed in retrieving the page for %s: %d of %d FSNs, started thread at %s."%(fsn, counter+1, len(self.fsn_list), start_time)
                         self.sendException.emit(error)
                 completion_status = True
                 progress_value = 100
                 data_set = self.data_list
                 eta = datetime.datetime.now()
-                self.sendData.emit(status, data_set, progress_value, completion_status, eta)
+                self.sendData.emit(status, data_set, progress_value, progress_list, completion_status, eta)
                 self.allow_run = False
 
     def __del__(self):
@@ -238,7 +245,7 @@ class FKRetriever(QtCore.QThread):
             try:
                 image_url = image_attributes["data-zoomimage"]
             except:
-                error = "Product page doesn't have zoomed-in image. Extracting original from thumbnail."
+                error = "%s doesn't have zoomed-in image. Extracting original from thumbnail."%fsn
                 self.sendException.emit(error)
                 image_url = image_attributes["data-src"]
                 image_url = image_url.replace("400x400","original")
