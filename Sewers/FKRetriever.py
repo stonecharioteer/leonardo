@@ -273,7 +273,9 @@ class FKRetriever(QtCore.QThread):
                 os.makedirs(current_save_location)
             image_save_name = os.path.join(current_save_location, image_name)
             image_counter = 0
-            for image_url in image_urls:
+            quasi_image_urls = image_url[:1]
+
+            for image_url in quasi_image_urls:
                 image_counter += 1
                 trial_counter = 0
                 while True:
