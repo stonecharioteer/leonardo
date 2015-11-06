@@ -13,6 +13,8 @@ from bs4 import BeautifulSoup
 from Katana import getETA
 from PyQt4 import QtCore
 
+
+
 class FKRetriever(QtCore.QThread):
     #status, data_set, progress_value, completion_status, eta
     sendData = QtCore.pyqtSignal(str, dict, int, list, bool, datetime.datetime) 
@@ -273,7 +275,10 @@ class FKRetriever(QtCore.QThread):
                 os.makedirs(current_save_location)
             image_save_name = os.path.join(current_save_location, image_name)
             image_counter = 0
-            for image_url in image_urls:
+            quasi_image_urls = image_urls
+            quasi_image_urls = image_urls[:1] #REMOVE THIS LATER!
+
+            for image_url in quasi_image_urls:
                 image_counter += 1
                 trial_counter = 0
                 while True:
