@@ -12,6 +12,7 @@ from PIL import Image
 import PIL
 from PyQt4 import QtCore
 import Katana
+from Registron import Registron
 
 class Splinter(QtCore.QThread):
     progress = QtCore.pyqtSignal(str, int, datetime.datetime, bool, list, int)
@@ -24,7 +25,8 @@ class Splinter(QtCore.QThread):
             self.thread_index = 0
         else:
             self.thread_index = thread_index
-        self.repo_path = repo_path 
+        self.repo_path = repo_path
+        self.registron = Registron()
 
         self.mutex = QtCore.QMutex()
         self.condition = QtCore.QWaitCondition()
@@ -160,6 +162,8 @@ class Splinter(QtCore.QThread):
                         self.progress.emit(message, progress, self.eta, completion_status, images_list, self.thread_index)
                         self.last_eta = self.eta
                         self.sendMessage.emit("Completed %d in %ss." %(counter, datetime.datetime.now() - start_time), self.last_eta, self.thread_index)
+                message = "Leonardo was used by %s to create %d images at %s."%(getpass.getuser(), counter, datetime.datetime.now())
+                self.registron.send(message)
                 self.allow_run = False
 
     def prepareAppImage(

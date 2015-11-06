@@ -20,13 +20,14 @@ from Sewers.ImageLabel import ImageLabel
 from Sewers.ImageButton import ImageButton
 from Sewers.Donatello import Donatello
 #from Sewers.April import April
- 
+
 class Leonardo(Turtle):
     def __init__(self, repo_path):
         super(Leonardo, self).__init__()
         self.threads = 1
         self.repo_path = repo_path 
         self.createUI()
+        self.counter = 0
         self.radical_rats = [Splinter(i, self.repo_path) for i in range(self.threads)]
         self.mapEvents()
 
