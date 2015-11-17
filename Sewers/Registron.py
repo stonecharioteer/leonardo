@@ -2,6 +2,7 @@ from PyQt4 import QtCore
 import os
 import getpass
 import codecs
+import datetime
 
 class Registron(QtCore.QThread):
     def __init__(self, *args, **kwargs):
