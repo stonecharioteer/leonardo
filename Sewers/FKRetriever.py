@@ -276,7 +276,6 @@ class FKRetriever(QtCore.QThread):
             image_save_name = os.path.join(current_save_location, image_name)
             image_counter = 0
             quasi_image_urls = image_urls
-            quasi_image_urls = image_urls[:1] #REMOVE THIS LATER!
 
             for image_url in quasi_image_urls:
                 image_counter += 1
